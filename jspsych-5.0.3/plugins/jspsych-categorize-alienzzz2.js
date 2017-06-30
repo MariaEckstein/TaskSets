@@ -1,14 +1,12 @@
 /**
- * Adapted from categorize
  * jspsych plugin for categorization trials with feedback
  * Josh de Leeuw
- * by Maria Eckstein (maria.eckstein@berkeley.edu)
  *
  * documentation: docs.jspsych.org
  **/
 
 
-jsPsych.plugins["categorize-alienzzz"] = (function() {
+jsPsych.plugins["categorize-alienzzz2"] = (function() {
 
   var plugin = {};
 
@@ -17,7 +15,13 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
   plugin.trial = function(display_element, trial) {
 
     // default parameters
+    // trial.text_answer = (typeof trial.text_answer === 'undefined') ? "" : trial.text_answer;
+    // trial.correct_text = (typeof trial.correct_text === 'undefined') ? "<p class='feedback'>Correct</p>" : trial.correct_text;
+    // trial.incorrect_text = (typeof trial.incorrect_text === 'undefined') ? "<p class='feedback'>Incorrect</p>" : trial.incorrect_text;
     trial.show_stim_with_feedback = (typeof trial.show_stim_with_feedback === 'undefined') ? true : trial.show_stim_with_feedback;
+    // trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
+    // trial.force_correct_button_press = (typeof trial.force_correct_button_press === 'undefined') ? false : trial.force_correct_button_press;
+    // trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
     trial.show_feedback_on_timeout = (typeof trial.show_feedback_on_timeout === 'undefined') ? false : trial.show_feedback_on_timeout;
     trial.timeout_message = trial.timeout_message || "<p>Please respond faster.</p>";
     // timing params
@@ -34,7 +38,6 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
     // that need to be cleared if the trial ends early
     var setTimeoutHandlers = [];
 
-    trial.season = "hot"
     if (trial.season == "hot") {
       trial.background = "img/hot.png"
     } else if (trial.season == "rainy") {
@@ -47,10 +50,9 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
 
     alien_height = 250
     alien_top = 230
-    trial.sad_alien = 1
-    sad_top = [alien_top + 100, alien_top + 50, alien_top][trial.sad_alien]
-    sad_left = [530, 810, 1100][trial.sad_alien]
-    reward_top = sad_top - 27
+    // sad_top = [alien_top + 100, alien_top + 50, alien_top][trial.sad_alien]
+    sad_left = [520, 800, 1050][trial.sad_alien]
+    reward_top = alien_top - 27
     reward_left = sad_left + 15
     button_top = alien_top + alien_height + 200
     button_height = 90
@@ -70,7 +72,6 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
       "id": 'jspsych-categorize-stimulus'
     })
 
-    trial.stimulus = 'img/Aliens1.png'
     var aliens = $('<img>', {
       "src": trial.stimulus,
       "style": 'position:absolute; top:' + alien_top + 'px',
@@ -84,16 +85,16 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
       "class": 'jspsych-categorize-stimulus',
       "src": 'img/sad.png',
       "style": 'position:absolute;' +
-               'top:' + sad_top + 'px;' +
+               'top:' + alien_top + 'px;' +
                'left:' + sad_left + 'px',
       "height": '120'
     })
 
-    var response_buttons =
-      "<img src='img/bed.png' style='position:absolute; top:" + button_top + "px; left:" + button1_left + "px' height=" + button_height + ">" +
-      "<img src='img/umbrella.png' style='position:absolute; top:" + button_top + "px; left:" + button2_left + "px' height=" + button_height + ">" +
-      "<img src='img/elephant.png' style='position:absolute; top:" + button_top + "px; left:" + button3_left + "px' height=" + button_height + ">" +
-      "<img src='img/rock.png' style='position:absolute; top:" + button_top + "px; left:" + button4_left + "px' height=" + button_height + ">" //+
+    var bed = "<img src='img/bed.png' style='position:absolute; top:" + button_top + "px; left:" + button1_left + "px' height=" + button_height + ">"
+    var umbrella = "<img src='img/umbrella.png' style='position:absolute; top:" + button_top + "px; left:" + button2_left + "px' height=" + button_height + ">"
+    var plant = "<img src='img/plant.png' style='position:absolute; top:" + button_top + "px; left:" + button3_left + "px' height=" + button_height + ">"
+    var rock = "<img src='img/rock.png' style='position:absolute; top:" + button_top + "px; left:" + button4_left + "px' height=" + button_height + ">"
+    var response_buttons = bed + umbrella + plant + rock
 
     // add Aliens, sadness, and response buttons to display
     display_element.append(background, aliens, sadness, response_buttons);
@@ -112,7 +113,6 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
       var correct = false;
-      // pressed_key = info.key;
       if (trial.key_answer == info.key) {
         correct = true;
       }
@@ -193,7 +193,7 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
         var happiness = $('<img>', {
           "src": 'img/happy.png',
           "style":  'position:absolute;' +
-                    'top:' + sad_top + 'px;' +
+                    'top:' + alien_top + 'px;' +
                     'left:' + sad_left + 'px',
           "height": '120',
           "id": 'jspsych-categorize-stimulus',
@@ -212,8 +212,8 @@ jsPsych.plugins["categorize-alienzzz"] = (function() {
         })
 
         display_element.append(background, aliens, border, response_buttons, happiness, number_feedback);
-      }
 
+      }
       setTimeout(function() {
         endTrial();
       }, trial.timing_feedback_duration);
