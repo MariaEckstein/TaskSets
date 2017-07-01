@@ -86,22 +86,22 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
     var response_buttons =
       "<div class='response_buttons'>" +
         "<button id='bed-button'" +
-          "style='position:absolute; left:" + button1_left + "px; top:" + button_top + "px; z = 10'" +
+          "style='position:absolute; left:" + button1_left + "px; top:" + button_top + "px; z=10'" +
           "class='jspsych-btn'>" +
           "<img src='img/bed.png' height=" + button_height + ">" +
         "</button>" +
         "<button id='umbrella-button'" +
-          "style='position:absolute; left:" + button2_left + "px; top:" + button_top + "px; z = 10'" +
+          "style='position:absolute; left:" + button2_left + "px; top:" + button_top + "px; z=10'" +
           "class='jspsych-btn'>" +
           "<img src='img/umbrella.png' height=" + button_height + ">" +
         "</button>" +
         "<button id='plant-button'" +
-          "style='position:absolute; left:" + button3_left + "px; top:" + button_top + "px; z = 10'" +
+          "style='position:absolute; left:" + button3_left + "px; top:" + button_top + "px; z=10'" +
           "class='jspsych-btn'>" +
           "<img src='img/plant.png' height=" + button_height + ">" +
         "</button>" +
         "<button id='rock-button'" +
-          "style='position:absolute; left:" + button4_left + "px; top:" + button_top + "px; z = 10'" +
+          "style='position:absolute; left:" + button4_left + "px; top:" + button_top + "px; z=10'" +
           "class='jspsych-btn'>" +
           "<img src='img/rock.png' height=" + button_height + ">" +
         "</button>" +
@@ -109,7 +109,70 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
 
     // add Aliens, sadness, and response buttons to display
     display_element.append(background, aliens, sadness, response_buttons);
-    var start_time = (new Date()).getTime();
+    trial.start_time = (new Date()).getTime();
+
+    // take care of button presses: mimic key presses
+    function clear_button_handlers() {
+      $('#bed-button').off('click');
+      $('#umbrella-button').off('click');
+      $('#plant-button').off('click');
+      $('#rock-button').off('click');
+    }
+
+    $('#bed-button').on('click', function() {
+      clear_button_handlers();
+      var response_time = (new Date()).getTime();
+      var rt = response_time - trial.start_time;
+      info = {
+        key: 74,
+        rt: rt
+      };
+      after_response(info);
+    });
+
+    $('#umbrella-button').on('click', function() {
+      clear_button_handlers();
+      var response_time = (new Date()).getTime();
+      var rt = response_time - trial.start_time;
+      info = {
+        key: 75,
+        rt: rt
+      };
+      after_response(info);
+    });
+
+    $('#plant-button').on('click', function() {
+      clear_button_handlers();
+      var response_time = (new Date()).getTime();
+      var rt = response_time - trial.start_time;
+      info = {
+        key: 76,
+        rt: rt
+      };
+      after_response(info);
+    });
+
+    $('#rock-button').on('click', function() {
+      clear_button_handlers();
+      var response_time = (new Date()).getTime();
+      var rt = response_time - trial.start_time;
+      info = {
+        key: 186,
+        rt: rt
+      };
+      after_response(info);
+    });
+
+    var trial_data = {};
+
+    if (trial.timing_response > 0) {
+      setTimeoutHandlers.push(setTimeout(function() {
+        after_response({
+          key: -1,
+          rt: -1
+        });
+      }, trial.timing_response));
+    }
 
     // create response function
     var after_response = function(info) {
@@ -122,9 +185,9 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       // clear keyboard listener
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
-      var correct = false;
+      var correct = 0;
       if (trial.key_answer == info.key) {
-        correct = true;
+        correct = 1;
       }
 
       // get feedback amount
@@ -143,8 +206,10 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       trial_data = {
         "rt": info.rt,
         "correct": correct,
+        "reward": feedback_amount,
         "stimulus": trial.stimulus,
         "sad_alien": trial.sad_alien,
+        "season": trial.season,
         "key_press": info.key
       };
 
@@ -152,70 +217,6 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
 
       var timeout = info.rt == -1;
       doFeedback(correct, timeout);
-    }
-
-    // take care of button presses: mimic key presses
-    function clear_button_handlers() {
-      $('#bed-button').off('click');
-      $('#umbrella-button').off('click');
-      $('#plant-button').off('click');
-      $('#rock-button').off('click');
-    }
-
-    $('#bed-button').on('click', function() {
-      clear_button_handlers();
-      var current_time = (new Date()).getTime();
-      rt = 7777;//current_time - start_time;
-      info = {
-        key: 74,
-        rt: rt
-      };
-      display_element.append("<p style='position:absolute; z:11'> Key:" + 74 + "RT:" + rt + "</p>")
-      after_response(info);
-    });
-
-    $('#umbrella-button').on('click', function() {
-      clear_button_handlers();
-      var current_time = (new Date()).getTime();
-      rt = 7777;//current_time - start_time;
-      info = {
-        key: 75,
-        rt: rt
-      };
-      after_response(info);
-    });
-
-    $('#plant-button').on('click', function() {
-      clear_button_handlers();
-      var current_time = (new Date()).getTime();
-      rt = 7777;//current_time - start_time;
-      info = {
-        key: 76,
-        rt: rt
-      };
-      after_response(info);
-    });
-
-    $('#rock-button').on('click', function() {
-      clear_button_handlers();
-      var current_time = (new Date()).getTime();
-      rt = 7777;//current_time - start_time;
-      info = {
-        key: 186,
-        rt: rt
-      };
-      after_response(info);
-    });
-
-    var trial_data = {};
-
-    if (trial.timing_response > 0) {
-      setTimeoutHandlers.push(setTimeout(function() {
-        after_response({
-          key: -1,
-          rt: -1
-        });
-      }, trial.timing_response));
     }
 
     function doFeedback(correct, timeout) {
@@ -257,6 +258,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
     function endTrial() {
       display_element.html("");
       display_element.append(background);
+      // jsPsych.data.displayData();  // for debugging only!
       jsPsych.finishTrial(trial_data);
     }
 
