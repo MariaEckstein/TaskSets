@@ -15,13 +15,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
   plugin.trial = function(display_element, trial) {
 
     // default parameters
-    // trial.text_answer = (typeof trial.text_answer === 'undefined') ? "" : trial.text_answer;
-    // trial.correct_text = (typeof trial.correct_text === 'undefined') ? "<p class='feedback'>Correct</p>" : trial.correct_text;
-    // trial.incorrect_text = (typeof trial.incorrect_text === 'undefined') ? "<p class='feedback'>Incorrect</p>" : trial.incorrect_text;
     trial.show_stim_with_feedback = (typeof trial.show_stim_with_feedback === 'undefined') ? true : trial.show_stim_with_feedback;
-    // trial.is_html = (typeof trial.is_html === 'undefined') ? false : trial.is_html;
-    // trial.force_correct_button_press = (typeof trial.force_correct_button_press === 'undefined') ? false : trial.force_correct_button_press;
-    // trial.prompt = (typeof trial.prompt === 'undefined') ? '' : trial.prompt;
     trial.show_feedback_on_timeout = (typeof trial.show_feedback_on_timeout === 'undefined') ? false : trial.show_feedback_on_timeout;
     trial.timeout_message = trial.timeout_message || "<p>Please respond faster.</p>";
     // timing params
@@ -48,19 +42,18 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       trial.background = "img/blank.png"
     }
 
-    alien_height = 250
-    alien_top = 230
-    // sad_top = [alien_top + 100, alien_top + 50, alien_top][trial.sad_alien]
-    sad_left = [520, 800, 1050][trial.sad_alien]
-    reward_top = alien_top - 27
-    reward_left = sad_left + 15
-    button_top = alien_top + alien_height + 200
-    button_height = 90
-    button_dist = 50
-    button1_left = 650
-    button2_left = button1_left + button_height + button_dist
-    button3_left = button2_left + button_height + button_dist
-    button4_left = button3_left + button_height + button_dist
+    var alien_height = 250
+    var alien_top = 230
+    var sad_left = [520, 800, 1050][trial.sad_alien]
+    var reward_top = alien_top - 27
+    var reward_left = sad_left + 15
+    var button_top = alien_top + alien_height + 200
+    var button_height = 90
+    var button_dist = 70
+    var button1_left = 650
+    var button2_left = button1_left + button_height + button_dist
+    var button3_left = button2_left + button_height + button_dist
+    var button4_left = button3_left + button_height + button_dist
 
     // create Aliens, sadness, and response buttons
     var background = $('<img>', {
@@ -90,16 +83,33 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       "height": '120'
     })
 
-    var bed = "<img src='img/bed.png' style='position:absolute; top:" + button_top + "px; left:" + button1_left + "px' height=" + button_height + ">"
-    var umbrella = "<img src='img/umbrella.png' style='position:absolute; top:" + button_top + "px; left:" + button2_left + "px' height=" + button_height + ">"
-    var plant = "<img src='img/plant.png' style='position:absolute; top:" + button_top + "px; left:" + button3_left + "px' height=" + button_height + ">"
-    var rock = "<img src='img/rock.png' style='position:absolute; top:" + button_top + "px; left:" + button4_left + "px' height=" + button_height + ">"
-    var response_buttons = bed + umbrella + plant + rock
+    var response_buttons =
+      "<div class='response_buttons'>" +
+        "<button id='bed-button'" +
+          "style='position:absolute; left:" + button1_left + "px; top:" + button_top + "px; z = 10'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/bed.png' height=" + button_height + ">" +
+        "</button>" +
+        "<button id='umbrella-button'" +
+          "style='position:absolute; left:" + button2_left + "px; top:" + button_top + "px; z = 10'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/umbrella.png' height=" + button_height + ">" +
+        "</button>" +
+        "<button id='plant-button'" +
+          "style='position:absolute; left:" + button3_left + "px; top:" + button_top + "px; z = 10'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/plant.png' height=" + button_height + ">" +
+        "</button>" +
+        "<button id='rock-button'" +
+          "style='position:absolute; left:" + button4_left + "px; top:" + button_top + "px; z = 10'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/rock.png' height=" + button_height + ">" +
+        "</button>" +
+      "</div>"
 
     // add Aliens, sadness, and response buttons to display
     display_element.append(background, aliens, sadness, response_buttons);
-
-    var trial_data = {};
+    var start_time = (new Date()).getTime();
 
     // create response function
     var after_response = function(info) {
@@ -117,23 +127,9 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
         correct = true;
       }
 
-      // get location for box around chosen item
-      border_left = 0
-      if (info.key == 74) {
-        border_left = button1_left - 10
-      } else if (info.key == 75) {
-        border_left = button2_left - 10
-      } else if (info.key == 76) {
-        border_left = button3_left - 10
-      } else if (info.key == 186) {
-        border_left = button4_left - 10
-      }
-
       // get feedback amount
       feedback_amount = 0
-      if (!correct) {
-        feedback_amount = 0
-      } else {
+      if (correct) {
         if (info.key == 74) {
           feedback_amount = trial.feedback_amounts[0]
         } else if (info.key == 75) {
@@ -152,19 +148,66 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
         "key_press": info.key
       };
 
-      display_element.html('');
+      display_element.html(''); // not sure what it does... remove?
 
       var timeout = info.rt == -1;
       doFeedback(correct, timeout);
     }
 
-    jsPsych.pluginAPI.getKeyboardResponse({
-      callback_function: after_response,
-      valid_responses: trial.choices,
-      rt_method: 'date',
-      persist: false,
-      allow_held_key: false
+    // take care of button presses: mimic key presses
+    function clear_button_handlers() {
+      $('#bed-button').off('click');
+      $('#umbrella-button').off('click');
+      $('#plant-button').off('click');
+      $('#rock-button').off('click');
+    }
+
+    $('#bed-button').on('click', function() {
+      clear_button_handlers();
+      var current_time = (new Date()).getTime();
+      rt = 7777;//current_time - start_time;
+      info = {
+        key: 74,
+        rt: rt
+      };
+      display_element.append("<p style='position:absolute; z:11'> Key:" + 74 + "RT:" + rt + "</p>")
+      after_response(info);
     });
+
+    $('#umbrella-button').on('click', function() {
+      clear_button_handlers();
+      var current_time = (new Date()).getTime();
+      rt = 7777;//current_time - start_time;
+      info = {
+        key: 75,
+        rt: rt
+      };
+      after_response(info);
+    });
+
+    $('#plant-button').on('click', function() {
+      clear_button_handlers();
+      var current_time = (new Date()).getTime();
+      rt = 7777;//current_time - start_time;
+      info = {
+        key: 76,
+        rt: rt
+      };
+      after_response(info);
+    });
+
+    $('#rock-button').on('click', function() {
+      clear_button_handlers();
+      var current_time = (new Date()).getTime();
+      rt = 7777;//current_time - start_time;
+      info = {
+        key: 186,
+        rt: rt
+      };
+      after_response(info);
+    });
+
+    var trial_data = {};
 
     if (trial.timing_response > 0) {
       setTimeoutHandlers.push(setTimeout(function() {
@@ -181,15 +224,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
         display_element.append(trial.timeout_message);
       } else {
 
-        var border = $('<img>', {
-          "src": 'img/border.png',
-          "style": 'position:absolute;' +
-                   'top:' + button_top + 'px;' +
-                   'left:' + border_left + 'px;',
-          "height": button_height + 20,
-          "width": button_height + 30,
-        })
-
+        // Add happy frame and number feedback to aliens
         var happiness = $('<img>', {
           "src": 'img/happy.png',
           "style":  'position:absolute;' +
@@ -211,7 +246,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
           "class": 'jspsych-categorize-stimulus'
         })
 
-        display_element.append(background, aliens, border, response_buttons, happiness, number_feedback);
+        display_element.append(background, aliens, response_buttons, happiness, number_feedback);
 
       }
       setTimeout(function() {

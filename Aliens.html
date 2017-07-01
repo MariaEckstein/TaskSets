@@ -6,7 +6,7 @@
     <script src="jspsych-5.0.3/jspsych.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-text.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-categorize.js"></script>
-    <script src="jspsych-5.0.3/plugins/jspsych-categorize-alienzzz.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-instructions.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-categorize-alienzzz2.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
   </head>
@@ -20,6 +20,7 @@
   - better reward schedule (right now, contexts can be recognized just because of the amounts)
   - read the novelty paper with the crops and planets -> similar?
   - add the other levels
+  - record data
   */
 
     alien_top = 230
@@ -39,11 +40,6 @@
     below_buttons = button_top + button_height + 50
 
     /* define welcome message block */
-    var welcome_block = {
-      type: "text",
-      text: "Welcome to the experiment. Press any key to begin."
-    };
-
     var bed = "<img src='img/bed.png' style='position:absolute; top:" + button_top + "px; left:" + button1_left + "px' height=" + button_height + ">"
     var umbrella = "<img src='img/umbrella.png' style='position:absolute; top:" + button_top + "px; left:" + button2_left + "px' height=" + button_height + ">"
     var plant = "<img src='img/plant.png' style='position:absolute; top:" + button_top + "px; left:" + button3_left + "px' height=" + button_height + ">"
@@ -61,51 +57,51 @@
     var happiness2 = "<img src='img/happy2.png' style='position:absolute; top:" + sad_top[2] + "px; left:" + sad_left[2] + "px;' height=120 >"
     var number_feedback = "<p style='color:green; font-size:46px; position:absolute; top:" + reward_top + "px; left:" + reward_left + "px;'> +5 </p>"
 
-    var instructions1 = {
-      type: "text",
-      text: "<p>In the following game, you will be taking care of three cute aliens." +
+    var welcome_block = "<p>Welcome to the experiment. Press 'next' to begin.</p>"
+
+    var instructions1 = "<p>In the following game, you will be taking care of three cute aliens." +
       "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +
       "<p>Each alien needs different things to thrive." +
       "One alien might need to chew on a rock in order grow, whereas another might need to catch cosmic rays with its umbrella</p>" +
       "<p>Over time, you will learn what each alien needs in order to grow.</p>" +
       aliens
-    }
 
-    var instructions2 = {
-      type: "text",
-      text: "<p>In addition, the aliens’ planet goes through different seasons, and aliens will need different things depending on these seasons!</p>" +
+    var instructions2 = "<p>In addition, the aliens’ planet goes through different seasons, and aliens will need different things depending on these seasons!</p>" +
       "<p>For example, in order to grow, an alien might need to chew on a rock in the hot season, but it needs to sleep in a bed during the rainy season.</p>" +
       "<img src='img/hot.png' height=" + alien_height + ">" +
       "<img src='img/cold.png' height=" + alien_height + ">" +
       "<img src='img/rainy.png' height=" + alien_height + ">"
-    }
 
-    var instructions3 = {
-      type: "text",
-      text: "<p>Let's practice the game with these three aliens:</p>" +
+    var instructions3 = "<p>Let's practice the game with these three aliens:</p>" +
       aliens +
       "<p>Try to make each one of them grow as much as you can, by learning what each one needs!</p>"
-    }
 
-    var instructions4 = {
-      type: "text",
-      text: "<p>Whenever an alien needs something, it will start crying, like the green alien below:</p>" +
+    var instructions4 = "<p>Whenever an alien needs something, it will start crying, like the green alien below:</p>" +
       aliens_abs + sadness0 +
       "<div style='position:absolute; top:" + below_aliens + "px;'" +
         "<p>When an alien is unhappy like this, you can offer it one of several things to cheer it up and help it grow!</p>" +
         "<p>How about a chew on the black rock? Click on the rock to see if the green alien would like that!</p>" +
       "</div>" +
       response_buttons
-    }
 
-    var instructions5 = {
-      type: "text",
-      text: "<p> The green alien liked the rock a lot! It is all happy again and it grew by 5 centimeters! </p>" +
+    var instructions5 = "<p> The green alien liked the rock a lot! It is all happy again and it grew by 5 centimeters! </p>" +
       aliens_abs + happiness0 + number_feedback +
       response_buttons + highlight_rock +
       "<p style='position:absolute; top:" + below_buttons + "px;'> Next time, another alien will be sad " +
       "- try to learn which item each alien likes to help them grow!</p>"
-    }
+
+    var instructions = {
+    type: 'instructions',
+    pages: [
+        welcome_block,
+        instructions1,
+        instructions2,
+        instructions3,
+        instructions4,
+        instructions5
+    ],
+    show_clickable_nav: true
+}
 
     var training_block = {
       type: "categorize-alienzzz2",
@@ -189,10 +185,10 @@
     /* create experiment timeline array */
     var timeline = [];
     // timeline.push(welcome_block);
-    // timeline.push(instructions1, instructions2, instructions3, instructions4, instructions5);
-    // timeline.push(training_block, training_block, training_block, training_block, training_block, training_block, training_block, training_block);
+    // timeline.push(instructions);
+    timeline.push(training_block, training_block, training_block, training_block, training_block, training_block, training_block, training_block);
     // timeline.push(instructions6);
-    timeline.push(all_seasons);
+    // timeline.push(all_seasons);
 
     /* start the experiment */
     jsPsych.init({
