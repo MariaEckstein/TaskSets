@@ -17,12 +17,12 @@
   <script>
 
   /* TDs
-  - instructions: use example trial in stead of hard-coded slides?
   - better reward schedule (right now, contexts can be recognized just because of the amounts)
   - read the novelty paper with the crops and planets -> similar?
   - add the other levels
-  - record data
+  - CHECK record data
   - CHECK mouse instead of keys
+  - CHECK instructions: use example trial in stead of hard-coded slides?
   - CHECK add for SubjectID, etc.
   */
 
@@ -108,19 +108,19 @@
       "<p>Try to learn which item each alien likes to help them grow!</p>"
 
     var instructions = {
-    type: 'alien-instructions',
-    pages: [
-        welcome_block,
-        instructions1,
-        instructions2,
-        instructions3,
-        instructions4,
-        instructions5,
-        instructions6
-    ],
-    show_clickable_nav: true,
-    timing_post_trial: 200
-}
+      type: 'alien-instructions',
+      pages: [
+          welcome_block,
+          instructions1,
+          instructions2,
+          instructions3,
+          instructions4,
+          instructions5,
+          instructions6
+      ],
+      show_clickable_nav: true,
+      timing_post_trial: 200
+    }
 
     var training_block = {
       type: "categorize-alienzzz2",
@@ -134,25 +134,29 @@
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
       timeline: [
-        // {key_answer: 74, sad_alien: 0},
-        // {key_answer: 75, sad_alien: 1},
-        // {key_answer: 76, sad_alien: 2},
-        // {key_answer: 74, sad_alien: 0},
+        {key_answer: 74, sad_alien: 0},
+        {key_answer: 75, sad_alien: 1},
+        {key_answer: 76, sad_alien: 2},
+        {key_answer: 74, sad_alien: 0},
         {key_answer: 75, sad_alien: 1},
         {key_answer: 76, sad_alien: 2}
       ]
     }
 
-    var instructions7 = {
-      type: "text",
-      text: "<p> Great job! You helped these three aliens grow a lot! </p>" +
+    var instructions7 =
+      "<p> Great job! You helped these three aliens grow a lot! </p>" +
       aliens_abs + happiness0 + happiness1 + happiness2 +
-      response_buttons +
-      "<div style='position:absolute; top:" + below_buttons + "px;'>" +
-        "<p> Let's move on the real game now! </p>" +
+      "<div style='position:absolute; top:" + below_aliens + "px;'" +
+        "<p> When you're ready, press Next to move on the real game. </p>" +
         "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +
         "Keep in mind that the aliens' preferences change with the seasons! </p>" +
       "</div>"
+
+    var instructions_post = {
+      type: 'alien-instructions',
+      pages: [instructions7],
+      show_clickable_nav: true,
+      timing_post_trial: 200
     }
 
     var hot_season = {
@@ -210,8 +214,11 @@
     }
 
     var goodbye = {
-      type: "text",
-      text: "The game is now over, you did a great job! Thank you for participating in the experiment!"
+      type: 'alien-instructions',
+      pages: ["<p>The game is now over, you did a great job!</p>" +
+        "<p>Thank you for participating in the experiment!</p>" +
+        "<p>Click Next to finish and download the data!</p>"],
+      show_clickable_nav: true
     }
 
     /* create experiment timeline array */
@@ -219,7 +226,7 @@
     timeline.push(get_subj_data);
     timeline.push(instructions);
     timeline.push(training_block, training_block);//, training_block, training_block, training_block, training_block, training_block, training_block, training_block);
-    timeline.push(instructions7);
+    timeline.push(instructions_post);
     timeline.push(all_seasons);
     timeline.push(goodbye);
 
@@ -237,7 +244,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      // fullscreen: true,
+      fullscreen: true,
       // show_progress_bar: true,  // doesn't work when I have a background..
       on_finish: function(data) {download_data(data)}
       // on_finish: function(data){ saveData("filename.csv", jsPsych.data.dataAsCSV()) },  // only works on server and with PHP script
