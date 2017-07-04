@@ -7,7 +7,7 @@
     <script src="jspsych-5.0.3/plugins/jspsych-text.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-categorize.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-survey-text.js"></script>
-    <script src="jspsych-5.0.3/plugins/jspsych-alien-instructions.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-instructions.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-categorize-alienzzz2.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
   </head>
@@ -31,84 +31,98 @@
       questions: ["SubjID:", "Date of birth (mm/dd/yyyy):", "Occupation:", "Highest degree:"]
     }
 
-    alien_top = 230
-    alien_height = 250
-    below_aliens = alien_top + alien_height + 50
-    sad_top = [alien_top + 100, alien_top + 50, alien_top]
-    sad_left = [530, 810, 1100]
-    reward_top = sad_top[0] - 27
-    reward_left = sad_left[0] + 15
-    button_top = alien_top + alien_height + 200
-    button_height = 90
-    border_height = button_height + 20
-    button_dist = 50
-    button1_left = 650
-    button2_left = button1_left + button_height + button_dist
-    button3_left = button2_left + button_height + button_dist
-    button4_left = button3_left + button_height + button_dist
-    below_buttons = button_top + button_height + 50
+    var alien_height = 250
+    var sad_lefts = [0, 280, 520]
+    var reward_top = - 27
+    var reward_left = sad_lefts[0] + 15
+    var button_height = 50
 
-    /* define welcome message block */
-    var bed = "<img src='img/bed.png' style='position:absolute; top:" + button_top + "px; left:" + button1_left + "px' height=" + button_height + ">"
-    var umbrella = "<img src='img/umbrella.png' style='position:absolute; top:" + button_top + "px; left:" + button2_left + "px' height=" + button_height + ">"
-    var plant = "<img src='img/plant.png' style='position:absolute; top:" + button_top + "px; left:" + button3_left + "px' height=" + button_height + ">"
-    var rock = "<img src='img/rock.png' style='position:absolute; top:" + button_top + "px; left:" + button4_left + "px' height=" + button_height + ">"
-    var response_buttons = bed + umbrella + plant + rock
-
-    var highlight_bed = "<img src='img/border.png' style='position:absolute; top:" + button_top +
-                              "px; left:" + button1_left + "px;' height=" + border_height + " width=" + border_height + " >"
+    var response_buttons =
+      "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+        "<button id='bed-button'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/bed.png' height=" + button_height + ">" +
+        "</button>" +
+        "<button id='umbrella-button'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/umbrella.png' height=" + button_height + ">" +
+        "</button>" +
+        "<button id='plant-button'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/plant.png' height=" + button_height + ">" +
+        "</button>" +
+        "<button id='rock-button'" +
+          "class='jspsych-btn'>" +
+          "<img src='img/rock.png' height=" + button_height + ">" +
+        "</button>" +
+      "</div></center>"
 
     var aliens = "<img src='img/Aliens1.png' height=" + alien_height + ">"
-    var aliens_abs = "<img src='img/Aliens1.png' style='position:absolute; top:" + alien_top + "px', height=" + alien_height + ">"
-    var sadness0 = "<img src='img/sad.png' style='position:absolute; top:" + sad_top[0] + "px; left:" + sad_left[0] + "px;' height=120 >"
-    var happiness0 = "<img src='img/happy2.png' style='position:absolute; top:" + sad_top[0] + "px; left:" + sad_left[0] + "px;' height=120 >"
-    var happiness1 = "<img src='img/happy2.png' style='position:absolute; top:" + sad_top[1] + "px; left:" + sad_left[1] + "px;' height=120 >"
-    var happiness2 = "<img src='img/happy2.png' style='position:absolute; top:" + sad_top[2] + "px; left:" + sad_left[2] + "px;' height=120 >"
-    var number_feedback = "<p style='color:green; font-size:46px; position:absolute; top:" + reward_top + "px; left:" + reward_left + "px;'> +5 </p>"
+    var sad0 = "<img src='img/happy.png' style='position:absolute; left:" + sad_lefts[0] + "px;' height=120>"
+    var exclamation_points = "<p style='color:red; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> !!!!"
+    var reward = "<p style='color:green; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> +5"
 
-    var welcome_block = "<p>Welcome to the experiment. Press 'next' to begin.</p>"
+    var sad_alien =
+      "<center><div style='position:relative'>" +
+        aliens + sad0 + exclamation_points +
+      "</div></center>"
 
-    var instructions1 = "<p>In the following game, you will be taking care of three aliens. " +
+    var happy_alien =
+      "<center><div style='position:relative;'>" +
+        aliens + sad0 + reward +
+      "</div></center>"
+
+    var happy_aliens =
+      "<center><div style='position:relative;'>" +
+        aliens +
+        "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[0] + "px;' height=120>" +
+        "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[1] + "px;' height=120>" +
+        "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[2] + "px;' height=120>" +
+      "</div></center>"
+
+    var welcome_block = "<p>Welcome to the experiment. Click 'Next' or press the right arrow to begin.</p>"
+
+    var instructions1 = "<center><p>In the following game, you will be taking care of three aliens. " +
       "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +
       "<p>Each alien needs different things to thrive. " +
       "One alien might need to chew on a shiny rock in order grow, " +
       "whereas another might need to catch cosmic rays with its red umbrella.</p>" +
-      "<p>Over time, you will learn what each alien needs in order to grow.</p>" +
+      "<p>Over time, you will learn what each alien needs in order to grow.</p></center>" +
       aliens
 
-    var instructions2 = "<p>The aliens’ planet goes through different seasons, " +
+    var instructions2 = "<center><p>The aliens’ planet goes through different seasons, " +
       "and aliens will need different things depending on these seasons.</p>" +
       "<p>For example, in order to grow, one alien might need to chew on a shiny rock in the hot season, " +
       "but it might need to sleep in a bed during the rainy season.</p>" +
       "There are three seasons on the aliens' planet: <i>hot, cold, and rainy</i>:" +
-      "<img src='img/hot.png' hspace='20' height=" + alien_height + ">" +
-      "<img src='img/cold.png' hspace='20' height=" + alien_height + ">" +
-      "<img src='img/rainy.png' hspace='20' height=" + alien_height + ">"
+      "<img src='img/hot.png' style='border: 10px solid transparent;' height=" + alien_height + ">" +
+      "<img src='img/cold.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + ">" +
+      "<img src='img/rainy.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + "></center>"
 
-    var instructions3 = "<p>Let's practice the game with these three aliens:</p>" +
+    var instructions3 = "<center><p>Let's practice the game with these three aliens:</p>" +
       aliens +
-      "<p>Try to make each one of them grow as much as you can, by learning what each one needs!</p>"
+      "<p>Try to make each one of them grow as much as you can, by learning what each one needs!</p></center>"
 
-    var instructions4 = "<p>Whenever an alien needs something, it will call you, just like the green alien below:</p>" +
-      aliens_abs + sadness0 +
-      "<div style='position:absolute; top:" + below_aliens + "px;'" +
-        "<p>When an alien is unhappy like this, you can offer it one of several things to cheer it up and help it grow.</p>" +
-        "<p>How about a nap in the green bed? In the game, you'll be able to click on an item to offer it to the alien.</p>" +
+    var instructions4 = "<center><p>Whenever an alien needs something, it will call you, just like the green alien below:</p>" +
+      sad_alien +
+      "<div style='position:relative; top=50px'" +
+        "<p>When an alien is unhappy like this green alien, you can offer it one of several things to cheer it up and help it grow.</p>" +
+        "<p>How about a nap in the green bed? In the game, you'll be able to click on an item to offer it to the unhappy alien.</p>" +
         "<p>Let's pretend you offered the alien a nap in the green bed - click Next to see what happens.</p>" +
       "</div>" +
-      response_buttons + highlight_bed
+      response_buttons + "</center>"
 
-    var instructions5 = "<p> The green alien liked the nap a lot! It is all happy now and it grew by 5 centimeters! </p>" +
-      aliens_abs + happiness0 + number_feedback +
-      response_buttons + highlight_bed
+    var instructions5 = "<center><p> The green alien liked the nap a lot! It is all happy now and it grew by 5 centimeters! </p>" +
+      happy_alien +
+      response_buttons + "</center>"
 
-    var instructions6 = "<p> When you are ready, you can press Next for a practice round of the game.</p>" +
+    var instructions6 = "<center><p> When you are ready, you can press Next for a practice round of the game.</p>" +
       "<p>Press Previous if you'd like to review the instructions before you start.</p>" +
       aliens +
-      "<p>Try to learn which item each alien likes to help them grow!</p>"
+      "<p>Try to learn which item each alien likes to help them grow!</p></center>"
 
     var instructions = {
-      type: 'alien-instructions',
+      type: 'instructions',
       pages: [
           welcome_block,
           instructions1,
@@ -144,16 +158,14 @@
     }
 
     var instructions7 =
-      "<p> Great job! You helped these three aliens grow a lot! </p>" +
-      aliens_abs + happiness0 + happiness1 + happiness2 +
-      "<div style='position:absolute; top:" + below_aliens + "px;'" +
-        "<p> When you're ready, press Next to move on the real game. </p>" +
-        "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +
-        "Keep in mind that the aliens' preferences change with the seasons! </p>" +
-      "</div>"
+      "<center><p> Great job! You helped these three aliens grow a lot! </p>" +
+      happy_aliens +
+      "<p> When you're ready, press Next to move on to the real game. </p>" +
+      "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +
+      "Keep in mind that the aliens' preferences change with the seasons! </p></center>"
 
     var instructions_post = {
-      type: 'alien-instructions',
+      type: 'instructions',
       pages: [instructions7],
       show_clickable_nav: true,
       timing_post_trial: 200
@@ -203,21 +215,21 @@
       type: "categorize-alienzzz2",
       stimulus: "img/Aliens2.png",
       choices: [74, 75, 76, 186],
-      timing_response: 3000,
+      timing_response: 7000,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
       timeline: [
-        hot_season,
-        cold_season,
-        rainy_season
+        hot_season, hot_season, hot_season,  // each season has 6 trials
+        cold_season, cold_season, cold_season,
+        rainy_season, rainy_season, rainy_season,
       ]
     }
 
     var goodbye = {
-      type: 'alien-instructions',
-      pages: ["<p>The game is now over, you did a great job!</p>" +
+      type: 'instructions',
+      pages: ["<center><p>The game is now over, you did a great job!</p>" +
         "<p>Thank you for participating in the experiment!</p>" +
-        "<p>Click Next to finish and download the data!</p>"],
+        "<p>Click Next to finish and download the data!</p></center>"],
       show_clickable_nav: true
     }
 
@@ -225,30 +237,19 @@
     var timeline = [];
     timeline.push(get_subj_data);
     timeline.push(instructions);
-    timeline.push(training_block, training_block);//, training_block, training_block, training_block, training_block, training_block, training_block, training_block);
+    timeline.push(training_block, training_block, training_block);
     timeline.push(instructions_post);
     timeline.push(all_seasons);
     timeline.push(goodbye);
-
-    function download_data(data) {
-      var csvString = jsPsych.data.dataAsCSV();
-      var a         = document.createElement('a');
-      a.href        = 'data:attachment/csv,' + csvString;
-      a.target      = '_blank';
-      a.download    = 'ExperimentData.csv';
-
-      document.body.appendChild(a);
-      a.click();
-    }
 
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
       fullscreen: true,
       // show_progress_bar: true,  // doesn't work when I have a background..
-      on_finish: function(data) {download_data(data)}
-      // on_finish: function(data){ saveData("filename.csv", jsPsych.data.dataAsCSV()) },  // only works on server and with PHP script
-      // on_finish: function() { jsPsych.data.displayData() };  // doesn't work here, but after each trial
+      on_finish: function() {
+        jsPsych.data.localSave('test.csv', 'csv')
+      }
     });
 
   </script>
