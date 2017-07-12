@@ -42,22 +42,25 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       trial.background = "img/blank.png"
     }
 
-    var sad_left = sad_lefts[trial.sad_alien]
-    var reward_left = sad_left + 15
-
     // create Aliens, sadness, and response buttons
     var background =
       "<img src=" + trial.background + " style='position:fixed; top:0px; left:0px; bottom:0px; right: 0px' height='100%' width='100%'>"
 
-    var sad_aliens =
+    sad_alien =
       "<center><div style='position:relative;'>" +
-        "<img src=" + trial.stimulus + " height=" + alien_height + ">" +
-        "<img src='img/happy.png' style='position:absolute; left:" + sad_left + "px;' height=120>" +
-        "<p style='color:red; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> !!!!" +
+        trial.aliens[trial.sad_alien] + speach + exclamation_points +
+      "</div></center>"
+
+    shuffled_buttons = shuffle(buttons)
+    response_buttons =
+      "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+      shuffled_buttons[0] +
+      shuffled_buttons[1] +
+      shuffled_buttons[2] +
       "</div></center>"
 
     // add Aliens, sadness, and response buttons to display
-    display_element.append(background, sad_aliens, response_buttons);
+    display_element.append(background, sad_alien, response_buttons);
     trial.start_time = (new Date()).getTime();
 
     // take care of button presses: mimic key presses
@@ -175,14 +178,13 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       } else {
 
         // Add happy frame and number feedback to aliens
-        var happy_aliens =
+        var happy_alien =
           "<center><div style='position:relative;'>" +
-            "<img src=" + trial.stimulus + " height=" + alien_height + ">" +
-            "<img src='img/happy.png' style='position:absolute; left:" + sad_left + "px;' height=120>" +
+            trial.aliens[trial.sad_alien] + speach +
             "<p style='color:green; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> +" + feedback_amount +
           "</div></center>"
 
-        display_element.append(background, happy_aliens, response_buttons);
+        display_element.append(background, happy_alien, response_buttons);
 
       }
       setTimeout(function() {

@@ -18,6 +18,8 @@
 
   /* TDs
   - better reward schedule (right now, contexts can be recognized just because of the amounts)
+  - display only one alien at a time
+  - permute response buttons each time
   - read the novelty paper with the crops and planets -> similar?
   - add the other levels
   - CHECK record data
@@ -26,50 +28,85 @@
   - CHECK add for SubjectID, etc.
   */
 
-    var get_subj_data = {
-      type: "survey-text",
-      questions: ["SubjID:", "Date of birth (mm/dd/yyyy):", "Occupation:", "Highest degree:"]
-    }
-
-    var alien_height = 250
+    var alien_height = 240
     var sad_lefts = [0, 280, 520]
+    var sad_left = 260
     var reward_top = - 27
-    var reward_left = sad_lefts[0] + 15
+    var reward_left = sad_left + 15
     var button_height = 50
 
-    var response_buttons =
+    bed_button =
+      "<button id='bed-button'" +
+        "class='jspsych-btn'>" +
+        "<img src='img/bed.png' height=" + button_height + ">" +
+      "</button>"
+    umbrella_button =
+      "<button id='umbrella-button'" +
+        "class='jspsych-btn'>" +
+        "<img src='img/umbrella.png' height=" + button_height + ">" +
+      "</button>"
+    plant_button =
+      "<button id='plant-button'" +
+        "class='jspsych-btn'>" +
+        "<img src='img/plant.png' height=" + button_height + ">" +
+      "</button>"
+    var buttons = [bed_button, umbrella_button, plant_button]
+
+    function shuffle(array) {
+      var currentIndex = array.length, temporaryValue, randomIndex;
+
+      // While there remain elements to shuffle...
+      while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+
+    shuffled_buttons = shuffle(buttons)
+    response_buttons =
       "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
-        "<button id='bed-button'" +
-          "class='jspsych-btn'>" +
-          "<img src='img/bed.png' height=" + button_height + ">" +
-        "</button>" +
-        "<button id='umbrella-button'" +
-          "class='jspsych-btn'>" +
-          "<img src='img/umbrella.png' height=" + button_height + ">" +
-        "</button>" +
-        "<button id='plant-button'" +
-          "class='jspsych-btn'>" +
-          "<img src='img/plant.png' height=" + button_height + ">" +
-        "</button>" +
-        "<button id='rock-button'" +
-          "class='jspsych-btn'>" +
-          "<img src='img/rock.png' height=" + button_height + ">" +
-        "</button>" +
+        shuffled_buttons[0] +
+        shuffled_buttons[1] +
+        shuffled_buttons[2] +
       "</div></center>"
 
-    var aliens = "<img src='img/Aliens1.png' height=" + alien_height + ">"
-    var sad0 = "<img src='img/happy.png' style='position:absolute; left:" + sad_lefts[0] + "px;' height=120>"
+    green_alien = "<img src='img/alien1.png' height=" + alien_height + ">"
+    purple_alien = "<img src='img/alien2.png' height=" + alien_height + ">"
+    red_alien = "<img src='img/alien3.png' height=" + alien_height + ">"
+    lblue_alien = "<img src='img/alien4.png' height=" + alien_height + ">"
+    orange_alien = "<img src='img/alien5.png' height=" + alien_height + ">"
+    dblue_alien = "<img src='img/alien6.png' height=" + alien_height + ">"
+    alien_array = [green_alien, purple_alien, dblue_alien]
+    shuffled_aliens = shuffle(alien_array)
+
+    var aliens =
+      "<center><div style='position:relative; z=10;'>" +
+        shuffled_aliens[0] +
+        shuffled_aliens[1] +
+        shuffled_aliens[2] +
+      "</div></center>"
+
+    var speach = "<img src='img/speach.png' style='position:absolute; left:" + sad_left + "px;' height=120>"
     var exclamation_points = "<p style='color:red; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> !!!!"
     var reward = "<p style='color:green; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> +5"
 
     var sad_alien =
       "<center><div style='position:relative'>" +
-        aliens + sad0 + exclamation_points +
+        green_alien + speach + exclamation_points +
       "</div></center>"
 
     var happy_alien =
       "<center><div style='position:relative;'>" +
-        aliens + sad0 + reward +
+        green_alien + speach + reward +
       "</div></center>"
 
     var happy_aliens =
@@ -81,6 +118,11 @@
       "</div></center>"
 
     var welcome_block = "<p>Welcome to the experiment. Click 'Next' or press the right arrow to begin.</p>"
+
+    var get_subj_data = {
+      type: "survey-text",
+      questions: ["SubjID:", "Date of birth (mm/dd/yyyy):", "Occupation:", "Highest degree:"]
+    }
 
     var instructions1 = "<center><p>In the following game, you will be taking care of three aliens. " +
       "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +
@@ -139,11 +181,12 @@
     var training_block = {
       type: "categorize-alienzzz2",
       season: "training",
-      stimulus: "img/Aliens1.png",
+      aliens: [green_alien, dblue_alien, purple_alien],
       feedback_amounts: [5, 5, 5],
       choices: [74, 75, 76, 186],
       data: {block: "training"},
       randomize_order: true,
+      timing_feedback_duration: 1500,
       timing_response: 10000,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
@@ -213,9 +256,10 @@
 
     var all_seasons = {
       type: "categorize-alienzzz2",
-      stimulus: "img/Aliens2.png",
+      aliens: shuffle([lblue_alien, orange_alien, red_alien]),
       choices: [74, 75, 76, 186],
       timing_response: 7000,
+      timing_feedback_duration: 1000,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
       timeline: [
@@ -235,7 +279,8 @@
 
     /* create experiment timeline array */
     var timeline = [];
-    timeline.push(get_subj_data);
+    // timeline.push(welcome_block);
+    // timeline.push(get_subj_data);
     timeline.push(instructions);
     timeline.push(training_block, training_block, training_block);
     timeline.push(instructions_post);
@@ -245,7 +290,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      fullscreen: true,
+      // fullscreen: true,
       // show_progress_bar: true,  // doesn't work when I have a background..
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
