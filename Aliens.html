@@ -18,17 +18,23 @@
 
   /* TDs
   - better reward schedule (right now, contexts can be recognized just because of the amounts)
-  - display only one alien at a time
-  - permute response buttons each time
+  - draw rewards from distribution
+  - add counter
   - read the novelty paper with the crops and planets -> similar?
   - add the other levels
+  - pseudo-randomize season order
+  - make sure background comes on before aliens
+  - CHECK only 3 actions
   - CHECK record data
   - CHECK mouse instead of keys
   - CHECK instructions: use example trial in stead of hard-coded slides?
   - CHECK add for SubjectID, etc.
+  - CHECK display only one alien at a time
+  - CHECK permute response buttons each time
   */
 
     var alien_height = 240
+    var alien_height_point_counter = 60
     var sad_lefts = [0, 280, 520]
     var sad_left = 260
     var reward_top = - 27
@@ -79,20 +85,20 @@
         shuffled_buttons[2] +
       "</div></center>"
 
-    green_alien = "<img src='img/alien1.png' height=" + alien_height + ">"
-    purple_alien = "<img src='img/alien2.png' height=" + alien_height + ">"
-    red_alien = "<img src='img/alien3.png' height=" + alien_height + ">"
-    lblue_alien = "<img src='img/alien4.png' height=" + alien_height + ">"
-    orange_alien = "<img src='img/alien5.png' height=" + alien_height + ">"
-    dblue_alien = "<img src='img/alien6.png' height=" + alien_height + ">"
+    green_alien = "<img src='img/alien1.png'"
+    purple_alien = "<img src='img/alien2.png'"
+    red_alien = "<img src='img/alien3.png'"
+    lblue_alien = "<img src='img/alien4.png'"
+    orange_alien = "<img src='img/alien5.png'"
+    dblue_alien = "<img src='img/alien6.png'"
     alien_array = [green_alien, purple_alien, dblue_alien]
     shuffled_aliens = shuffle(alien_array)
 
     var aliens =
       "<center><div style='position:relative; z=10;'>" +
-        shuffled_aliens[0] +
-        shuffled_aliens[1] +
-        shuffled_aliens[2] +
+        shuffled_aliens[0] + " height=" + alien_height + ">"
+        shuffled_aliens[1] + " height=" + alien_height + ">"
+        shuffled_aliens[2] + " height=" + alien_height + ">"
       "</div></center>"
 
     var speach = "<img src='img/speach.png' style='position:absolute; left:" + sad_left + "px;' height=120>"
@@ -111,7 +117,9 @@
 
     var happy_aliens =
       "<center><div style='position:relative;'>" +
-        aliens +
+        shuffled_aliens[0] +
+        shuffled_aliens[1] +
+        shuffled_aliens[2] +
         "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[0] + "px;' height=120>" +
         "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[1] + "px;' height=120>" +
         "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[2] + "px;' height=120>" +
@@ -191,12 +199,12 @@
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
       timeline: [
-        {key_answer: 74, sad_alien: 0},
-        {key_answer: 75, sad_alien: 1},
-        {key_answer: 76, sad_alien: 2},
-        {key_answer: 74, sad_alien: 0},
-        {key_answer: 75, sad_alien: 1},
-        {key_answer: 76, sad_alien: 2}
+        {key_answer: 0, sad_alien: 0},
+        {key_answer: 1, sad_alien: 1},
+        {key_answer: 2, sad_alien: 2},
+        {key_answer: 0, sad_alien: 0},
+        {key_answer: 1, sad_alien: 1},
+        {key_answer: 2, sad_alien: 2},
       ]
     }
 
@@ -219,12 +227,12 @@
       feedback_amounts: [3, 2, 1],
       randomize_order: true,
       timeline: [
-        {key_answer: 76, sad_alien: 0},
-        {key_answer: 75, sad_alien: 1},
-        {key_answer: 74, sad_alien: 2},
-        {key_answer: 76, sad_alien: 0},
-        {key_answer: 75, sad_alien: 1},
-        {key_answer: 74, sad_alien: 2}
+        {key_answer: 0, sad_alien: 2},
+        {key_answer: 1, sad_alien: 1},
+        {key_answer: 2, sad_alien: 0},
+        {key_answer: 0, sad_alien: 2},
+        {key_answer: 1, sad_alien: 1},
+        {key_answer: 2, sad_alien: 0},
       ]
     }
     var cold_season = {
@@ -232,12 +240,12 @@
       feedback_amounts: [5, 4, 6],
       randomize_order: true,
       timeline: [
-        {key_answer: 74, sad_alien: 0},
-        {key_answer: 76, sad_alien: 1},
-        {key_answer: 75, sad_alien: 2},
-        {key_answer: 74, sad_alien: 0},
-        {key_answer: 76, sad_alien: 1},
-        {key_answer: 75, sad_alien: 2}
+        {key_answer: 0, sad_alien: 0},
+        {key_answer: 1, sad_alien: 2},
+        {key_answer: 2, sad_alien: 1},
+        {key_answer: 0, sad_alien: 0},
+        {key_answer: 1, sad_alien: 2},
+        {key_answer: 2, sad_alien: 1},
       ]
     }
     var rainy_season = {
@@ -245,27 +253,36 @@
       feedback_amounts: [7, 9, 8],
       randomize_order: true,
       timeline: [
-        {key_answer: 75, sad_alien: 0},
-        {key_answer: 74, sad_alien: 1},
-        {key_answer: 76, sad_alien: 2},
-        {key_answer: 75, sad_alien: 0},
-        {key_answer: 74, sad_alien: 1},
-        {key_answer: 76, sad_alien: 2}
+        {key_answer: 0, sad_alien: 1},
+        {key_answer: 1, sad_alien: 0},
+        {key_answer: 2, sad_alien: 2},
+        {key_answer: 0, sad_alien: 1},
+        {key_answer: 1, sad_alien: 0},
+        {key_answer: 2, sad_alien: 2},
       ]
     }
 
     var all_seasons = {
       type: "categorize-alienzzz2",
-      aliens: shuffle([lblue_alien, orange_alien, red_alien]),
+      aliens: shuffle([green_alien, orange_alien, red_alien]),
       choices: [74, 75, 76, 186],
       timing_response: 7000,
-      timing_feedback_duration: 1000,
+      timing_feedback_duration: 750,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
+      // points: [function(){
+      //   return
+      // }]
       timeline: [
         hot_season, hot_season, hot_season,  // each season has 6 trials
         cold_season, cold_season, cold_season,
         rainy_season, rainy_season, rainy_season,
+        hot_season, hot_season,
+        cold_season, cold_season,
+        rainy_season, rainy_season,
+        hot_season,
+        cold_season,
+        rainy_season
       ]
     }
 
@@ -281,9 +298,9 @@
     var timeline = [];
     // timeline.push(welcome_block);
     // timeline.push(get_subj_data);
-    timeline.push(instructions);
-    timeline.push(training_block, training_block, training_block);
-    timeline.push(instructions_post);
+    // timeline.push(instructions);
+    // timeline.push(training_block, training_block, training_block);
+    // timeline.push(instructions_post);
     timeline.push(all_seasons);
     timeline.push(goodbye);
 

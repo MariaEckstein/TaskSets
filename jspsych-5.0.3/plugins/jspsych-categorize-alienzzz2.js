@@ -46,21 +46,46 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
     var background =
       "<img src=" + trial.background + " style='position:fixed; top:0px; left:0px; bottom:0px; right: 0px' height='100%' width='100%'>"
 
+    c_alien_tops = [25, 35, 45]
+    point_tops = [0, 60, 120]
+    trial.points = [0, 1, 2]
+    alien0_counter =
+        trial.aliens[0] + " style='position:absolute; right:50px; top:" + c_alien_tops[0] + "px;' height=" + alien_height_point_counter + ">" +
+        "<p style='position:absolute; right:0px; top:" + point_tops[0] + "px; font-size:46px;'>" + trial.points[0]
+
+    alien1_counter =
+        trial.aliens[1] + " style='position:absolute; right:50px; top:" + c_alien_tops[1] + "px;' height=" + alien_height_point_counter + ">" +
+        "<p style='position:absolute; right:0px; top:" + point_tops[1] + "px; font-size:46px;'>" + trial.points[1]
+
+    alien2_counter =
+        trial.aliens[2] + " style='position:absolute; right:50px; top:" + c_alien_tops[2] + "px;' height=" + alien_height_point_counter + ">" +
+        "<p style='position:absolute; right:0px; top:" + point_tops[2] + "px; font-size:46px;'>" + trial.points[2]
+
+    point_counters =
+      "<div>" +
+        alien0_counter +
+        alien1_counter +
+        alien2_counter +
+      "</div>"
+
     sad_alien =
       "<center><div style='position:relative;'>" +
-        trial.aliens[trial.sad_alien] + speach + exclamation_points +
+        point_counters +
+        trial.aliens[trial.sad_alien] + " height=" + alien_height + ">"
+        speach + exclamation_points +
       "</div></center>"
 
     shuffled_buttons = shuffle(buttons)
     response_buttons =
       "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
-      shuffled_buttons[0] +
-      shuffled_buttons[1] +
-      shuffled_buttons[2] +
+        shuffled_buttons[0] +
+        shuffled_buttons[1] +
+        shuffled_buttons[2] +
       "</div></center>"
 
     // add Aliens, sadness, and response buttons to display
-    display_element.append(background, sad_alien, response_buttons);
+    display_element.append(background);
+    display_element.append(sad_alien, response_buttons);
     trial.start_time = (new Date()).getTime();
 
     // take care of button presses: mimic key presses
@@ -76,7 +101,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       var response_time = (new Date()).getTime();
       var rt = response_time - trial.start_time;
       info = {
-        key: 74,
+        key: 0,
         rt: rt
       };
       after_response(info);
@@ -87,7 +112,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       var response_time = (new Date()).getTime();
       var rt = response_time - trial.start_time;
       info = {
-        key: 75,
+        key: 1,
         rt: rt
       };
       after_response(info);
@@ -98,7 +123,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       var response_time = (new Date()).getTime();
       var rt = response_time - trial.start_time;
       info = {
-        key: 76,
+        key: 2,
         rt: rt
       };
       after_response(info);
@@ -109,7 +134,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       var response_time = (new Date()).getTime();
       var rt = response_time - trial.start_time;
       info = {
-        key: 186,
+        key: 3,
         rt: rt
       };
       after_response(info);
@@ -145,14 +170,16 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       // get feedback amount
       feedback_amount = 0
       if (correct) {
-        if (info.key == 74) {
+        if (info.key == 0) {
           feedback_amount = trial.feedback_amounts[0]
-        } else if (info.key == 75) {
+        } else if (info.key == 1) {
           feedback_amount = trial.feedback_amounts[1]
-        } else if (info.key == 76) {
+        } else if (info.key == 2) {
           feedback_amount = trial.feedback_amounts[2]
         }
       }
+
+      // trial.points[info.key] = trial.points[info.key] + feedback_amount
 
       // save data
       trial_data = {
@@ -162,7 +189,8 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
         "stimulus": trial.stimulus,
         "sad_alien": trial.sad_alien,
         "season": trial.season,
-        "key_press": info.key
+        "key_press": info.key,
+        "point_count": trial.points,
       };
 
       display_element.html(''); // not sure what it does... remove?
@@ -180,7 +208,8 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
         // Add happy frame and number feedback to aliens
         var happy_alien =
           "<center><div style='position:relative;'>" +
-            trial.aliens[trial.sad_alien] + speach +
+            trial.aliens[trial.sad_alien] + " height=" + alien_height + ">" +
+            speach +
             "<p style='color:green; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> +" + feedback_amount +
           "</div></center>"
 
