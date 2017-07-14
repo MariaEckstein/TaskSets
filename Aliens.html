@@ -8,6 +8,7 @@
     <script src="jspsych-5.0.3/plugins/jspsych-categorize.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-survey-text.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-instructions.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-categorize-alienzzz2.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
   </head>
@@ -19,11 +20,11 @@
   /* TDs
   - better reward schedule (right now, contexts can be recognized just because of the amounts)
   - draw rewards from distribution
-  - add counter
   - read the novelty paper with the crops and planets -> similar?
   - add the other levels
   - pseudo-randomize season order
-  - make sure background comes on before aliens
+  - CHECK make sure background comes on before aliens
+  - CHECK add counter
   - CHECK only 3 actions
   - CHECK record data
   - CHECK mouse instead of keys
@@ -40,6 +41,7 @@
     var reward_top = - 27
     var reward_left = sad_left + 15
     var button_height = 50
+    var points = [0, 0, 0]
 
     bed_button =
       "<button id='bed-button'" +
@@ -85,47 +87,51 @@
         shuffled_buttons[2] +
       "</div></center>"
 
-    green_alien = "<img src='img/alien1.png'"
-    purple_alien = "<img src='img/alien2.png'"
-    red_alien = "<img src='img/alien3.png'"
-    lblue_alien = "<img src='img/alien4.png'"
-    orange_alien = "<img src='img/alien5.png'"
-    dblue_alien = "<img src='img/alien6.png'"
-    alien_array = [green_alien, purple_alien, dblue_alien]
+    dblue_alien = "<img src='img/alien1.png' "
+    lgreen_alien = "<img src='img/alien2.png' "
+    dred_alien = "<img src='img/alien3.png' "
+    purple_alien = "<img src='img/alien4.png' "
+    lblue_alien = "<img src='img/alien5.png' "
+    dgreen_alien = "<img src='img/alien6.png' "
+    alien_array = [dred_alien, lblue_alien, dgreen_alien]
     shuffled_aliens = shuffle(alien_array)
 
     var aliens =
       "<center><div style='position:relative; z=10;'>" +
-        shuffled_aliens[0] + " height=" + alien_height + ">"
-        shuffled_aliens[1] + " height=" + alien_height + ">"
-        shuffled_aliens[2] + " height=" + alien_height + ">"
+        shuffled_aliens[0] + "height=" + alien_height + ">" +
+        shuffled_aliens[1] + "height=" + alien_height + ">" +
+        shuffled_aliens[2] + "height=" + alien_height + ">" +
       "</div></center>"
 
-    var speach = "<img src='img/speach.png' style='position:absolute; left:" + sad_left + "px;' height=120>"
+    var speech = "<img src='img/speech.png' style='position:absolute; left:" + sad_left + "px;' height=120>"
     var exclamation_points = "<p style='color:red; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> !!!!"
     var reward = "<p style='color:green; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> +5"
 
     var sad_alien =
       "<center><div style='position:relative'>" +
-        green_alien + speach + exclamation_points +
+        dgreen_alien + "height=" + alien_height + ">" +
+        speech + exclamation_points +
       "</div></center>"
 
     var happy_alien =
       "<center><div style='position:relative;'>" +
-        green_alien + speach + reward +
+        dgreen_alien + "height=" + alien_height + ">" +
+        speech + reward +
       "</div></center>"
 
     var happy_aliens =
       "<center><div style='position:relative;'>" +
-        shuffled_aliens[0] +
-        shuffled_aliens[1] +
-        shuffled_aliens[2] +
+        shuffled_aliens[0] + "height=" + alien_height + ">" +
+        shuffled_aliens[1] + "height=" + alien_height + ">" +
+        shuffled_aliens[2] + "height=" + alien_height + ">" +
         "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[0] + "px;' height=120>" +
         "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[1] + "px;' height=120>" +
         "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[2] + "px;' height=120>" +
       "</div></center>"
 
-    var welcome_block = "<p>Welcome to the experiment. Click 'Next' or press the right arrow to begin.</p>"
+    var move_on = "<center><p><i>Click next or press the right-arrow key to move on.</i></p></center>"
+
+    var welcome_block = "<center><p>Welcome to the experiment!</p></center>" + move_on
 
     var get_subj_data = {
       type: "survey-text",
@@ -138,7 +144,8 @@
       "One alien might need to chew on a shiny rock in order grow, " +
       "whereas another might need to catch cosmic rays with its red umbrella.</p>" +
       "<p>Over time, you will learn what each alien needs in order to grow.</p></center>" +
-      aliens
+      aliens +
+      move_on
 
     var instructions2 = "<center><p>The aliens’ planet goes through different seasons, " +
       "and aliens will need different things depending on these seasons.</p>" +
@@ -147,11 +154,13 @@
       "There are three seasons on the aliens' planet: <i>hot, cold, and rainy</i>:" +
       "<img src='img/hot.png' style='border: 10px solid transparent;' height=" + alien_height + ">" +
       "<img src='img/cold.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + ">" +
-      "<img src='img/rainy.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + "></center>"
+      "<img src='img/rainy.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + "></center>" +
+      move_on
 
     var instructions3 = "<center><p>Let's practice the game with these three aliens:</p>" +
       aliens +
-      "<p>Try to make each one of them grow as much as you can, by learning what each one needs!</p></center>"
+      "<p>Try to make each one of them grow as much as you can, by learning what each one needs!</p></center>" +
+      move_on
 
     var instructions4 = "<center><p>Whenever an alien needs something, it will call you, just like the green alien below:</p>" +
       sad_alien +
@@ -189,22 +198,22 @@
     var training_block = {
       type: "categorize-alienzzz2",
       season: "training",
-      aliens: [green_alien, dblue_alien, purple_alien],
+      aliens: [dred_alien, lblue_alien, dgreen_alien],
       feedback_amounts: [5, 5, 5],
       choices: [74, 75, 76, 186],
       data: {block: "training"},
       randomize_order: true,
       timing_feedback_duration: 1500,
-      timing_response: 10000,
+      timing_response: 15000,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
       timeline: [
         {key_answer: 0, sad_alien: 0},
-        {key_answer: 1, sad_alien: 1},
-        {key_answer: 2, sad_alien: 2},
-        {key_answer: 0, sad_alien: 0},
-        {key_answer: 1, sad_alien: 1},
-        {key_answer: 2, sad_alien: 2},
+        // {key_answer: 1, sad_alien: 1},
+        // {key_answer: 2, sad_alien: 2},
+        // {key_answer: 0, sad_alien: 0},
+        // {key_answer: 1, sad_alien: 1},
+        // {key_answer: 2, sad_alien: 2},
       ]
     }
 
@@ -228,11 +237,11 @@
       randomize_order: true,
       timeline: [
         {key_answer: 0, sad_alien: 2},
-        {key_answer: 1, sad_alien: 1},
-        {key_answer: 2, sad_alien: 0},
-        {key_answer: 0, sad_alien: 2},
-        {key_answer: 1, sad_alien: 1},
-        {key_answer: 2, sad_alien: 0},
+        // {key_answer: 1, sad_alien: 1},
+        // {key_answer: 2, sad_alien: 0},
+        // {key_answer: 0, sad_alien: 2},
+        // {key_answer: 1, sad_alien: 1},
+        // {key_answer: 2, sad_alien: 0},
       ]
     }
     var cold_season = {
@@ -240,12 +249,12 @@
       feedback_amounts: [5, 4, 6],
       randomize_order: true,
       timeline: [
-        {key_answer: 0, sad_alien: 0},
+        // {key_answer: 0, sad_alien: 0},
         {key_answer: 1, sad_alien: 2},
-        {key_answer: 2, sad_alien: 1},
-        {key_answer: 0, sad_alien: 0},
-        {key_answer: 1, sad_alien: 2},
-        {key_answer: 2, sad_alien: 1},
+        // {key_answer: 2, sad_alien: 1},
+        // {key_answer: 0, sad_alien: 0},
+        // {key_answer: 1, sad_alien: 2},
+        // {key_answer: 2, sad_alien: 1},
       ]
     }
     var rainy_season = {
@@ -253,36 +262,65 @@
       feedback_amounts: [7, 9, 8],
       randomize_order: true,
       timeline: [
-        {key_answer: 0, sad_alien: 1},
-        {key_answer: 1, sad_alien: 0},
+        // {key_answer: 0, sad_alien: 1},
+        // {key_answer: 1, sad_alien: 0},
         {key_answer: 2, sad_alien: 2},
-        {key_answer: 0, sad_alien: 1},
-        {key_answer: 1, sad_alien: 0},
-        {key_answer: 2, sad_alien: 2},
+        // {key_answer: 0, sad_alien: 1},
+        // {key_answer: 1, sad_alien: 0},
+        // {key_answer: 2, sad_alien: 2},
+      ]
+    }
+
+    start_new_season_page =
+        "style='position:fixed; top:0px; left:0px; bottom:0px; right:0px; z=-10' " +
+        "height='100%' width='100%'>" +
+      "<p style='position:relative; border: 250px solid transparent; z=10; font-size:60px'><i>New season!</i></p>"
+
+    var start_hot_season = {
+      type: "start_new_season",
+      show_clickable_nav: true,
+      pages: [
+        "<img src=img/hot.png " +
+          start_new_season_page
+      ]
+    }
+
+    var start_rainy_season = {
+      type: "start_new_season",
+      show_clickable_nav: true,
+      pages: [
+        "<img src=img/rainy.png " +
+          start_new_season_page
+      ]
+    }
+
+    var start_cold_season = {
+      type: "start_new_season",
+      show_clickable_nav: true,
+      pages: [
+        "<img src=img/cold.png " +
+          start_new_season_page
       ]
     }
 
     var all_seasons = {
       type: "categorize-alienzzz2",
-      aliens: shuffle([green_alien, orange_alien, red_alien]),
-      choices: [74, 75, 76, 186],
-      timing_response: 7000,
+      aliens: shuffle([dblue_alien, lgreen_alien, purple_alien]),
+      // choices: [74, 75, 76, 186],  //?!?!?!TD
+      timing_response: 10000,
       timing_feedback_duration: 750,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
-      // points: [function(){
-      //   return
-      // }]
       timeline: [
-        hot_season, hot_season, hot_season,  // each season has 6 trials
-        cold_season, cold_season, cold_season,
-        rainy_season, rainy_season, rainy_season,
-        hot_season, hot_season,
-        cold_season, cold_season,
-        rainy_season, rainy_season,
-        hot_season,
-        cold_season,
-        rainy_season
+        start_hot_season, hot_season, hot_season, hot_season,  // each season has 6 trials
+        start_cold_season, cold_season, cold_season, cold_season,
+        start_rainy_season, rainy_season, rainy_season, rainy_season,
+        start_hot_season, hot_season, hot_season,
+        start_cold_season, cold_season, cold_season,
+        start_rainy_season, rainy_season, rainy_season,
+        start_hot_season, hot_season,
+        start_cold_season, cold_season,
+        start_rainy_season, rainy_season
       ]
     }
 
@@ -296,11 +334,10 @@
 
     /* create experiment timeline array */
     var timeline = [];
-    // timeline.push(welcome_block);
     // timeline.push(get_subj_data);
     // timeline.push(instructions);
-    // timeline.push(training_block, training_block, training_block);
-    // timeline.push(instructions_post);
+    timeline.push(training_block, training_block, training_block);
+    timeline.push(instructions_post);
     timeline.push(all_seasons);
     timeline.push(goodbye);
 
