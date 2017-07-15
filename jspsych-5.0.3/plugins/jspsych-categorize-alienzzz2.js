@@ -166,19 +166,30 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       }
 
       // get feedback amount
-      feedback_amount = 0
+      amount = 1
       if (correct) {
         if (info.key == 0) {
-          feedback_amount = trial.feedback_amounts[0]
+          amount = trial.feedback_amounts[0]
         } else if (info.key == 1) {
-          feedback_amount = trial.feedback_amounts[1]
+          amount = trial.feedback_amounts[1]
         } else if (info.key == 2) {
-          feedback_amount = trial.feedback_amounts[2]
+          amount = trial.feedback_amounts[2]
         }
       }
+      function randn_bm() {
+          var u = 1 - Math.random(); // Subtraction to flip [0, 1) to (0, 1].
+          var v = 1 - Math.random();
+          return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+      }
+      exact_amount = amount + 0.3 * randn_bm()
+      rounded_amount = Math.round(exact_amount * 10) / 10  // round doesn't round with decimals
+      feedback_amount = Math.max(0, rounded_amount)
 
       // update point counter
       points[trial.sad_alien] += feedback_amount
+      for (i = 0; i < points.length; i++) {
+          points[i] = Math.round(10 * points[i]) / 10
+      }
 
       // save data
       trial_data = {

@@ -18,11 +18,13 @@
   <script>
 
   /* TDs
-  - better reward schedule (right now, contexts can be recognized just because of the amounts)
-  - draw rewards from distribution
   - read the novelty paper with the crops and planets -> similar?
   - add the other levels
-  - pseudo-randomize season order
+  - randomize association betweenn seasons and TS
+  - CHECK pseudo-randomize season order
+  - CHECK randomize association between season-pic and reward amounts
+  - CHECK better reward schedule (right now, contexts can be recognized just because of the amounts)
+  - CHECK draw rewards from distribution
   - CHECK make sure background comes on before aliens
   - CHECK add counter
   - CHECK only 3 actions
@@ -33,6 +35,59 @@
   - CHECK display only one alien at a time
   - CHECK permute response buttons each time
   */
+
+    training_rewards = [6, 6, 6]
+    season_rewards_ordered = [
+      [2, 4, 7],
+      [6, 9, 3],
+      [10, 5, 8]
+    ]
+
+    TS_train = [
+      {key_answer: 0, sad_alien: 0},
+      // {key_answer: 1, sad_alien: 1},
+      // {key_answer: 2, sad_alien: 2},
+      // {key_answer: 0, sad_alien: 0},
+      // {key_answer: 1, sad_alien: 1},
+      // {key_answer: 2, sad_alien: 2}
+    ]
+
+    TS1 = [
+      // {key_answer: 0, sad_alien: 2},
+      // {key_answer: 1, sad_alien: 1},
+      {key_answer: 2, sad_alien: 0},
+      // {key_answer: 0, sad_alien: 2},
+      // {key_answer: 1, sad_alien: 1},
+      // {key_answer: 2, sad_alien: 0},
+    ]
+
+    TS2 = [
+      // {key_answer: 0, sad_alien: 1},
+      {key_answer: 1, sad_alien: 0},
+      // {key_answer: 2, sad_alien: 2},
+      // {key_answer: 0, sad_alien: 1},
+      // {key_answer: 1, sad_alien: 0},
+      // {key_answer: 2, sad_alien: 2},
+    ]
+
+    TS3 = [
+      {key_answer: 0, sad_alien: 0},
+      // {key_answer: 1, sad_alien: 2},
+      // {key_answer: 2, sad_alien: 1},
+      // {key_answer: 0, sad_alien: 0},
+      // {key_answer: 1, sad_alien: 2},
+      // {key_answer: 2, sad_alien: 1},
+    ]
+
+    TSs = [TS1, TS2, TS3]
+
+    TS_rands = [
+      [0, 1, 2],
+      [1, 2, 0],
+      [2, 0, 1]
+    ]
+
+    var TS_rand = TS_rands[Math.floor(Math.random() * TS_rands.length)];  // TD! Draw
 
     var alien_height = 240
     var alien_height_point_counter = 60
@@ -199,22 +254,14 @@
       type: "categorize-alienzzz2",
       season: "training",
       aliens: [dred_alien, lblue_alien, dgreen_alien],
-      feedback_amounts: [5, 5, 5],
-      choices: [74, 75, 76, 186],
+      feedback_amounts: training_rewards,
       data: {block: "training"},
       randomize_order: true,
       timing_feedback_duration: 1500,
       timing_response: 15000,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
-      timeline: [
-        {key_answer: 0, sad_alien: 0},
-        // {key_answer: 1, sad_alien: 1},
-        // {key_answer: 2, sad_alien: 2},
-        // {key_answer: 0, sad_alien: 0},
-        // {key_answer: 1, sad_alien: 1},
-        // {key_answer: 2, sad_alien: 2},
-      ]
+      timeline: TS_train
     }
 
     var instructions7 =
@@ -231,44 +278,38 @@
       timing_post_trial: 200
     }
 
+    links = [
+      [0, 2, 1],  // everything except [0,1,2] and [2,1,0]
+      // [1, 0, 2],  // only need 3
+      [1, 2, 0],
+      [2, 0, 1]
+    ]
+
+    link = links[Math.floor(Math.random() * links.length)]  // TD! Draw according to SubjID or so
+
+    season_rewards = [
+      season_rewards_ordered[link[0]],
+      season_rewards_ordered[link[1]],
+      season_rewards_ordered[link[2]]
+    ]
+
     var hot_season = {
       season: "hot",
-      feedback_amounts: [3, 2, 1],
+      feedback_amounts: season_rewards[0],
       randomize_order: true,
-      timeline: [
-        {key_answer: 0, sad_alien: 2},
-        // {key_answer: 1, sad_alien: 1},
-        // {key_answer: 2, sad_alien: 0},
-        // {key_answer: 0, sad_alien: 2},
-        // {key_answer: 1, sad_alien: 1},
-        // {key_answer: 2, sad_alien: 0},
-      ]
+      timeline: TSs[TS_rand[0]]
     }
     var cold_season = {
       season: "cold",
-      feedback_amounts: [5, 4, 6],
+      feedback_amounts: season_rewards[1],
       randomize_order: true,
-      timeline: [
-        // {key_answer: 0, sad_alien: 0},
-        {key_answer: 1, sad_alien: 2},
-        // {key_answer: 2, sad_alien: 1},
-        // {key_answer: 0, sad_alien: 0},
-        // {key_answer: 1, sad_alien: 2},
-        // {key_answer: 2, sad_alien: 1},
-      ]
+      timeline: TSs[TS_rand[1]]
     }
     var rainy_season = {
       season: "rainy",
-      feedback_amounts: [7, 9, 8],
+      feedback_amounts: season_rewards[2],
       randomize_order: true,
-      timeline: [
-        // {key_answer: 0, sad_alien: 1},
-        // {key_answer: 1, sad_alien: 0},
-        {key_answer: 2, sad_alien: 2},
-        // {key_answer: 0, sad_alien: 1},
-        // {key_answer: 1, sad_alien: 0},
-        // {key_answer: 2, sad_alien: 2},
-      ]
+      timeline: TSs[TS_rand[2]]
     }
 
     start_new_season_page =
@@ -303,25 +344,46 @@
       ]
     }
 
+    first_rep_chunks = [
+      [start_hot_season, hot_season, hot_season, hot_season],
+      [start_cold_season, cold_season, cold_season, cold_season],
+      [start_rainy_season, rainy_season, rainy_season, rainy_season]
+    ]
+
+    second_rep_chunks = [
+      [start_hot_season, hot_season, hot_season],
+      [start_cold_season, cold_season, cold_season],
+      [start_rainy_season, rainy_season, rainy_season]
+    ]
+
+    third_rep_chunks = [
+      [start_hot_season, hot_season],
+      [start_cold_season, cold_season],
+      [start_rainy_season, rainy_season]
+    ]
+
+    season_orders = [
+      [[0, 1, 2], [1, 2, 0], [2, 0, 1]],
+      [[1, 2, 0], [2, 0, 1], [0, 1, 2]],
+      [[2, 0, 1], [0, 1, 2], [1, 2, 0]]
+    ]
+
+    season_order = season_orders[Math.floor(Math.random() * season_orders.length)];  // TD! draw for each subject!
+
+    seasons_in_order = [].concat(
+      first_rep_chunks[season_order[0][0]], first_rep_chunks[season_order[0][1]], first_rep_chunks[season_order[0][2]],
+      second_rep_chunks[season_order[1][0]], second_rep_chunks[season_order[1][1]], second_rep_chunks[season_order[1][2]],
+      third_rep_chunks[season_order[2][0]], third_rep_chunks[season_order[2][1]], third_rep_chunks[season_order[2][2]]
+    )
+
     var all_seasons = {
       type: "categorize-alienzzz2",
       aliens: shuffle([dblue_alien, lgreen_alien, purple_alien]),
-      // choices: [74, 75, 76, 186],  //?!?!?!TD
       timing_response: 10000,
       timing_feedback_duration: 750,
       timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                        "Please respond faster next time! </p>",
-      timeline: [
-        start_hot_season, hot_season, hot_season, hot_season,  // each season has 6 trials
-        start_cold_season, cold_season, cold_season, cold_season,
-        start_rainy_season, rainy_season, rainy_season, rainy_season,
-        start_hot_season, hot_season, hot_season,
-        start_cold_season, cold_season, cold_season,
-        start_rainy_season, rainy_season, rainy_season,
-        start_hot_season, hot_season,
-        start_cold_season, cold_season,
-        start_rainy_season, rainy_season
-      ]
+      timeline: seasons_in_order
     }
 
     var goodbye = {
