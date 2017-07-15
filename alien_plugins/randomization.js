@@ -1,0 +1,100 @@
+// RANDOMIZATIONS
+// Orders of seasons
+season_orders = [
+  [[0, 1, 2], [1, 2, 0], [2, 0, 1]],
+  [[1, 2, 0], [2, 0, 1], [0, 1, 2]],
+  [[2, 0, 1], [0, 1, 2], [1, 2, 0]]
+]
+
+// Assignments of TS to seasons (0: hot; 1: cold; 2: rainy)
+TS_rands = [
+  [0, 1, 2],
+  [1, 2, 0],
+  [2, 0, 1]
+]
+
+// DEFINITIONS
+// Define maximum rewards for each season and alien
+training_rewards = [6, 6, 6]
+season_rewards_ordered = [
+  [2, 4, 7],
+  [6, 9, 3],
+  [10, 5, 8]
+]
+
+// Determine order of rewards, independent of which seasons appear when
+orders = [  // everything except [0,1,2] and [2,1,0]
+  [0, 2, 1],
+  // [1, 0, 2],  // only need 3
+  [1, 2, 0],
+  [2, 0, 1]
+]
+
+// Define task sets
+TS_train = [
+  {key_answer: 0, sad_alien: 0},
+  // {key_answer: 1, sad_alien: 1},
+  // {key_answer: 2, sad_alien: 2},
+  // {key_answer: 0, sad_alien: 0},
+  // {key_answer: 1, sad_alien: 1},
+  // {key_answer: 2, sad_alien: 2}
+]
+
+TS1 = [
+  // {key_answer: 0, sad_alien: 2},
+  // {key_answer: 1, sad_alien: 1},
+  {key_answer: 2, sad_alien: 0},
+  // {key_answer: 0, sad_alien: 2},
+  // {key_answer: 1, sad_alien: 1},
+  // {key_answer: 2, sad_alien: 0},
+]
+
+TS2 = [
+  // {key_answer: 0, sad_alien: 1},
+  {key_answer: 1, sad_alien: 0},
+  // {key_answer: 2, sad_alien: 2},
+  // {key_answer: 0, sad_alien: 1},
+  // {key_answer: 1, sad_alien: 0},
+  // {key_answer: 2, sad_alien: 2},
+]
+
+TS3 = [
+  {key_answer: 0, sad_alien: 0},
+  // {key_answer: 1, sad_alien: 2},
+  // {key_answer: 2, sad_alien: 1},
+  // {key_answer: 0, sad_alien: 0},
+  // {key_answer: 1, sad_alien: 2},
+  // {key_answer: 2, sad_alien: 1},
+]
+
+TSs = [TS1, TS2, TS3]
+
+// SHUFFLING FUNCTION
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+// ACTUALLY RANDOMIZE STUFF
+var TS_rand = TS_rands[Math.floor(Math.random() * TS_rands.length)];
+order = orders[Math.floor(Math.random() * orders.length)]
+season_rewards = [
+  season_rewards_ordered[order[0]],
+  season_rewards_ordered[order[1]],
+  season_rewards_ordered[order[2]]
+]
+season_order = season_orders[Math.floor(Math.random() * season_orders.length)];
