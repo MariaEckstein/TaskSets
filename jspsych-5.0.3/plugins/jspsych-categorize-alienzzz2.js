@@ -74,7 +74,7 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
         speech + exclamation_points +
       "</div></center>"
 
-    shuffled_buttons = shuffle(buttons)
+    shuffled_buttons = shuffle(item_buttons)
     response_buttons =
       "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
         shuffled_buttons[0] +
@@ -88,55 +88,26 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
 
     // take care of button presses: mimic key presses
     function clear_button_handlers() {
-      $('#bed-button').off('click');
-      $('#umbrella-button').off('click');
-      $('#plant-button').off('click');
-      $('#rock-button').off('click');
+      for (i = 0; i < button_names.length; i ++) {
+        btn = "#".concat(button_names[i], "-button")
+        $(btn).off('click');
+      }
     }
 
-    $('#bed-button').on('click', function() {
-      clear_button_handlers();
-      var response_time = (new Date()).getTime();
-      var rt = response_time - trial.start_time;
-      info = {
-        key: 0,
-        rt: rt
-      };
-      after_response(info);
-    });
-
-    $('#umbrella-button').on('click', function() {
-      clear_button_handlers();
-      var response_time = (new Date()).getTime();
-      var rt = response_time - trial.start_time;
-      info = {
-        key: 1,
-        rt: rt
-      };
-      after_response(info);
-    });
-
-    $('#plant-button').on('click', function() {
-      clear_button_handlers();
-      var response_time = (new Date()).getTime();
-      var rt = response_time - trial.start_time;
-      info = {
-        key: 2,
-        rt: rt
-      };
-      after_response(info);
-    });
-
-    $('#rock-button').on('click', function() {
-      clear_button_handlers();
-      var response_time = (new Date()).getTime();
-      var rt = response_time - trial.start_time;
-      info = {
-        key: 3,
-        rt: rt
-      };
-      after_response(info);
-    });
+    for (let i = 0; i < button_names.length; i ++) {
+      btn = "#".concat(button_names[i], "-button")
+      $(btn).on('click', function() {
+          clear_button_handlers();
+          var response_time = (new Date()).getTime();
+          var rt = response_time - trial.start_time;
+          info = {
+            key: button_names[i],
+            rt: rt
+          };
+          console.log(info);
+          after_response(info);
+      });
+    }
 
     var trial_data = {};
 
@@ -168,14 +139,13 @@ jsPsych.plugins["categorize-alienzzz2"] = (function() {
       // get feedback amount
       amount = 1
       if (correct) {
-        if (info.key == 0) {
-          amount = trial.feedback_amounts[0]
-        } else if (info.key == 1) {
-          amount = trial.feedback_amounts[1]
-        } else if (info.key == 2) {
-          amount = trial.feedback_amounts[2]
+        for (i = 0; i < button_names.length; i++) {
+          if (info.key == button_names[i]) {
+            amount = trial.feedback_amounts[i]
+          }
         }
       }
+
       function randn_bm() {
           var u = 1 - Math.random(); // Subtraction to flip [0, 1) to (0, 1].
           var v = 1 - Math.random();
