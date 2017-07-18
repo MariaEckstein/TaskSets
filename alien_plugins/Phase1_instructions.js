@@ -70,8 +70,9 @@ var phase1_instructions = {
 
 // Training trials
 var training_block = {
-  type: "categorize-alienzzz2",
+  type: "phase1",
   season: "training",
+  show_stim_with_feedback: true,
   aliens: practice_aliens,
   feedback_amounts: training_rewards,
   data: {block: "training"},

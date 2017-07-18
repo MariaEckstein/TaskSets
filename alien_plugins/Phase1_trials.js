@@ -75,7 +75,7 @@ seasons_in_order = [].concat(
 
 // Define a jsPsych object for all the trials; pick aliens; max RT; timing
 var all_seasons = {
-  type: "categorize-alienzzz2",
+  type: "phase1",
   aliens: phase1_aliens,
   timing_response: 10000,
   timing_feedback_duration: 750,

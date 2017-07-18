@@ -1,4 +1,16 @@
 
+intro_alien_same_season =
+  "<center><p>In the following game, you will be taking care of three aliens. " +
+  "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +
+  "<p>Each alien needs different things to thrive. " +
+  "One alien might need to chew on a shiny rock in order grow, " +
+  "whereas another might need to catch cosmic rays with its red umbrella.</p>" +
+  "<p>Over time, you will learn what each alien needs in order to grow.</p></center>" +
+  aliens +
+  move_on
+
+
+
 season = {
   assess: "season",
   randomize_order: true,
@@ -50,18 +62,17 @@ alien_rest_season = {
   timeline: rest_timeline
 }
 
-// new_block = {
-//   type: "instructions",
-//   pages: [next_block]
-// }
-
 phase2_trials = {
   type: "phase2",
   timing_response: 10000,
   timeline: [].concat(
+    intro_alien_same_seasonn,
     alien_same_season,
+    intro_season,
     season,
+    intro_alien,
     alien,
+    intro_alien_rest_season,
     alien_rest_season
   )
 }

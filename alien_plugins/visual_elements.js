@@ -6,7 +6,7 @@ var sad_left = 260
 var reward_top = - 27
 var reward_left = sad_left + 15
 var button_height = 50
-var big_button_height = 100
+var big_button_height = alien_height
 var points = [0, 0, 0]
 
 // Aliens
@@ -16,6 +16,8 @@ alien3 = "<img src='img/alien3.png' "
 alien4 = "<img src='img/alien4.png' "
 alien5 = "<img src='img/alien5.png' "
 alien6 = "<img src='img/alien6.png' "
+alien7 = "<img src='img/alien7.png' "
+alien8 = "<img src='img/alien8.png' "
 practice_aliens = [alien3, alien5, alien6]
 practice_aliens = shuffle(practice_aliens)
 phase1_aliens_ord = [alien1, alien2, alien4]
@@ -66,17 +68,20 @@ alien_season_buttons = []
 for (se = 0; se < seasons.length; se ++) {
   for (al = 0; al < phase1_aliens.length; al ++) {
     button_name = "alien" + phase1_aliens[al].substring(19, 20) + seasons[se] + "-button";
+    picture =
+      "<center><div style='position:relative;'>" +
+        phase1_aliens[al] + "style='position:absolute; left: 10%' height=" + big_button_height + ">" +
+        "<img src='img/" + seasons[se] + ".png' height=" + big_button_height + ">" +
+      "</div></center>"
     button =
       "<button id='" + button_name + "' " +
-        "class='jspsych-btn'>" +
-        phase1_aliens[al] + "height=" + big_button_height + ">" +
-        "<img src='img/" + seasons[se] + ".png' height=" + big_button_height + ">" +
+      "class='jspsych-btn'>" +
+        picture +
       "</button>"
     alien_season_buttons.push(button)
     all_sa_button_names.push("#".concat(button_name));
   }
 }
-// var all_sa_buttons = [].concat(season_buttons, alien_buttons, alien_season_buttons)
 
 // Rest
 var speech = "<img src='img/speech.png' style='position:absolute; left:" + sad_left + "px;' height=120>"

@@ -8,15 +8,17 @@
     <!-- <script src="jspsych-5.0.3/plugins/jspsych-categorize.js"></script> -->
     <script src="jspsych-5.0.3/plugins/jspsych-survey-text.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-instructions.js"></script>
-    <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
-    <script src="jspsych-5.0.3/plugins/jspsych-categorize-alienzzz2.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-phase1.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-phase2.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
     <script src="alien_plugins/randomization.js"></script>
     <script src="alien_plugins/visual_elements.js"></script>
     <script src="alien_plugins/Phase1_instructions.js"></script>
     <script src="alien_plugins/Phase1_trials.js"></script>
     <script src="alien_plugins/Phase2_instructions.js"></script>
     <script src="alien_plugins/Phase2_trials.js"></script>
+    <script src="alien_plugins/Phase3-instructions-trials.js"></script>
+    <script src="alien_plugins/Phase4-instructions-trials.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
   </head>
   <body>
@@ -25,11 +27,11 @@
   <script>
 
     /* TDs
-    - Add transitions between assess blocks
-    - Make seasons the background in the alien-season buttons
-    - fix location of point counter and points in bubbles
     - read the novelty paper with the crops and planets -> similar?
     - add the other levels
+    - CHECK fix location of point counter and points in bubbles
+    - CHECK Add transitions between assess blocks
+    - CHECK Make seasons the background in the alien-season buttons
     - CHECK randomize association betweenn seasons and TS
     - CHECK pseudo-randomize season order
     - CHECK randomize association between season-pic and reward amounts
@@ -54,7 +56,11 @@
     // timeline.push(phase1_instructions_post);
     // timeline.push(all_seasons);
     // timeline.push(phase2_instructions);
-    timeline.push(phase2_trials);
+    // timeline.push(phase2_trials);
+    // timeline.push(phase3_instructions);
+    // timeline.push(all_seasons_phase3);
+    // timeline.push(phase4_instructions);
+    timeline.push(all_seasons_phase4);
     // timeline.push(goodbye);
 
     /* start the experiment */
