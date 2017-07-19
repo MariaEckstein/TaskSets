@@ -79,7 +79,7 @@ var training_block = {
   data: {block: "training"},
   randomize_order: true,
   timing_feedback_duration: 1500,
-  timing_response: 15000,
+  timing_response: 10000,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                    "Please respond faster next time! </p>",
   timeline: TS_train

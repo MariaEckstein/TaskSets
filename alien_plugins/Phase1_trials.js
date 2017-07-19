@@ -22,7 +22,7 @@ var rainy_season = {
 start_new_season_page =
     "style='position:fixed; top:0px; left:0px; bottom:0px; right:0px; z=-10' " +
     "height='100%' width='100%'>" +
-  "<p style='position:relative; border: 250px solid transparent; z=10; font-size:60px'><i>New season!</i></p>"
+  "<p style='position:relative; border: 250px solid transparent; z=10; font-size:60px'><i>The season has changed.</i></p>"
 
 var start_hot_season = {
   type: "start_new_season",

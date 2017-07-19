@@ -3,7 +3,7 @@
 instructions1 =
   "<center><p>Congratulations! You won the competition!</p>" +
   "[cheering?]" +
-  "<p>The aliens reward you with all kinds of beautiful prices. " +
+  "<p>The aliens reward you with all kinds of beautiful prizes. " +
   "You feel honored.</p>"
 
 instructions2 =
@@ -79,16 +79,6 @@ rainy_season_phase4 = {
 }
 
 // Define the numbers of trials for each repetition of each season
-// first_rep_chunks = [
-//   [start_hot_season, hot_season_phase4, hot_season_phase4, hot_season_phase4],
-//   [start_cold_season, cold_season_phase4, cold_season_phase4, cold_season_phase4],
-//   [start_rainy_season, rainy_season_phase4, rainy_season_phase4, rainy_season_phase4]
-// ]
-second_rep_chunks = [
-  [start_hot_season, hot_season_phase4, hot_season_phase4],
-  [start_cold_season, cold_season_phase4, cold_season_phase4],
-  [start_rainy_season, rainy_season_phase4, rainy_season_phase4]
-]
 third_rep_chunks = [
   [start_hot_season, hot_season_phase4],
   [start_cold_season, cold_season_phase4],
@@ -97,8 +87,6 @@ third_rep_chunks = [
 
 // Get the seasons in the pre-randomized order
 seasons_in_order_phase4 = [].concat(
-  // first_rep_chunks[season_order_phase4[0][0]], first_rep_chunks[season_order_phase4[0][1]], first_rep_chunks[season_order_phase4[0][2]],
-  second_rep_chunks[season_order_phase4[1][0]], second_rep_chunks[season_order_phase4[1][1]], second_rep_chunks[season_order_phase4[1][2]],
   third_rep_chunks[season_order_phase4[2][0]], third_rep_chunks[season_order_phase4[2][1]], third_rep_chunks[season_order_phase4[2][2]]
 )
 
