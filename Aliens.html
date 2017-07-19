@@ -11,6 +11,7 @@
     <script src="jspsych-5.0.3/plugins/jspsych-phase1.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-phase2.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
+    <script> var subjID = 10;</script>
     <script src="alien_plugins/randomization.js"></script>
     <script src="alien_plugins/visual_elements.js"></script>
     <script src="alien_plugins/Phase1_instructions.js"></script>
@@ -19,6 +20,7 @@
     <script src="alien_plugins/Phase2_trials.js"></script>
     <script src="alien_plugins/Phase3-instructions-trials.js"></script>
     <script src="alien_plugins/Phase4-instructions-trials.js"></script>
+    <script src="alien_plugins/Phase5-instructions-trials.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
   </head>
   <body>
@@ -28,7 +30,14 @@
 
     /* TDs
     - read the novelty paper with the crops and planets -> similar?
-    - add the other levels
+    - make new aliens transparent
+    - do run through
+    - get pilot data
+    - add all the pics for instructions(?)
+    - let chosen button remain on the screen longer?
+    - CHECK make background images same size (for buttons)
+    - CHECK add debug subject
+    - CHECK add the other levels
     - CHECK fix location of point counter and points in bubbles
     - CHECK Add transitions between assess blocks
     - CHECK Make seasons the background in the alien-season buttons
@@ -50,18 +59,20 @@
 
     /* create experiment timeline array */
     var timeline = [];
-    // timeline.push(get_subj_data);
-    // timeline.push(phase1_instructions);
-    // timeline.push(training_block, training_block, training_block);
-    // timeline.push(phase1_instructions_post);
-    // timeline.push(all_seasons);
-    // timeline.push(phase2_instructions);
-    // timeline.push(phase2_trials);
-    // timeline.push(phase3_instructions);
-    // timeline.push(all_seasons_phase3);
-    // timeline.push(phase4_instructions);
+    timeline.push(get_subj_data);
+    timeline.push(phase1_instructions);
+    timeline.push(training_block, training_block, training_block);
+    timeline.push(phase1_instructions_post);
+    timeline.push(all_seasons);
+    timeline.push(phase2_instructions);
+    timeline.push(phase2_trials);
+    timeline.push(phase3_instructions);
+    timeline.push(all_seasons_phase3);
+    timeline.push(phase4_instructions);
     timeline.push(all_seasons_phase4);
-    // timeline.push(goodbye);
+    timeline.push(phase5_instructions);
+    timeline.push(rainbow_season_phase5);
+    timeline.push(goodbye);
 
     /* start the experiment */
     jsPsych.init({

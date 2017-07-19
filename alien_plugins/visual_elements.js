@@ -98,7 +98,7 @@ response_buttons =
   "</div></center>"
 
 var aliens =
-  "<center><div style='position:relative; z=10;'>" +
+  "<center><div style='position:relative; z=10; border: 10px solid transparent;'>" +
     practice_aliens[0] + "height=" + alien_height + ">" +
     practice_aliens[1] + "height=" + alien_height + ">" +
     practice_aliens[2] + "height=" + alien_height + ">" +
@@ -107,7 +107,7 @@ var aliens =
 var sad_alien =
   "<center><div style='position:relative'>" +
     alien6 + "height=" + alien_height + ">" +
-    speech + exclamation_points +
+    // speech + exclamation_points +
   "</div></center>"
 
 var happy_alien =

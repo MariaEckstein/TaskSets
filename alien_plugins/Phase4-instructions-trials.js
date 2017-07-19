@@ -9,18 +9,16 @@ instructions1 =
 instructions2 =
   "<center><p>The party for the annual competition is still ongoing, " +
   "and having had such a wonderful time, " +
-  "you decide to stay just a little longer with the aliens. " +
-  "While you are there, you decide to continue taking care of the aliens and helping them grow.</p>" +
+  "you decide to stay just a little longer with the aliens, helping them grow.</p>" +
   "<p>Note that after the annual competition, " +
-  "aliens don't show how much they grow. " +
+  "aliens won't show how you much they grow. " +
   "This means that you won't see the effects of your actions. " +
   "Still do your best to help each alien grow as much as possible, " +
   "using your previous experience!</p>" +
   "<p>Also note that the competition attracts many visitors, " +
   "so you will have to take care of new aliens. " +
   "Try your best to help each alien grow as much as you can, old or new!</p> " +
-  "<p>Press 'Next' when you are ready to start, " +
-  "or press 'Previous' if you would like to review the instructions.</p></center>"
+  "<p>Press 'Next' when you are ready to start!</p></center>"
 
 var phase4_instructions = {
   type: 'instructions',
@@ -33,24 +31,37 @@ var phase4_instructions = {
 }
 
 // Get the seasons in the pre-randomized order
-TS1_phase4 = TS1.concat(
-  {key_answer: "", sad_alien: 3},
-  {key_answer: "", sad_alien: 4},
-  {key_answer: "", sad_alien: 3},
-  {key_answer: "", sad_alien: 4},
-)
-TS2_phase4 = TS2.concat(
-  {key_answer: "", sad_alien: 3},
-  {key_answer: "", sad_alien: 4},
-  {key_answer: "", sad_alien: 3},
-  {key_answer: "", sad_alien: 4},
-)
-TS3_phase4 = TS3.concat(
-  {key_answer: "", sad_alien: 3},
-  {key_answer: "", sad_alien: 4},
-  {key_answer: "", sad_alien: 3},
-  {key_answer: "", sad_alien: 4},
-)
+if (subjID != 0) {  // long version
+  TS1_phase4 = TSs[0].concat(
+    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
+    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
+  )
+  TS2_phase4 = TSs[1].concat(
+    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
+    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
+  )
+  TS3_phase4 = TSs[2].concat(
+    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
+    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
+  )
+} else {  // short version
+  TS1_phase4 = TSs[0].concat(
+    {key_answer: "", sad_alien: 3},
+  )
+  TS2_phase4 = TSs[1].concat(
+    {key_answer: "", sad_alien: 3},
+  )
+  TS3_phase4 = TSs[2].concat(
+    {key_answer: "", sad_alien: 3},
+  )
+  console.log(TS3_phase4.length, TS3_phase4[0], TS3_phase4[1])
+}
 TSs_phase4 = [TS1_phase4, TS2_phase4, TS3_phase4]
 
 hot_season_phase4 = {

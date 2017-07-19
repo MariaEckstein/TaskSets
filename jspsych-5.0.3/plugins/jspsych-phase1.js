@@ -38,6 +38,8 @@ jsPsych.plugins["phase1"] = (function() {
       trial.background = "img/rainy.png"
     } else if (trial.season == "cold") {
       trial.background = "img/cold.png"
+    } else if (trial.season == "rainbow") {
+      trial.background = "img/rainbow.png"
     } else {
       trial.background = "img/blank.png"
     }
@@ -104,7 +106,6 @@ jsPsych.plugins["phase1"] = (function() {
             key: button_names[i],
             rt: rt
           };
-          console.log(info);
           after_response(info);
       });
     }
@@ -229,11 +230,7 @@ jsPsych.plugins["phase1"] = (function() {
         "<center><div style='position:relative;'>" +
           point_counters +
         "</div></center>"
-      // if (!trial.show_stim_with_feedback) {
-      //   point_counters = " ";
-      // }
       display_element.append(background, point_counters);
-      // jsPsych.data.displayData();  // for debugging only!
       jsPsych.finishTrial(trial_data);
     }
 

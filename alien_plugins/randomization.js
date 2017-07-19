@@ -1,3 +1,4 @@
+
 // RANDOMIZATIONS
 // Orders of seasons
 season_orders = [
@@ -50,30 +51,39 @@ TS_train = [
 
 // Phase-1 task sets
 TS1 = [
-  // {key_answer: button_names[0], sad_alien: 2},
-  // {key_answer: button_names[1], sad_alien: 1},
+  {key_answer: button_names[0], sad_alien: 2},
+  {key_answer: button_names[1], sad_alien: 1},
   {key_answer: button_names[2], sad_alien: 0},
-  // {key_answer: button_names[0], sad_alien: 2},
-  // {key_answer: button_names[1], sad_alien: 1},
-  // {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: button_names[0], sad_alien: 2},
+  {key_answer: button_names[1], sad_alien: 1},
+  {key_answer: button_names[2], sad_alien: 0},
 ]
 TS2 = [
-  // {key_answer: button_names[0], sad_alien: 1},
+  {key_answer: button_names[0], sad_alien: 1},
   {key_answer: button_names[1], sad_alien: 0},
-  // {key_answer: button_names[2], sad_alien: 2},
-  // {key_answer: button_names[0], sad_alien: 1},
-  // {key_answer: button_names[1], sad_alien: 0},
-  // {key_answer: button_names[2], sad_alien: 2},
+  {key_answer: button_names[2], sad_alien: 2},
+  {key_answer: button_names[0], sad_alien: 1},
+  {key_answer: button_names[1], sad_alien: 0},
+  {key_answer: button_names[2], sad_alien: 2},
 ]
 TS3 = [
   {key_answer: button_names[0], sad_alien: 0},
-  // {key_answer: button_names[1], sad_alien: 2},
-  // {key_answer: button_names[2], sad_alien: 1},
-  // {key_answer: button_names[0], sad_alien: 0},
-  // {key_answer: button_names[1], sad_alien: 2},
-  // {key_answer: button_names[2], sad_alien: 1},
+  {key_answer: button_names[1], sad_alien: 2},
+  {key_answer: button_names[2], sad_alien: 1},
+  {key_answer: button_names[0], sad_alien: 0},
+  {key_answer: button_names[1], sad_alien: 2},
+  {key_answer: button_names[2], sad_alien: 1},
 ]
 TSs = [TS1, TS2, TS3]
+
+if (subjID == 0) {
+  TS_train = [TS_train[0]]
+  TSs = [
+    [TS1[0]],
+    [TS2[2]],
+    [TS3[1]],
+  ]
+}
 
 // SHUFFLING FUNCTION
 function shuffle(array) {

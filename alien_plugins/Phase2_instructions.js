@@ -28,8 +28,8 @@ instructions2 =
 instructions2b =
   "<center><p>Before the competition starts, " +
   "each competitor is allowed to pick the aliens and seasons they want to use in the competition. " +
-  "You wil be one of them! Make sure you pick the best aliens and seasons, " +
-  "using your experience in the game so far!</p>" +
+  "You wil be one of the competitors! Make sure you pick the best aliens and seasons, " +
+  "using your experience on the planet so far!</p>" +
   "<p>You might need to indiciate your choices multiple times. " +
   "Answer carefully each time to make sure you'll end up with the aliens and seasons " +
   "that will let you win the competition!</p>" +
@@ -43,10 +43,10 @@ exmpl_alien_season_buttons =
 
 intro_slide_alien_same_season =
   "<center><p>In the selection process, you will first select which aliens you would prefer in each season. " +
-  "For example, you might see the two aliens and seasons below. Which alien would you pick, given the season?</p>" +
+  "For example, you might see the two aliens in the season below. Which alien would you pick, given the season?</p>" +
   exmpl_alien_season_buttons +
   "<p>Make your choice carefully, your opponent will automatically get the other alien!" +
-  "<p>Press next when you are ready to select your aliens! Press previous if you want to review the instructions."
+  "<p>Press 'Next' when you are ready to select your aliens! Press 'Previous' if you want to review the instructions."
 
 exmpl_season_buttons =
   "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
@@ -116,6 +116,7 @@ var phase2_instructions = {
       instructions1,
       instructions2,
       instructions2b,
+      intro_slide_alien_same_season,
   ],
   show_clickable_nav: true,
   timing_post_trial: 200

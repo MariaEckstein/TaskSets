@@ -32,19 +32,19 @@ jsPsych.plugins["phase2"] = (function() {
     // that need to be cleared if the trial ends early
     var setTimeoutHandlers = [];
 
-    shuffled_buttons = shuffle(trial.buttons)
+    // prepare the two buttons that will be shown
+    shuffled_buttons = shuffle(trial.buttons);
     response_buttons =
       "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
         shuffled_buttons[0] +
         shuffled_buttons[1] +
       "</div></center>"
 
-    // add Aliens, sadness, and response buttons to display
+    // display buttons
     display_element.append(response_buttons);
     trial.start_time = (new Date()).getTime();
 
-    // take care of button presses: mimic key presses
-    // get a list of all the buttons
+    // take care of button presses: record data
     function clear_button_handlers() {
       for (btn = 0; btn < all_sa_button_names.length; btn ++) {
         $(all_sa_button_names[btn]).off('click');
@@ -60,13 +60,11 @@ jsPsych.plugins["phase2"] = (function() {
             key: all_sa_button_names[i],
             rt: rt
           };
-          console.log(info);
           after_response(info);
       });
     }
 
     var trial_data = {};
-
     if (trial.timing_response > 0) {
       setTimeoutHandlers.push(setTimeout(function() {
         after_response({
@@ -96,19 +94,26 @@ jsPsych.plugins["phase2"] = (function() {
         "key-right": shuffled_buttons[1],
       };
 
-      display_element.html(''); // not sure what it does... remove?
+      display_element.html('');
 
       var timeout = info.rt == -1;
       correct = -1;
-      doFeedback(correct, timeout);
+      doFeedback(info.key, timeout);
     }
 
-    function doFeedback(correct, timeout) {
+    function doFeedback(key, timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.append(trial.timeout_message);
       } else {
-        display_element.html(''); // not sure what it does... remove?
+        display_element.html('');
+
+        // selected_response_button =
+        //   "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+        //     shuffled_buttons[0] +
+        //     shuffled_buttons[1] +
+        //   "</div></center>"
+        // display_element.append(selected_response_button);
       }
       setTimeout(function() {
         endTrial();

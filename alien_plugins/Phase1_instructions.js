@@ -15,42 +15,43 @@ instructions1 = "<center><p>In the following game, you will be taking care of th
   aliens +
   move_on
 
-instructions2 = "<center><p>The aliens’ planet goes through different seasons, " +
+instructions2 = "<center><p>The aliens' planet goes through different seasons, " +
   "and aliens will need different things depending on these seasons.</p>" +
-  "<p>For example, in order to grow, one alien might need to chew on a shiny rock in the hot season, " +
-  "but it might need to sleep in a bed during the rainy season.</p>" +
+  "<p>For example, in order to grow, one alien might need to sleep in a bed in the hot season, " +
+  "but it might need to chew on a shiny rock during the rainy season.</p>" +
   "There are three seasons on the aliens' planet: <i>hot, cold, and rainy</i>:" +
   "<img src='img/hot.png' style='border: 10px solid transparent;' height=" + alien_height + ">" +
   "<img src='img/cold.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + ">" +
   "<img src='img/rainy.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + "></center>" +
   move_on
 
-instructions3 = "<center><p>Let's practice the game with these three aliens:</p>" +
+instructions3 = "<center><p>Before the actual game, let's practice with these three aliens:</p>" +
   aliens +
-  "<p>Try to make each one of them grow as much as you can, by learning what each one needs!</p></center>" +
+  "<p>Try to make each one of them grow as much as you can, by learning what each one needs! " +
+  "There will not be different seasons in the practice round.</center>" +
   move_on
 
-instructions4 = "<center><p>Whenever an alien needs something, it will call you, just like the green alien below:</p>" +
+instructions4 =
+  "<center><p>Whenever an alien needs something, it will pop up on the screen, like the green alien below:</p>" +
   sad_alien +
   "<div style='position:relative; top=50px'" +
-    "<p>When an alien is unhappy like this green alien, you can offer it one of several things to cheer it up and help it grow.</p>" +
-    "<p>How about a nap in the green bed? In the game, you'll be able to click on an item to offer it to the unhappy alien.</p>" +
+    "<p>When this happens, you can offer the alien one of several things to help it grow.</p>" +
+    "<p>How about a nap in the cozy bed? " +
+    "In the game, you'll be able to click on an item to offer it to the alien.</p>" +
     "<p>Let's pretend you offered the alien a nap in the green bed - click Next to see what happens.</p>" +
   "</div>" +
   response_buttons +
-  move_on +
   "</center>"
 
 instructions5 = "<center><p> The green alien liked the nap a lot! It is all happy now and it grew by 5 centimeters! </p>" +
   happy_alien +
   response_buttons +
-  move_on + "</center>"
+  "</center>"
 
 instructions6 = "<center><p> When you are ready, you can press Next for a practice round of the game.</p>" +
   "<p>Press Previous if you'd like to review the instructions before you start.</p>" +
   aliens +
-  "<p>Try to learn which item each alien likes to help them grow!</p>"
-  move_on + "</center>"
+  "<p>Try to learn which item makes each alien grow most!</p></center>"
 
 // Put instruction slides together
 var phase1_instructions = {
