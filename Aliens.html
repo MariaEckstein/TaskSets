@@ -4,8 +4,6 @@
     <title>Aliens</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="jspsych-5.0.3/jspsych.js"></script>
-    <!-- <script src="jspsych-5.0.3/plugins/jspsych-text.js"></script> -->
-    <!-- <script src="jspsych-5.0.3/plugins/jspsych-categorize.js"></script> -->
     <script src="jspsych-5.0.3/plugins/jspsych-survey-text.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-instructions.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-phase1.js"></script>
@@ -30,11 +28,11 @@
 
     /* TDs
     - read the novelty paper with the crops and planets -> similar?
-    - make new aliens transparent
     - do run through
     - get pilot data
     - add all the pics for instructions(?)
     - let chosen button remain on the screen longer?
+    - CHECK make new aliens transparent
     - CHECK make background images same size (for buttons)
     - CHECK add debug subject
     - CHECK add the other levels
@@ -77,8 +75,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      // fullscreen: true,
-      // show_progress_bar: true,  // doesn't work when I have a background..
+      fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }

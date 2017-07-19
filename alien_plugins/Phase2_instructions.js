@@ -30,9 +30,9 @@ instructions2b =
   "each competitor is allowed to pick the aliens and seasons they want to use in the competition. " +
   "You wil be one of the competitors! Make sure you pick the best aliens and seasons, " +
   "using your experience on the planet so far!</p>" +
-  "<p>You might need to indiciate your choices multiple times. " +
-  "Answer carefully each time to make sure you'll end up with the aliens and seasons " +
-  "that will let you win the competition!</p>" +
+  // "<p>You might need to indiciate your choices multiple times. " +
+  // "Answer carefully each time to make sure you'll end up with the aliens and seasons " +
+  // "that will let you win the competition!</p>" +
   "<p>Click next to learn how the selection process works!</p></center>"
 
 exmpl_alien_season_buttons =
@@ -43,9 +43,9 @@ exmpl_alien_season_buttons =
 
 intro_slide_alien_same_season =
   "<center><p>In the selection process, you will first select which aliens you would prefer in each season. " +
-  "For example, you might see the two aliens in the season below. Which alien would you pick, given the season?</p>" +
+  "For example, you might see the two aliens in the season below. Which alien would you pick, given the season?" +
+  "<p>Your opponent will automatically get the other alien.</p>" +
   exmpl_alien_season_buttons +
-  "<p>Make your choice carefully, your opponent will automatically get the other alien!" +
   "<p>Press 'Next' when you are ready to select your aliens! Press 'Previous' if you want to review the instructions."
 
 exmpl_season_buttons =
@@ -59,7 +59,7 @@ intro_slide_season =
   "<p>Next in the selection process, you will select which seasons you would prefer for the competition. " +
   "For example, you might see the two seasons below. Which one would you rather have?</p>" +
   exmpl_season_buttons +
-  "<p>Answer carefully, your opponent will automatically get the other season!"
+  "<p>Your opponent will automatically get the other season!"
 
 exmpl_alien_buttons =
   "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
@@ -72,7 +72,7 @@ intro_slide_alien =
   "<p>Next in the selection process, you will select which aliens you would prefer for the competition, independent of the season. " +
   "For example, you might see the two aliens below. Which one would you pick?</p>" +
   exmpl_alien_buttons +
-  "<p>Answer carefully, your opponent will automatically get the other alien! "
+  "<p>Your opponent will automatically get the other alien! "
 
 exmpl_alien_season_buttons_rest =
   "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
@@ -86,7 +86,7 @@ intro_slide_alien_rest_season =
   "For example, you might see two aliens in two different seasons, like below. " +
   "Which combination of alien and season would you pick?</p>" +
   exmpl_alien_season_buttons_rest +
-  "<p>Answer carefully, your opponent will automatically get the other one!"
+  "<p>Your opponent will automatically get the other one!"
 
 // Put instruction slides together
 intro_alien_same_seasonn = {

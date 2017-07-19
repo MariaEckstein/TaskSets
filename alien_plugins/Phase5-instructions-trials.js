@@ -5,8 +5,8 @@ instructions1 =
   "[happy aliens?]"
 
 instructions2 =
-  "<center><p>The annual competition has by now long passed, " +
-  "and most visitors have left to go back to their homes. " +
+  "<center><p>The annual competition has now long passed, " +
+  "and most visitors have left to go back to their home planets. " +
   "Your bags are packed as well. " +
   "You are about to step on board of the space ship that will take you home.<p>" +
   "<p>But suddenly, you see your alien friend running toward you, waving its arms. " +
@@ -21,7 +21,8 @@ instructions3 =
   "Continue helping the aliens grow, selecting the right items for each one. " +
   "All the guests and spectators have left, so you will only need to take care of your three original aliens.<p>" +
   "<p>In the rainbow season, it is impossible to see how much aliens grow. " +
-  "Still do your best to help each alien grow as much as you can!<p>"
+  "Still do your best to help each alien grow as much as you can!<p>" +
+  "<p>Press Next when you are ready to start!</p>"
 
 var phase5_instructions = {
   type: 'instructions',

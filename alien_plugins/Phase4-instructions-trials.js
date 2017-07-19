@@ -7,18 +7,13 @@ instructions1 =
   "You feel honored.</p>"
 
 instructions2 =
-  "<center><p>The party for the annual competition is still ongoing, " +
-  "and having had such a wonderful time, " +
-  "you decide to stay just a little longer with the aliens, helping them grow.</p>" +
-  "<p>Note that after the annual competition, " +
-  "aliens won't show how you much they grow. " +
+  "<center><p>There is a big party after the annual competition, " +
+  "which attracts visitors from many different planets. " +
+  "You decide to stay for this party to help the old and new aliens grow.</p>" +
+  "<p>Note that after the annual competition, aliens won't show how you much they grow. " +
   "This means that you won't see the effects of your actions. " +
-  "Still do your best to help each alien grow as much as possible, " +
-  "using your previous experience!</p>" +
-  "<p>Also note that the competition attracts many visitors, " +
-  "so you will have to take care of new aliens. " +
-  "Try your best to help each alien grow as much as you can, old or new!</p> " +
-  "<p>Press 'Next' when you are ready to start!</p></center>"
+  "Still do your best to help each alien grow as much as possible!</p>" +
+  "<p>Press Next when you are ready to start!</p></center>"
 
 var phase4_instructions = {
   type: 'instructions',

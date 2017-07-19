@@ -3,13 +3,11 @@
 instructions1 =
   "<center><p>Great job making all these choices! You are now ready to enter the competition.</p>" +
   "[pic of arena]" +
-  "<p>Make sure you let each of your aliens grow as much as possible! " +
-  "Use the knowledge you have gained so far to win this competition. " +
+  "<p>Let each of your aliens grow as much as possible to win this competition. " +
   "Everything works the same as when you were taking care of aliens before.</p>" +
-  "<p>Note: You will only see your own score during the competition. " +
-  "Your opponent's score will not be revealed until the end.</p>" +
+  "<p>Note: You will only see your own score during the competition and not your opponent's score.</p>" +
   "<p>Now do your best and good luck!</p>" +
-  "<p>Press 'Next' when you are ready.</p></center>"
+  "<p>Press Next when you are ready.</p></center>"
 
 var phase3_instructions = {
   type: 'instructions',
