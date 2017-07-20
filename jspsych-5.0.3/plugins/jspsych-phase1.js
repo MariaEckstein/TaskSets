@@ -171,7 +171,10 @@ jsPsych.plugins["phase1"] = (function() {
         "sad_alien": trial.sad_alien,
         "season": trial.season,
         "key_press": info.key,
-        "point_count": points,
+        "points1": points[0],
+        "points2": points[1],
+        "points3": points[2],
+        "phase": trial.phase,
       };
 
       display_element.html(''); // not sure what it does... remove?

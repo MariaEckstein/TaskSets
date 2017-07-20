@@ -43,6 +43,7 @@ rainbow_timeline = [
 ]
 var rainbow_season_phase5 = {
   type: "phase1",
+  phase: 5,
   season: "rainbow",
   aliens: phase1_aliens,
   randomize_order: true,
@@ -51,7 +52,5 @@ var rainbow_season_phase5 = {
   timing_feedback_duration: 200,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                    "Please respond faster next time! </p>",
-  timeline: [].concat(
-    rainbow_timeline, rainbow_timeline, rainbow_timeline
-  )
+  timeline: rainbow_timeline
 }

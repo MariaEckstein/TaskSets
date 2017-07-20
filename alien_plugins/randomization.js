@@ -108,7 +108,7 @@ function shuffle(array) {
 // ACTUALLY RANDOMIZE STUFF
 sa_order = shuffle([0, 1, 2])
 TS_rand = TS_rands[Math.floor(Math.random() * TS_rands.length)];
-TS_rand_phase4 = TS_rands[Math.floor(Math.random() * TS_rands.length)];
+// TS_rand_phase4 = TS_rands[Math.floor(Math.random() * TS_rands.length)];  // NOT necessary! The TS need to be the same for phase1 and phase4!
 season_order = season_orders[Math.floor(Math.random() * season_orders.length)];
 season_order_phase3 = season_orders[Math.floor(Math.random() * season_orders.length)];
 season_order_phase4 = season_orders[Math.floor(Math.random() * season_orders.length)];

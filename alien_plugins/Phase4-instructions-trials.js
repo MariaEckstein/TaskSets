@@ -27,35 +27,37 @@ var phase4_instructions = {
 
 // Get the seasons in the pre-randomized order
 if (subjID != 0) {  // long version
-  TS1_phase4 = TSs[0].concat(
+  TS1_phase4 = [
+    TS1[0],  // {key_answer: button_names[0], sad_alien: 2},
+    TS1[1],  // {key_answer: button_names[1], sad_alien: 1},
+    TS1[2],  // {key_answer: button_names[2], sad_alien: 0},
     {key_answer: "", sad_alien: 3},
     {key_answer: "", sad_alien: 4},
+  ]
+  TS2_phase4 = [
+    TS2[0],
+    TS2[1],
+    TS2[2],
     {key_answer: "", sad_alien: 3},
     {key_answer: "", sad_alien: 4},
-  )
-  TS2_phase4 = TSs[1].concat(
+  ]
+  TS3_phase4 = [
+    TS3[0],
+    TS3[1],
+    TS3[2],
     {key_answer: "", sad_alien: 3},
     {key_answer: "", sad_alien: 4},
-    {key_answer: "", sad_alien: 3},
-    {key_answer: "", sad_alien: 4},
-  )
-  TS3_phase4 = TSs[2].concat(
-    {key_answer: "", sad_alien: 3},
-    {key_answer: "", sad_alien: 4},
-    {key_answer: "", sad_alien: 3},
-    {key_answer: "", sad_alien: 4},
-  )
+  ]
 } else {  // short version
-  TS1_phase4 = TSs[0].concat(
+  TS1_phase4 = TS1[0].concat(
     {key_answer: "", sad_alien: 3},
   )
-  TS2_phase4 = TSs[1].concat(
+  TS2_phase4 = TS2[1].concat(
     {key_answer: "", sad_alien: 3},
   )
-  TS3_phase4 = TSs[2].concat(
+  TS3_phase4 = TS3[2].concat(
     {key_answer: "", sad_alien: 3},
   )
-  console.log(TS3_phase4.length, TS3_phase4[0], TS3_phase4[1])
 }
 TSs_phase4 = [TS1_phase4, TS2_phase4, TS3_phase4]
 
@@ -63,36 +65,38 @@ hot_season_phase4 = {
   season: "hot",
   feedback_amounts: season_rewards[0],
   randomize_order: true,
-  timeline: TSs_phase4[TS_rand_phase4[0]]
+  timeline: TSs_phase4[TS_rand[0]]
 }
 cold_season_phase4 = {
   season: "cold",
   feedback_amounts: season_rewards[1],
   randomize_order: true,
-  timeline: TSs_phase4[TS_rand_phase4[1]]
+  timeline: TSs_phase4[TS_rand[1]]
 }
 rainy_season_phase4 = {
   season: "rainy",
   feedback_amounts: season_rewards[2],
   randomize_order: true,
-  timeline: TSs_phase4[TS_rand_phase4[2]]
+  timeline: TSs_phase4[TS_rand[2]]
 }
 
 // Define the numbers of trials for each repetition of each season
 third_rep_chunks = [
-  [start_hot_season, hot_season_phase4],
-  [start_cold_season, cold_season_phase4],
-  [start_rainy_season, rainy_season_phase4]
+  [start_hot_season, hot_season_phase4],  // 5 trials
+  [start_cold_season, cold_season_phase4],  // 5 trials
+  [start_rainy_season, rainy_season_phase4]  // 5 trials
 ]
 
 // Get the seasons in the pre-randomized order
 seasons_in_order_phase4 = [].concat(
+  third_rep_chunks[season_order_phase4[1][0]], third_rep_chunks[season_order_phase4[1][1]], third_rep_chunks[season_order_phase4[1][2]],
   third_rep_chunks[season_order_phase4[2][0]], third_rep_chunks[season_order_phase4[2][1]], third_rep_chunks[season_order_phase4[2][2]]
 )
 
 // Define a jsPsych object for all the trials; pick aliens; max RT; timing
 var all_seasons_phase4 = {
   type: "phase1",
+  phase: 4,
   aliens: phase1_aliens.concat(alien7, alien8),
   show_stim_with_feedback: false,
   timing_response: 10000,

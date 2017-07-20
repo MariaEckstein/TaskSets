@@ -69,15 +69,16 @@ alien_rest_season = {
 // Put everything together in the final phase2 trial object
 phase2_trials = {
   type: "phase2",
+  phase: 2,
   timing_response: 10000,
   timeline: [].concat(
     // intro_alien_same_seasonn,  // now part of instructions
-    alien_same_season,
+    alien_same_season, alien_same_season,
     intro_season,
-    season,
+    season, season,
     intro_alien,
-    alien,
+    alien, alien,
     intro_alien_rest_season,
-    alien_rest_season
+    alien_rest_season, alien_rest_season
   )
 }

@@ -73,6 +73,7 @@ var phase1_instructions = {
 var training_block = {
   type: "phase1",
   season: "training",
+  phase: "training",
   show_stim_with_feedback: true,
   aliens: practice_aliens,
   feedback_amounts: training_rewards,
