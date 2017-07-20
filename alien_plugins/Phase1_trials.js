@@ -50,6 +50,11 @@ var start_cold_season = {
 }
 
 // Define the numbers of trials for each repetition of each season
+zeroeth_rep_chunks = [
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season],
+  [start_cold_season, cold_season, cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
+]
 first_rep_chunks = [
   [start_hot_season, hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season, cold_season],
@@ -68,9 +73,10 @@ third_rep_chunks = [
 
 // Get the seasons in the pre-randomized order
 seasons_in_order = [].concat(
-  first_rep_chunks[season_order[0][0]], first_rep_chunks[season_order[0][1]], first_rep_chunks[season_order[0][2]],
-  second_rep_chunks[season_order[1][0]], second_rep_chunks[season_order[1][1]], second_rep_chunks[season_order[1][2]],
-  third_rep_chunks[season_order[2][0]], third_rep_chunks[season_order[2][1]], third_rep_chunks[season_order[2][2]]
+  zeroeth_rep_chunks[season_order[0][0]], zeroeth_rep_chunks[season_order[0][1]], zeroeth_rep_chunks[season_order[0][2]],
+  first_rep_chunks[season_order[1][0]], first_rep_chunks[season_order[1][1]], first_rep_chunks[season_order[1][2]],
+  second_rep_chunks[season_order[2][0]], second_rep_chunks[season_order[2][1]], second_rep_chunks[season_order[2][2]],
+  third_rep_chunks[season_order[3][0]], third_rep_chunks[season_order[3][1]], third_rep_chunks[season_order[3][2]]
 )
 
 // Define a jsPsych object for all the trials; pick aliens; max RT; timing
