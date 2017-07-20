@@ -1,0 +1,116 @@
+---
+title: "TaskSets"
+author: "Maria Eckstein"
+date: "July 19, 2017"
+output: html_document
+---
+
+```{r Read in data}
+
+data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data"
+filenames = list.files(data_dir, pattern = "*.csv")
+all_files = data.frame()
+for (filename in filenames) {
+  subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "-1"))
+  subj_file$subjID = strsplit(substr(as.character(subj_file$responses), 8, 10), "[^0-9]")[[1]][[1]]
+  
+  # Add trial column: counter within blocks
+  subj_file$trial = NA
+  for (row in 2:nrow(subj_file)) {
+    if (!is.na(subj_file$season[row]) & is.na(subj_file$season[row-1])) {
+      trial = 1
+    } else if (!is.na(subj_file$season[row]) & !is.na(subj_file$season[row-1])) {
+      trial = trial + 1
+    } else if (is.na(subj_file$season[row])) {
+      trial = NA
+    }
+    subj_file$trial[row] = trial
+  }
+  
+  # Add block column
+  subj_file$block = 0
+  block = 0
+  for (row in 2:nrow(subj_file)) {
+    if (!is.na(subj_file$trial[row])) {
+      if (subj_file$trial[row] == 1) {
+        block = block + 1
+      }
+    }
+    subj_file$block[row] = block
+  }
+  
+  # Add alien-trial column
+  subj_file$alien_trial = NA
+  alien_season_counter = data.frame(training = c(0, 0, 0), hot = c(0, 0, 0), cold = c(0, 0, 0), rainy = c(0, 0, 0), rainbow = c(0, 0, 0))
+  for (row in 1:nrow(subj_file)) {
+    sad_alien = subj_file$sad_alien[row] + 1
+    if (!is.na(sad_alien)) {
+      season = as.character(subj_file$season[row])
+      alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
+      subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
+    }
+  }
+  
+  all_files = rbind(all_files, subj_file)
+}
+
+library("ggplot2"); library("plyr")
+theme_set(theme_bw())
+
+all_files = subset(all_files, select = -c(responses, internal_node_id, view_history))
+
+all_files$subjID = as.numeric(as.character(all_files$subjID))
+all_files$sad_alien = factor(all_files$sad_alien)
+
+all_files$key.left = as.character(all_files$key.left)
+all_files$key.left[!is.na(all_files$key.left)] = substr(all_files$key.left[!is.na(all_files$key.left)], 13, 21)
+all_files$key.left = factor(all_files$key.left)
+
+all_files$key.right = as.character(all_files$key.right)
+all_files$key.right[!is.na(all_files$key.right)] = substr(all_files$key.right[!is.na(all_files$key.right)], 13, 21)
+all_files$key.right = factor(all_files$key.right)
+
+all_files
+summary(all_files)
+```
+```{r Clean data and create summary dataframe}
+
+# all_files = subset(all_files, rt < 5000 & rt < 150)
+# sum_data = ddply(all_files, .(subjID, trial_type, sad_alien, season), summarize,
+#                  ACC = mean(correct, na.rm = T))
+# summary(sum_data)
+
+```
+```{r Phase 1}
+phase1 = subset(all_files, trial_type == "phase1" & season != "rainbow" & trial_index < 140)
+phase1$block = factor(phase1$block)
+
+learning_curves = ggplot(phase1, aes(alien_trial, correct)) +  #, color = block
+  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "point") +
+  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
+  coord_cartesian(x = c(0, 12)) +
+  facet_grid(~ season)
+learning_curves
+learning_curves + aes(color = sad_alien, group = sad_alien)
+```
+```{r Phase 2}
+
+```
+```{r Phase 3}
+phase3 = subset(all_files, trial_type == "phase1" & season != "rainbow" & trial_index > 140 & trial_index < 246)
+phase3$block = factor(phase3$block)
+
+learning_curves = ggplot(phase3, aes(alien_trial, correct)) +  #, color = block
+  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "point") +
+  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
+  coord_cartesian(x = c(13, 18)) +
+  facet_grid(~ season)
+learning_curves
+learning_curves + aes(color = sad_alien, group = sad_alien)
+```
+```{r Phase 4}
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
