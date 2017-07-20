@@ -1,3 +1,9 @@
+// Timing variables
+var max_RT = 3000
+var feedback_duration = 750
+var max_RT_train = max_RT
+var feedback_duration_train = 1000
+
 // Positions on the screen
 var alien_height = 240
 var alien_height_point_counter = 60
@@ -30,11 +36,15 @@ phase1_aliens = [
 // Phase 1: Item buttons
 item_buttons = []
 for (i = 0; i < 3; i ++) {
-  button =
-    "<button id='" + button_names[i] + "-button'" +
-      "class='jspsych-btn'>" +
-      "<img src='img/" + button_names[i] + ".png' height=" + button_height + ">" +
-    "</button>"
+  if (input_device == "mouse") {
+    button =
+      "<button id='" + button_names[i] + "-button'" +
+        "class='jspsych-btn'>" +
+        "<img src='img/" + button_names[i] + ".png' height=" + button_height + ">" +
+      "</button>"
+  } else if (input_device == "keyboard") {
+    button = "<img src='img/" + button_names[i] + ".png' style='border: 20px solid transparent'; height=" + button_height + ">"
+  }
   item_buttons.push(button)
 }
 

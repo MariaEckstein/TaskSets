@@ -22,7 +22,7 @@ var rainy_season = {
 start_new_season_page =
     "style='position:fixed; top:0px; left:0px; bottom:0px; right:0px; z=-10' " +
     "height='100%' width='100%'>" +
-  "<p style='position:relative; border: 250px solid transparent; z=10; font-size:60px'><i>The season has changed.</i></p>"
+  "<p style='position:relative; border: 250px solid transparent; z=10; font-size:50px'><i>The season has changed.</i></p>"
 
 var start_hot_season = {
   type: "start_new_season",
@@ -83,9 +83,10 @@ seasons_in_order = [].concat(
 var all_seasons = {
   type: "phase1",
   phase: 1,
+  choices: [74, 75, 76],
   aliens: phase1_aliens,
-  timing_response: 10000,
-  timing_feedback_duration: 750,
+  timing_response: max_RT,
+  timing_feedback_duration: feedback_duration,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                    "Please respond faster next time! </p>",
   timeline: seasons_in_order

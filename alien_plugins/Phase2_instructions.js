@@ -30,9 +30,6 @@ instructions2b =
   "each competitor is allowed to pick the aliens and seasons they want to use in the competition. " +
   "You wil be one of the competitors! Make sure you pick the best aliens and seasons, " +
   "using your experience on the planet so far!</p>" +
-  // "<p>You might need to indiciate your choices multiple times. " +
-  // "Answer carefully each time to make sure you'll end up with the aliens and seasons " +
-  // "that will let you win the competition!</p>" +
   "<p>Click next to learn how the selection process works!</p></center>"
 
 exmpl_alien_season_buttons =

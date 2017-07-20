@@ -25,7 +25,7 @@ for (a1 = 0; a1 < alien_season_buttons.length; a1 ++) {
 }
 
 // Create shorter version for debug subject 0
-if (subjID == 0) {
+if (short_version) {
   same_season_timeline = [
     same_season_timeline[0],
     same_season_timeline[2],
@@ -70,7 +70,8 @@ alien_rest_season = {
 phase2_trials = {
   type: "phase2",
   phase: 2,
-  timing_response: 10000,
+  choices: [74, 75, 76],
+  timing_response: max_RT,
   timeline: [].concat(
     // intro_alien_same_seasonn,  // now part of instructions
     alien_same_season, alien_same_season,

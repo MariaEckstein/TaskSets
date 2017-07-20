@@ -72,15 +72,15 @@ var phase1_instructions = {
 // Training trials
 var training_block = {
   type: "phase1",
-  season: "training",
   phase: "training",
-  show_stim_with_feedback: true,
+  season: "training",
+  choices: [74, 75, 76],
   aliens: practice_aliens,
   feedback_amounts: training_rewards,
-  data: {block: "training"},
+  show_stim_with_feedback: true,
   randomize_order: true,
-  timing_feedback_duration: 1500,
-  timing_response: 10000,
+  timing_feedback_duration: feedback_duration_train,
+  timing_response: max_RT_train,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                    "Please respond faster next time! </p>",
   timeline: TS_train

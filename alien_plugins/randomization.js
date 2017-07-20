@@ -20,6 +20,11 @@ alien_ids = shuffle([0, 1, 2])
 // DEFINITIONS
 // Button names and order
 var button_names = ["bed", "umbrella", "plant"]
+if (input_device == "mouse") {
+  key_answers = button_names
+} else if (input_device == "keyboard") {
+  key_answers = [74, 75, 76]
+}
 var seasons = ["hot", "cold", "rainy"]
 var aliens = ["alien1", "alien2", "alien4"]
 
@@ -41,42 +46,42 @@ reward_orders = [  // everything except [0,1,2] and [2,1,0]
 
 // Training task sets
 TS_train = [
-  {key_answer: button_names[0], sad_alien: 0},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 2},
-  {key_answer: button_names[0], sad_alien: 0},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 2},
+  {key_answer: key_answers[0], sad_alien: 0},
+  {key_answer: key_answers[1], sad_alien: 1},
+  {key_answer: key_answers[2], sad_alien: 2},
+  {key_answer: key_answers[0], sad_alien: 0},
+  {key_answer: key_answers[1], sad_alien: 1},
+  {key_answer: key_answers[2], sad_alien: 2},
 ]
 
 // Phase-1 task sets
 TS1 = [
-  {key_answer: button_names[0], sad_alien: 2},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 0},
-  {key_answer: button_names[0], sad_alien: 2},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: key_answers[0], sad_alien: 2},
+  {key_answer: key_answers[1], sad_alien: 1},
+  {key_answer: key_answers[2], sad_alien: 0},
+  {key_answer: key_answers[0], sad_alien: 2},
+  {key_answer: key_answers[1], sad_alien: 1},
+  {key_answer: key_answers[2], sad_alien: 0},
 ]
 TS2 = [
-  {key_answer: button_names[0], sad_alien: 1},
-  {key_answer: button_names[1], sad_alien: 0},
-  {key_answer: button_names[2], sad_alien: 2},
-  {key_answer: button_names[0], sad_alien: 1},
-  {key_answer: button_names[1], sad_alien: 0},
-  {key_answer: button_names[2], sad_alien: 2},
+  {key_answer: key_answers[0], sad_alien: 1},
+  {key_answer: key_answers[1], sad_alien: 0},
+  {key_answer: key_answers[2], sad_alien: 2},
+  {key_answer: key_answers[0], sad_alien: 1},
+  {key_answer: key_answers[1], sad_alien: 0},
+  {key_answer: key_answers[2], sad_alien: 2},
 ]
 TS3 = [
-  {key_answer: button_names[0], sad_alien: 0},
-  {key_answer: button_names[1], sad_alien: 2},
-  {key_answer: button_names[2], sad_alien: 1},
-  {key_answer: button_names[0], sad_alien: 0},
-  {key_answer: button_names[1], sad_alien: 2},
-  {key_answer: button_names[2], sad_alien: 1},
+  {key_answer: key_answers[0], sad_alien: 0},
+  {key_answer: key_answers[1], sad_alien: 2},
+  {key_answer: key_answers[2], sad_alien: 1},
+  {key_answer: key_answers[0], sad_alien: 0},
+  {key_answer: key_answers[1], sad_alien: 2},
+  {key_answer: key_answers[2], sad_alien: 1},
 ]
 TSs = [TS1, TS2, TS3]
 
-if (subjID == 0) {
+if (short_version) {
   TS_train = [TS_train[0]]
   TSs = [
     [TS1[0]],
@@ -108,7 +113,6 @@ function shuffle(array) {
 // ACTUALLY RANDOMIZE STUFF
 sa_order = shuffle([0, 1, 2])
 TS_rand = TS_rands[Math.floor(Math.random() * TS_rands.length)];
-// TS_rand_phase4 = TS_rands[Math.floor(Math.random() * TS_rands.length)];  // NOT necessary! The TS need to be the same for phase1 and phase4!
 season_order = season_orders[Math.floor(Math.random() * season_orders.length)];
 season_order_phase3 = season_orders[Math.floor(Math.random() * season_orders.length)];
 season_order_phase4 = season_orders[Math.floor(Math.random() * season_orders.length)];

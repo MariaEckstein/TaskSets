@@ -44,36 +44,6 @@ jsPsych.plugins["phase2"] = (function() {
     display_element.append(response_buttons);
     trial.start_time = (new Date()).getTime();
 
-    // take care of button presses: record data
-    function clear_button_handlers() {
-      for (btn = 0; btn < all_sa_button_names.length; btn ++) {
-        $(all_sa_button_names[btn]).off('click');
-      }
-    }
-
-    for (let i = 0; i < all_sa_button_names.length; i ++) {
-      $(all_sa_button_names[i]).on('click', function() {
-          clear_button_handlers();
-          var response_time = (new Date()).getTime();
-          var rt = response_time - trial.start_time;
-          info = {
-            key: all_sa_button_names[i],
-            rt: rt
-          };
-          after_response(info);
-      });
-    }
-
-    var trial_data = {};
-    if (trial.timing_response > 0) {
-      setTimeoutHandlers.push(setTimeout(function() {
-        after_response({
-          key: -1,
-          rt: -1
-        });
-      }, trial.timing_response));
-    }
-
     // create response function
     var after_response = function(info) {
 
@@ -99,6 +69,47 @@ jsPsych.plugins["phase2"] = (function() {
       var timeout = info.rt == -1;
       correct = -1;
       doFeedback(info.key, timeout);
+    }
+
+    // take care of button presses: record data
+    if (input_device == "mouse") {
+      function clear_button_handlers() {
+        for (btn = 0; btn < all_sa_button_names.length; btn ++) {
+          $(all_sa_button_names[btn]).off('click');
+        }
+      }
+
+      for (let i = 0; i < all_sa_button_names.length; i ++) {
+        $(all_sa_button_names[i]).on('click', function() {
+            clear_button_handlers();
+            var response_time = (new Date()).getTime();
+            var rt = response_time - trial.start_time;
+            info = {
+              key: all_sa_button_names[i],
+              rt: rt
+            };
+            after_response(info);
+        });
+      }
+
+    } else if (input_device == "keyboard") {
+      jsPsych.pluginAPI.getKeyboardResponse({
+        callback_function: after_response,
+        valid_responses: trial.choices,
+        rt_method: 'date',
+        persist: false,
+        allow_held_key: false
+      });
+    }
+
+    var trial_data = {};
+    if (trial.timing_response > 0) {
+      setTimeoutHandlers.push(setTimeout(function() {
+        after_response({
+          key: -1,
+          rt: -1
+        });
+      }, trial.timing_response));
     }
 
     function doFeedback(key, timeout) {

@@ -26,7 +26,7 @@ var phase4_instructions = {
 }
 
 // Get the seasons in the pre-randomized order
-if (subjID != 0) {  // long version
+if (!short_version) {  // long version
   TS1_phase4 = [
     TS1[0],  // {key_answer: button_names[0], sad_alien: 2},
     TS1[1],  // {key_answer: button_names[1], sad_alien: 1},
@@ -49,15 +49,18 @@ if (subjID != 0) {  // long version
     {key_answer: "", sad_alien: 4},
   ]
 } else {  // short version
-  TS1_phase4 = TS1[0].concat(
+  TS1_phase4 = [
+    TS1[0],
     {key_answer: "", sad_alien: 3},
-  )
-  TS2_phase4 = TS2[1].concat(
+  ]
+  TS2_phase4 = [
+    TS2[0],
     {key_answer: "", sad_alien: 3},
-  )
-  TS3_phase4 = TS3[2].concat(
+  ]
+  TS3_phase4 = [
+    TS3[0],
     {key_answer: "", sad_alien: 3},
-  )
+  ]
 }
 TSs_phase4 = [TS1_phase4, TS2_phase4, TS3_phase4]
 
@@ -97,9 +100,10 @@ seasons_in_order_phase4 = [].concat(
 var all_seasons_phase4 = {
   type: "phase1",
   phase: 4,
+  choices: [74, 75, 76],
   aliens: phase1_aliens.concat(alien7, alien8),
   show_stim_with_feedback: false,
-  timing_response: 10000,
+  timing_response: max_RT,
   timing_feedback_duration: 200,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                    "Please respond faster next time! </p>",

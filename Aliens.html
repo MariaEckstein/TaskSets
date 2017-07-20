@@ -2,14 +2,19 @@
 <html>
   <head>
     <title>Aliens</title>
+    <script>
+      // IMPORTANT PARAMETERS
+      var short_version = false;
+      var input_device = "keyboard";  // mouse OR keyboard
+    </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="jspsych-5.0.3/jspsych.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-survey-text.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-instructions.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-phase1.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-phaze1.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-phase2.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
-    <script> var subjID = 999;</script>
     <script src="alien_plugins/randomization.js"></script>
     <script src="alien_plugins/visual_elements.js"></script>
     <script src="alien_plugins/Phase1_instructions.js"></script>
@@ -27,12 +32,15 @@
   <script>
 
     /* TDs
-    - make RTs etc. variables and define at the beginngin!
+    - don't get points if no reward!
+    - change visual appearance of phase 2 for keyboard!
+    - respond "as fast and accurately as possible"
     - read the novelty paper with the crops and planets -> similar?
-    - do run through
-    - get pilot data
+    - hide things: $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
     - add all the pics for instructions(?)
     - let chosen button remain on the screen longer?
+    - CHECK use keyboard, give them less time
+    - CHECK make RTs etc. variables and define at the beginning!
     - CHECK make new aliens transparent
     - CHECK make background images same size (for buttons)
     - CHECK add debug subject
@@ -58,15 +66,15 @@
 
     /* create experiment timeline array */
     var timeline = [];
-    timeline.push(get_subj_data);
-    timeline.push(phase1_instructions);
-    timeline.push(training_block, training_block, training_block);
-    timeline.push(phase1_instructions_post);
-    timeline.push(all_seasons);
-    timeline.push(phase2_instructions);
+    // timeline.push(get_subj_data);
+    // timeline.push(phase1_instructions);
+    // timeline.push(training_block, training_block, training_block);
+    // timeline.push(phase1_instructions_post);
+    // timeline.push(all_seasons);
+    // timeline.push(phase2_instructions);
     timeline.push(phase2_trials);
-    timeline.push(phase3_instructions);
-    timeline.push(all_seasons_phase3);
+    // timeline.push(phase3_instructions);
+    // timeline.push(all_seasons_phase3);
     timeline.push(phase4_instructions);
     timeline.push(all_seasons_phase4);
     timeline.push(phase5_instructions);
@@ -76,7 +84,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      fullscreen: true,
+      // fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }

@@ -76,7 +76,7 @@ jsPsych.plugins["phase1"] = (function() {
         speech + exclamation_points +
       "</div></center>"
 
-    shuffled_buttons = shuffle(item_buttons)
+    shuffled_buttons = item_buttons  // don't shuffle buttons
     response_buttons =
       "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
         shuffled_buttons[0] +
@@ -88,38 +88,7 @@ jsPsych.plugins["phase1"] = (function() {
     display_element.append(background, sad_alien, response_buttons);
     trial.start_time = (new Date()).getTime();
 
-    // take care of button presses: mimic key presses
-    function clear_button_handlers() {
-      for (i = 0; i < button_names.length; i ++) {
-        btn = "#".concat(button_names[i], "-button")
-        $(btn).off('click');
-      }
-    }
-
-    for (let i = 0; i < button_names.length; i ++) {
-      btn = "#".concat(button_names[i], "-button")
-      $(btn).on('click', function() {
-          clear_button_handlers();
-          var response_time = (new Date()).getTime();
-          var rt = response_time - trial.start_time;
-          info = {
-            key: button_names[i],
-            rt: rt
-          };
-          after_response(info);
-      });
-    }
-
     var trial_data = {};
-
-    if (trial.timing_response > 0) {
-      setTimeoutHandlers.push(setTimeout(function() {
-        after_response({
-          key: -1,
-          rt: -1
-        });
-      }, trial.timing_response));
-    }
 
     // create response function
     var after_response = function(info) {
@@ -132,23 +101,24 @@ jsPsych.plugins["phase1"] = (function() {
       // clear keyboard listener
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
-      var correct = 0;
+      var correct = false;
       if (trial.key_answer == info.key) {
-        correct = 1;
+        correct = true;
       }
+      console.log(info.key, trial.key_answer, trial.key_answer == info.key, correct)
 
       // get feedback amount
       amount = 1
       if (correct) {
-        for (i = 0; i < button_names.length; i++) {
-          if (info.key == button_names[i]) {
+        for (i = 0; i < key_answers.length; i++) {
+          if (info.key == key_answers[i]) {
             amount = trial.feedback_amounts[i]
           }
         }
       }
 
       function randn_bm() {
-          var u = 1 - Math.random(); // Subtraction to flip [0, 1) to (0, 1].
+          var u = 1 - Math.random();  // Subtraction to flip [0, 1) to (0, 1].
           var v = 1 - Math.random();
           return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
       }
@@ -181,6 +151,47 @@ jsPsych.plugins["phase1"] = (function() {
 
       var timeout = info.rt == -1;
       doFeedback(correct, timeout);
+    }
+
+    // take care of button presses: mimic key presses
+    if (input_device == "mouse") {
+      function clear_button_handlers() {
+        for (i = 0; i < button_names.length; i ++) {
+          btn = "#".concat(button_names[i], "-button")
+          $(btn).off('click');
+        }
+      }
+      for (let i = 0; i < button_names.length; i ++) {
+        btn = "#".concat(button_names[i], "-button")
+        $(btn).on('click', function() {
+            clear_button_handlers();
+            var response_time = (new Date()).getTime();
+            var rt = response_time - trial.start_time;
+            info = {
+              key: button_names[i],
+              rt: rt
+            };
+            after_response(info);
+        });
+      }
+
+    } else if (input_device == "keyboard") {
+      jsPsych.pluginAPI.getKeyboardResponse({
+        callback_function: after_response,
+        valid_responses: trial.choices,
+        rt_method: 'date',
+        persist: false,
+        allow_held_key: false
+      });
+    }
+
+    if (trial.timing_response > 0) {
+      setTimeoutHandlers.push(setTimeout(function() {
+        after_response({
+          key: -1,
+          rt: -1
+        });
+      }, trial.timing_response));
     }
 
     function doFeedback(correct, timeout) {
