@@ -78,7 +78,7 @@ jsPsych.plugins["phase1"] = (function() {
 
     shuffled_buttons = item_buttons  // don't shuffle buttons
     response_buttons =
-      "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+      "<center><div class='response_buttons'>" +
         shuffled_buttons[0] +
         shuffled_buttons[1] +
         shuffled_buttons[2] +
@@ -108,23 +108,16 @@ jsPsych.plugins["phase1"] = (function() {
       console.log(info.key, trial.key_answer, trial.key_answer == info.key, correct)
 
       // get feedback amount
-      amount = 1
-      if (correct) {
+      feedback_amount = 0  // incorrect response or no answer
+      if (correct) {  // correct response
         for (i = 0; i < key_answers.length; i++) {
           if (info.key == key_answers[i]) {
-            amount = trial.feedback_amounts[i]
+            noised_amount = trial.feedback_amounts[i] + 0.3 * randn_bm()
+            rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
+            feedback_amount = Math.max(0, rounded_amount)
           }
         }
       }
-
-      function randn_bm() {
-          var u = 1 - Math.random();  // Subtraction to flip [0, 1) to (0, 1].
-          var v = 1 - Math.random();
-          return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-      }
-      exact_amount = amount + 0.3 * randn_bm()
-      rounded_amount = Math.round(exact_amount * 10) / 10  // round doesn't round with decimals
-      feedback_amount = Math.max(0, rounded_amount)
 
       // update point counter
       points[trial.sad_alien] += feedback_amount

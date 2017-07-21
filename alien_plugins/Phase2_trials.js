@@ -43,25 +43,21 @@ if (short_version) {
 // Define stuff for jsPsych trial objects
 alien_same_season = {
   assess: "alien-season",
-  timing_feedback_duration: 1,
   randomize_order: true,
   timeline: same_season_timeline
 }
 season = {
   assess: "season",
   randomize_order: true,
-  timing_feedback_duration: 1,
   timeline: season_timeline
 }
 alien = {
   assess: "alien",
   randomize_order: true,
-  timing_feedback_duration: 1,
   timeline: alien_timeline
 }
 alien_rest_season = {
   assess: "alien-season",
-  timing_feedback_duration: 1,
   randomize_order: true,
   timeline: rest_timeline
 }
@@ -71,11 +67,14 @@ phase2_trials = {
   type: "phase2",
   phase: 2,
   choices: [74, 75, 76],
+  show_feedback_on_timeout: true,
+  timing_feedback_duration: 1000,
   timing_response: max_RT,
+  timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
+                   "Please respond faster next time! </p>",
   timeline: [].concat(
-    // intro_alien_same_seasonn,  // now part of instructions
-    alien_same_season, alien_same_season,
-    intro_season,
+    // alien_same_season, alien_same_season,
+    // intro_season,
     season, season,
     intro_alien,
     alien, alien,

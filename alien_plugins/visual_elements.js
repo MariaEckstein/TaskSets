@@ -14,6 +14,11 @@ var reward_left = sad_left + 15
 var button_height = 50
 var big_button_height = alien_height
 var points = [0, 0, 0]
+if (input_device == "mouse") {
+  border_witdth = 0;
+} else if (input_device == "keyboard") {
+  border_witdth = 20;
+}
 
 // Aliens
 alien1 = "<img src='img/alien1.png' "
@@ -36,14 +41,13 @@ phase1_aliens = [
 // Phase 1: Item buttons
 item_buttons = []
 for (i = 0; i < 3; i ++) {
+  button = "<img src='img/" + button_names[i] + ".png' style='border: " +
+    border_witdth + "px solid transparent;' height=" + button_height + ">"
   if (input_device == "mouse") {
     button =
-      "<button id='" + button_names[i] + "-button'" +
-        "class='jspsych-btn'>" +
-        "<img src='img/" + button_names[i] + ".png' height=" + button_height + ">" +
+      "<button id='" + button_names[i] + "-button' class='jspsych-btn'>" +
+        button +
       "</button>"
-  } else if (input_device == "keyboard") {
-    button = "<img src='img/" + button_names[i] + ".png' style='border: 20px solid transparent'; height=" + button_height + ">"
   }
   item_buttons.push(button)
 }
@@ -51,45 +55,51 @@ for (i = 0; i < 3; i ++) {
 // Phase 2: alien-season buttons
 season_buttons = []
 all_sa_button_names = []
+
 for (se = 0; se < seasons.length; se ++) {
-  button_name = seasons[se] + "-button";
-  button =
-    "<button id='" + button_name + "' " +
-      "class='jspsych-btn'>" +
-      "<img src='img/" + seasons[se] + ".png' height=" + big_button_height + ">" +
-    "</button>"
-    season_buttons.push(button);
+  button = "<img class='phase2_button' src='img/" + seasons[se] + ".png' id='" + seasons[se] + "-button'>"
+  if (input_device == "mouse") {
+    button_name = seasons[se] + "-button";
     all_sa_button_names.push("#".concat(button_name));
+    button =
+      "<button id='" + button_name + "' class='jspsych-btn'>" +
+        button +
+      "</button>"
+  }
+  season_buttons.push(button);
 }
 
 alien_buttons = []
 for (al = 0; al < phase1_aliens.length; al ++) {
-  button_name = "alien" + phase1_aliens[al].substring(19, 20) + "-button";
-  button =
-    "<button id='" + button_name + "' " +
-      "class='jspsych-btn'>" +
-      phase1_aliens[al] + "height=" + big_button_height + ">" +
-    "</button>"
-    alien_buttons.push(button)
+  button = phase1_aliens[al] + "class='phase2_button'>"
+  if (input_device == "mouse") {
+    button_name = "alien" + phase1_aliens[al].substring(19, 20) + "-button";
     all_sa_button_names.push("#".concat(button_name));
+    button =
+      "<button id='" + button_name + "' class='jspsych-btn'>" +
+        button +
+      "</button>"
+  }
+  alien_buttons.push(button)
 }
 
 alien_season_buttons = []
 for (se = 0; se < seasons.length; se ++) {
   for (al = 0; al < phase1_aliens.length; al ++) {
-    button_name = "alien" + phase1_aliens[al].substring(19, 20) + seasons[se] + "-button";
-    picture =
-      "<center><div style='position:relative;'>" +
-        phase1_aliens[al] + "style='position:absolute; left: 10%' height=" + big_button_height + ">" +
-        "<img src='img/" + seasons[se] + ".png' height=" + big_button_height + ">" +
-      "</div></center>"
     button =
-      "<button id='" + button_name + "' " +
-      "class='jspsych-btn'>" +
-        picture +
-      "</button>"
+      "<center><div style='position:relative; border: " + border_witdth + "px solid transparent;'>" +
+        phase1_aliens[al] + "class='phase2_button' style='position:absolute; left: 25%'>" +
+        "<img class='phase2_button' src='img/" + seasons[se] + ".png'>" +
+      "</div></center>"
+    if (input_device == "mouse") {
+      button_name = "alien" + phase1_aliens[al].substring(19, 20) + seasons[se] + "-button";
+      all_sa_button_names.push("#".concat(button_name));
+      button =
+        "<button id='" + button_name + "' class='jspsych-btn'>" +
+          button +
+        "</button>"
+    }
     alien_season_buttons.push(button)
-    all_sa_button_names.push("#".concat(button_name));
   }
 }
 

@@ -35,7 +35,7 @@ jsPsych.plugins["phase2"] = (function() {
     // prepare the two buttons that will be shown
     shuffled_buttons = shuffle(trial.buttons);
     response_buttons =
-      "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+      "<center><div class='response_buttons'>" +
         shuffled_buttons[0] +
         shuffled_buttons[1] +
       "</div></center>"
@@ -54,17 +54,23 @@ jsPsych.plugins["phase2"] = (function() {
 
       // clear keyboard listener
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
+      if (info.key == 74) {
+        select = 0;
+      } else if (info.key == 76) {
+        select = 1;
+      }
 
       // save data
       trial_data = {
         "rt": info.rt,
-        "key_press": info.key,
+        "key": info.key,
         "assess": trial.assess,
-        "key-left": shuffled_buttons[0],
-        "key-right": shuffled_buttons[1],
+        "stim_left": shuffled_buttons[0],
+        "stim_right": shuffled_buttons[1],
+        "stim_selected": shuffled_buttons[select]
       };
 
-      display_element.html('');
+      // display_element.html('');
 
       var timeout = info.rt == -1;
       correct = -1;
@@ -117,14 +123,7 @@ jsPsych.plugins["phase2"] = (function() {
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.append(trial.timeout_message);
       } else {
-        display_element.html('');
-
-        // selected_response_button =
-        //   "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
-        //     shuffled_buttons[0] +
-        //     shuffled_buttons[1] +
-        //   "</div></center>"
-        // display_element.append(selected_response_button);
+        $(key).css('visibility', 'hidden');
       }
       setTimeout(function() {
         endTrial();
