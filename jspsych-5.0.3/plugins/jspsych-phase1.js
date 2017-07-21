@@ -32,61 +32,45 @@ jsPsych.plugins["phase1"] = (function() {
     // that need to be cleared if the trial ends early
     var setTimeoutHandlers = [];
 
-    if (trial.season == "hot") {
-      trial.background = "img/hot.png"
-    } else if (trial.season == "rainy") {
-      trial.background = "img/rainy.png"
-    } else if (trial.season == "cold") {
-      trial.background = "img/cold.png"
-    } else if (trial.season == "rainbow") {
-      trial.background = "img/rainbow.png"
-    } else {
-      trial.background = "img/blank.png"
-    }
+    // get background, alien, point counters, and response buttons
+    background = "<img class='background' src=img/" + trial.season + ".png>"
+    sad_alien = "<img class='alien' id='sad_alien' src='img/" + trial.aliens[trial.sad_alien] + ".png'>"
 
-    // create Aliens, sadness, and response buttons
-    var background =
-      "<img src=" + trial.background + " style='position:fixed; top:0px; left:0px; bottom:0px; right: 0px' height='100%' width='100%'>"
-
-    var c_alien_tops = [20, 80, 140, 200, 260]
-    var point_tops = [0, 60, 120, 180, 240]
-    alien_counters = []
+    point_counters = "<div class='counter_box' id='counter_box'>"
     for (i = 0; i < 3; i ++) {
-      alien_counter =
-        trial.aliens[i] + " style='position:absolute; right:100px; top:" + c_alien_tops[i] + "px;' height=" + alien_height_point_counter + ">" +
-        "<p style='position:absolute; right:0px; top:" + point_tops[i] + "px; font-size:46px;'>" + points[i] + "</p>"
-      alien_counters.push(alien_counter)
+      point_counters = point_counters.concat(
+        "<img class='counter_alien' style='top: ", c_alien_tops[i], "px' src='img/", trial.aliens[i], ".png'>",
+        "<p class='counter_number' style='top: ", point_tops[i], "px'>", points[i], "</p>"
+      )
     }
-
-    point_counters =
-      "<div>" +
-        alien_counters[0] +
-        alien_counters[1] +
-        alien_counters[2] +
-      "</div>"
-
+    point_counters = point_counters.concat("</div>")
     if (!trial.show_stim_with_feedback) {
       point_counters = " ";
     }
 
-    sad_alien =
-      "<center><div style='position:relative;'>" +
-        point_counters +
-        trial.aliens[trial.sad_alien] + " height=" + alien_height + ">"
-        speech + exclamation_points +
-      "</div></center>"
-
-    shuffled_buttons = item_buttons  // don't shuffle buttons
+    button_order = shuffle([0, 1, 2])
+    shuffled_buttons = [
+      item_buttons[button_order[0]],
+      item_buttons[button_order[1]],
+      item_buttons[button_order[2]]
+    ]
     response_buttons =
-      "<center><div class='response_buttons'>" +
+      "<center><div class='response_buttons' id='response_buttons'>" +
         shuffled_buttons[0] +
         shuffled_buttons[1] +
         shuffled_buttons[2] +
       "</div></center>"
 
-    // add Aliens, sadness, and response buttons to display
-    display_element.append(background, sad_alien, response_buttons);
-    trial.start_time = (new Date()).getTime();
+    alien_counters_buttons =
+      "<center><div class='alien_box' id='everything'>" +
+        sad_alien +
+        point_counters +
+        response_buttons +
+      "</div></center>"
+
+    // display everyting
+    display_element.html("");
+    display_element.append(background, alien_counters_buttons);
 
     var trial_data = {};
 
@@ -101,17 +85,28 @@ jsPsych.plugins["phase1"] = (function() {
       // clear keyboard listener
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
+      var key = info.key;
+      if (key == left_key) {
+        item_chosen = button_names[button_order[0]]
+      } else if (key == middle_key) {
+        item_chosen = button_names[button_order[1]]
+      } else if (key == right_key) {
+        item_chosen = button_names[button_order[2]]
+      } else {
+        item_chosen = NaN
+      }
+
       var correct = false;
-      if (trial.key_answer == info.key) {
+      if (trial.key_answer == item_chosen) {
         correct = true;
       }
-      console.log(info.key, trial.key_answer, trial.key_answer == info.key, correct)
+      console.log(info.key, trial.key_answer, trial.key_answer == info.key)
 
       // get feedback amount
       feedback_amount = 0  // incorrect response or no answer
       if (correct) {  // correct response
-        for (i = 0; i < key_answers.length; i++) {
-          if (info.key == key_answers[i]) {
+        for (i = 0; i < button_names.length; i++) {
+          if (item_chosen == button_names[i]) {
             noised_amount = trial.feedback_amounts[i] + 0.3 * randn_bm()
             rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
             feedback_amount = Math.max(0, rounded_amount)
@@ -119,7 +114,7 @@ jsPsych.plugins["phase1"] = (function() {
         }
       }
 
-      // update point counter
+      // update points
       points[trial.sad_alien] += feedback_amount
       for (i = 0; i < points.length; i++) {
           points[i] = Math.round(10 * points[i]) / 10
@@ -130,53 +125,33 @@ jsPsych.plugins["phase1"] = (function() {
         "rt": info.rt,
         "correct": correct,
         "reward": feedback_amount,
-        "stimulus": trial.stimulus,
         "sad_alien": trial.sad_alien,
         "season": trial.season,
-        "key_press": info.key,
+        "item_left": shuffled_buttons[0],
+        "item_center": shuffled_buttons[1],
+        "item_right": shuffled_buttons[2],
+        "item_chosen": item_chosen,
+        "key": info.key,
         "points1": points[0],
         "points2": points[1],
         "points3": points[2],
         "phase": trial.phase,
       };
 
-      display_element.html(''); // not sure what it does... remove?
+      display_element.html('');  // clears display before feedback screen
 
       var timeout = info.rt == -1;
-      doFeedback(correct, timeout);
+      doFeedback(key, correct, timeout);
     }
 
     // take care of button presses: mimic key presses
-    if (input_device == "mouse") {
-      function clear_button_handlers() {
-        for (i = 0; i < button_names.length; i ++) {
-          btn = "#".concat(button_names[i], "-button")
-          $(btn).off('click');
-        }
-      }
-      for (let i = 0; i < button_names.length; i ++) {
-        btn = "#".concat(button_names[i], "-button")
-        $(btn).on('click', function() {
-            clear_button_handlers();
-            var response_time = (new Date()).getTime();
-            var rt = response_time - trial.start_time;
-            info = {
-              key: button_names[i],
-              rt: rt
-            };
-            after_response(info);
-        });
-      }
-
-    } else if (input_device == "keyboard") {
-      jsPsych.pluginAPI.getKeyboardResponse({
-        callback_function: after_response,
-        valid_responses: trial.choices,
-        rt_method: 'date',
-        persist: false,
-        allow_held_key: false
-      });
-    }
+    jsPsych.pluginAPI.getKeyboardResponse({
+      callback_function: after_response,
+      valid_responses: trial.choices,
+      rt_method: 'date',
+      persist: false,
+      allow_held_key: false
+    });
 
     if (trial.timing_response > 0) {
       setTimeoutHandlers.push(setTimeout(function() {
@@ -187,43 +162,61 @@ jsPsych.plugins["phase1"] = (function() {
       }, trial.timing_response));
     }
 
-    function doFeedback(correct, timeout) {
+    function doFeedback(key, correct, timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.append(trial.timeout_message);
       } else {
 
-      // Add happy frame and number feedback to aliens
-      alien_counters = []
-      for (i = 0; i < 3; i ++) {
-        alien_counter =
-          trial.aliens[i] + " style='position:absolute; right:100px; top:" + c_alien_tops[i] + "px;' height=" + alien_height_point_counter + ">" +
-          "<p style='position:absolute; right:0px; top:" + point_tops[i] + "px; font-size:46px;'>" + points[i] + "</p>"
-        alien_counters.push(alien_counter)
-      }
-
-      point_counters =
-        "<div>" +
-          alien_counters[0] +
-          alien_counters[1] +
-          alien_counters[2] +
+      // add reward bubble
+      reward_bubble = "<div>" +
+          "<img class='bubble' src='img/speech.png'>" +
+          "<p class='reward'> +" + feedback_amount +
         "</div>"
 
-      reward_bubble = speech + "<p style='color:green; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> +" + feedback_amount;
-
+      // update point counters
+      point_counters = "<div class='counter_box' id='counter_box'>"
+      for (i = 0; i < 3; i ++) {
+        point_counters = point_counters.concat(
+          "<img class='counter_alien' style='top: ", c_alien_tops[i], "px' src='img/", trial.aliens[i], ".png'>",
+          "<p class='counter_number' style='top: ", point_tops[i], "px'>", points[i], "</p>"
+        )
+      }
+      point_counters = point_counters.concat("</div>")
       if (!trial.show_stim_with_feedback) {
         point_counters = " ";
         reward_bubble = " ";
       }
 
-      var happy_alien =
-        "<center><div style='position:relative;'>" +
-          point_counters +
-          trial.aliens[trial.sad_alien] + " height=" + alien_height + ">" +
+      alien_counters_buttons =
+        "<center><div class='alien_box'>" +
+          sad_alien +
           reward_bubble +
+          point_counters +
+          response_buttons +
         "</div></center>"
 
-      display_element.append(background, happy_alien, response_buttons);
+      display_element.append(background, alien_counters_buttons);
+
+      // remove non-clicked buttons
+      if (key == 74) {
+        disappear_button_id = "#".concat(shuffled_buttons[1].split("id='")[1].split("'>")[0])
+        $(disappear_button_id).css('visibility', 'hidden');
+        disappear_button_id = "#".concat(shuffled_buttons[2].split("id='")[1].split("'>")[0])
+        $(disappear_button_id).css('visibility', 'hidden');
+      } else if (key == 75) {
+        disappear_button_id = "#".concat(shuffled_buttons[0].split("id='")[1].split("'>")[0])
+        $(disappear_button_id).css('visibility', 'hidden');
+        disappear_button_id = "#".concat(shuffled_buttons[2].split("id='")[1].split("'>")[0])
+        $(disappear_button_id).css('visibility', 'hidden');
+      } else if (key == 76) {
+        disappear_button_id = "#".concat(shuffled_buttons[1].split("id='")[1].split("'>")[0])
+        $(disappear_button_id).css('visibility', 'hidden');
+        disappear_button_id = "#".concat(shuffled_buttons[0].split("id='")[1].split("'>")[0])
+        $(disappear_button_id).css('visibility', 'hidden');
+      } else {
+        disappear_button_id = "xyzid='xyz"  // ugly solution ;( don't know how to get element ids...
+      }
 
       }
       setTimeout(function() {
@@ -234,9 +227,12 @@ jsPsych.plugins["phase1"] = (function() {
     function endTrial() {
       display_element.html("");
       point_counters =
-        "<center><div style='position:relative;'>" +
+        "<center><div class='alien_box'>" +
           point_counters +
         "</div></center>"
+      if (!trial.show_stim_with_feedback) {
+        point_counters = " ";
+      }
       display_element.append(background, point_counters);
       jsPsych.finishTrial(trial_data);
     }

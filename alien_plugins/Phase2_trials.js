@@ -15,7 +15,7 @@ for (a1 = 0; a1 < alien_season_buttons.length; a1 ++) {
   for (a2 = 0; a2 < alien_season_buttons.length; a2 ++) {
     if (a1 < a2) {  // we don't compare identical stimuli
       trial_buttons = [alien_season_buttons[a1], alien_season_buttons[a2]]
-      if (Math.floor(a1 / phase1_aliens.length) == (Math.floor(a2 / phase1_aliens.length))) {  // stimuli come from the same season
+      if (Math.floor(a1 / ph1_alien_names.length) == (Math.floor(a2 / ph1_alien_names.length))) {  // stimuli come from the same season
         same_season_timeline.push({buttons: trial_buttons})
       } else {
         rest_timeline.push({buttons: trial_buttons})
@@ -42,7 +42,7 @@ if (short_version) {
 
 // Define stuff for jsPsych trial objects
 alien_same_season = {
-  assess: "alien-season",
+  assess: "alien-same-season",
   randomize_order: true,
   timeline: same_season_timeline
 }
@@ -57,7 +57,7 @@ alien = {
   timeline: alien_timeline
 }
 alien_rest_season = {
-  assess: "alien-season",
+  assess: "alien-rest-season",
   randomize_order: true,
   timeline: rest_timeline
 }
@@ -66,15 +66,15 @@ alien_rest_season = {
 phase2_trials = {
   type: "phase2",
   phase: 2,
-  choices: [74, 75, 76],
+  choices: [left_key, middle_key, right_key],
   show_feedback_on_timeout: true,
-  timing_feedback_duration: 1000,
+  timing_feedback_duration: feedback_duration,
   timing_response: max_RT,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
                    "Please respond faster next time! </p>",
   timeline: [].concat(
-    // alien_same_season, alien_same_season,
-    // intro_season,
+    alien_same_season, alien_same_season,
+    intro_season,
     season, season,
     intro_alien,
     alien, alien,

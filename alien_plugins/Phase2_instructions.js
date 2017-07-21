@@ -1,13 +1,13 @@
 
 // Instruction slides
 happy_aliens =
-  "<center><div style='position:relative;'>" +
-    phase1_aliens[0] + "height=" + alien_height + ">" +
-    phase1_aliens[1] + "height=" + alien_height + ">" +
-    phase1_aliens[2] + "height=" + alien_height + ">" +
-    "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[0] + "px;' height=120>" +
-    "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[1] + "px;' height=120>" +
-    "<img src='img/happy2.png' style='position:absolute; left:" + sad_lefts[2] + "px;' height=120>" +
+  "<center><div class='alien_box'>" +
+    "<img class='alien' src='img/" + ph1_alien_names[0] + ".png'>" +
+    "<img class='alien' src='img/" + ph1_alien_names[1] + ".png'>" +
+    "<img class='alien' src='img/" + ph1_alien_names[2] + ".png'>" +
+    "<img class='bubble' src='img/happy2.png' style='left: 0%;'>" +
+    "<img class='bubble' src='img/happy2.png' style='left: 30%;'>" +
+    "<img class='bubble' src='img/happy2.png' style='left: 60%;'>" +
   "</div></center>"
 
 instructions1 =
@@ -33,7 +33,7 @@ instructions2b =
   "<p>Click next to learn how the selection process works!</p></center>"
 
 exmpl_alien_season_buttons =
-  "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+  "<center><div class='response_buttons'>" +
     alien_season_buttons[0] +
     alien_season_buttons[1] +
   "</div></center>"
@@ -46,7 +46,7 @@ intro_slide_alien_same_season =
   "<p>Press 'Next' when you are ready to select your aliens! Press 'Previous' if you want to review the instructions."
 
 exmpl_season_buttons =
-  "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+  "<center><div class='response_buttons'>" +
     season_buttons[0] +
     season_buttons[1] +
   "</div></center>"
@@ -59,7 +59,7 @@ intro_slide_season =
   "<p>Your opponent will automatically get the other season!"
 
 exmpl_alien_buttons =
-  "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+  "<center><div class='response_buttons'>" +
     alien_buttons[0] +
     alien_buttons[1] +
   "</div></center>"
@@ -72,7 +72,7 @@ intro_slide_alien =
   "<p>Your opponent will automatically get the other alien! "
 
 exmpl_alien_season_buttons_rest =
-  "<center><div class='response_buttons' style='position:relative; border: 100px solid transparent; z=10;'>" +
+  "<center><div class='response_buttons'>" +
     alien_season_buttons[0] +
     alien_season_buttons[5] +
   "</div></center>"

@@ -19,33 +19,28 @@ var rainy_season = {
 }
 
 // Create the transition page (point resetter) for each season
-start_new_season_page =
-    "style='position:fixed; top:0px; left:0px; bottom:0px; right:0px; z=-10' " +
-    "height='100%' width='100%'>" +
-  "<p style='position:relative; border: 250px solid transparent; z=10; font-size:50px'><i>The season has changed.</i></p>"
-
 var start_hot_season = {
   type: "start_new_season",
   show_clickable_nav: true,
   pages: [
-    "<img src=img/hot.png " +
-      start_new_season_page
+    "<img class='background' src='img/hot.png'>" +
+    "<p class='start_new_season'><i>The season has changed.</i></p>"
   ]
 }
 var start_rainy_season = {
   type: "start_new_season",
   show_clickable_nav: true,
   pages: [
-    "<img src=img/rainy.png " +
-      start_new_season_page
+    "<img class='background' src='img/rainy.png'>" +
+    "<p class='start_new_season'><i>The season has changed.</i></p>"
   ]
 }
 var start_cold_season = {
   type: "start_new_season",
   show_clickable_nav: true,
   pages: [
-    "<img src=img/cold.png " +
-      start_new_season_page
+    "<img class='background' src='img/cold.png'>" +
+    "<p class='start_new_season'><i>The season has changed.</i></p>"
   ]
 }
 
@@ -83,8 +78,8 @@ seasons_in_order = [].concat(
 var all_seasons = {
   type: "phase1",
   phase: 1,
-  choices: [74, 75, 76],
-  aliens: phase1_aliens,
+  choices: [left_key, middle_key, right_key],
+  aliens: ph1_alien_names,
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +

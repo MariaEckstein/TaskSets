@@ -29,8 +29,8 @@ seasons_in_order = [].concat(
 var all_seasons_phase3 = {
   type: "phase1",
   phase: 3,
-  choices: [74, 75, 76],
-  aliens: phase1_aliens,
+  choices: [left_key, middle_key, right_key],
+  aliens: ph1_alien_names,
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
   timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +

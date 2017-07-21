@@ -33,7 +33,7 @@ jsPsych.plugins["phase2"] = (function() {
     var setTimeoutHandlers = [];
 
     // prepare the two buttons that will be shown
-    shuffled_buttons = shuffle(trial.buttons);
+    shuffled_buttons = shuffle(trial.buttons)
     response_buttons =
       "<center><div class='response_buttons'>" +
         shuffled_buttons[0] +
@@ -41,6 +41,7 @@ jsPsych.plugins["phase2"] = (function() {
       "</div></center>"
 
     // display buttons
+    display_element.html("");
     display_element.append(response_buttons);
     trial.start_time = (new Date()).getTime();
 
@@ -54,11 +55,21 @@ jsPsych.plugins["phase2"] = (function() {
 
       // clear keyboard listener
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
-      if (info.key == 74) {
-        select = 0;
-      } else if (info.key == 76) {
-        select = 1;
+
+      // get id of selected and non-selected stimuli
+      if (info.key == left_key) {
+        pressed_button = shuffled_buttons[0];
+        disappear_button = shuffled_buttons[1];
+      } else if (info.key == right_key) {
+        pressed_button = shuffled_buttons[1];
+        disappear_button = shuffled_buttons[0];
+      } else {
+        pressed_button = "xyzid='xyz"  // ugly solution ;( don't know how to get element ids...
+        disappear_button = "xyzid='xyz"  // ugly solution ;( don't know how to get element ids...
       }
+      console.log(pressed_button)
+      pressed_button_id = "#".concat(pressed_button.split("id='")[1].split("'>")[0])
+      disappear_button_id = "#".concat(disappear_button.split("id='")[1].split("'>")[0])
 
       // save data
       trial_data = {
@@ -67,46 +78,22 @@ jsPsych.plugins["phase2"] = (function() {
         "assess": trial.assess,
         "stim_left": shuffled_buttons[0],
         "stim_right": shuffled_buttons[1],
-        "stim_selected": shuffled_buttons[select]
+        "stim_selected": pressed_button_id
       };
-
-      // display_element.html('');
 
       var timeout = info.rt == -1;
       correct = -1;
-      doFeedback(info.key, timeout);
+      doFeedback(timeout);
     }
 
     // take care of button presses: record data
-    if (input_device == "mouse") {
-      function clear_button_handlers() {
-        for (btn = 0; btn < all_sa_button_names.length; btn ++) {
-          $(all_sa_button_names[btn]).off('click');
-        }
-      }
-
-      for (let i = 0; i < all_sa_button_names.length; i ++) {
-        $(all_sa_button_names[i]).on('click', function() {
-            clear_button_handlers();
-            var response_time = (new Date()).getTime();
-            var rt = response_time - trial.start_time;
-            info = {
-              key: all_sa_button_names[i],
-              rt: rt
-            };
-            after_response(info);
-        });
-      }
-
-    } else if (input_device == "keyboard") {
-      jsPsych.pluginAPI.getKeyboardResponse({
-        callback_function: after_response,
-        valid_responses: trial.choices,
-        rt_method: 'date',
-        persist: false,
-        allow_held_key: false
-      });
-    }
+    jsPsych.pluginAPI.getKeyboardResponse({
+      callback_function: after_response,
+      valid_responses: trial.choices,
+      rt_method: 'date',
+      persist: false,
+      allow_held_key: false
+    });
 
     var trial_data = {};
     if (trial.timing_response > 0) {
@@ -118,12 +105,13 @@ jsPsych.plugins["phase2"] = (function() {
       }, trial.timing_response));
     }
 
-    function doFeedback(key, timeout) {
+    function doFeedback(timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.append(trial.timeout_message);
       } else {
-        $(key).css('visibility', 'hidden');
+        // hide non-selected stimulus
+        $(disappear_button_id).css('visibility', 'hidden');
       }
       setTimeout(function() {
         endTrial();

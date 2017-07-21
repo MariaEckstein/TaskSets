@@ -5,6 +5,48 @@ var get_subj_data = {
   questions: ["SubjID:", "Date of birth (mm/dd/yyyy):", "Occupation:", "Highest degree:"]
 }
 
+// Put things together
+shuffled_buttons = shuffle(item_buttons)
+response_buttons =
+  "<center><div class='response_buttons'>" +
+    shuffled_buttons[0] +
+    shuffled_buttons[1] +
+    shuffled_buttons[2] +
+  "</div></center>"
+
+var aliens =
+  "<center><div class='alien_box'>" +
+    "<img class='alien' src='img/" + pr_alien_names[0] + ".png'>" +
+    "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
+    "<img class='alien' src='img/" + pr_alien_names[2] + ".png'>" +
+  "</div></center>"
+
+var sad_alien =
+  "<center><div class='alien_box'>" +
+    "<img class='alien' src='img/alien6.png'>" +
+  "</div></center>"
+
+reward_bubble = "<div>" +
+    "<img class='bubble' src='img/speech.png'>" +
+    "<p class='reward'> +5" +
+  "</div>"
+
+var happy_alien =
+  "<center><div class='alien_box'>" +
+    "<img class='alien' src='img/alien6.png'>" +
+    reward_bubble +
+  "</div></center>"
+
+happy_aliens =
+  "<center><div class='alien_box'>" +
+    "<img class='alien' src='img/" + pr_alien_names[0] + ".png'>" +
+    "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
+    "<img class='alien' src='img/" + pr_alien_names[2] + ".png'>" +
+    "<img class='bubble' src='img/happy2.png' style='left: 0%;'>" +
+    "<img class='bubble' src='img/happy2.png' style='left: 30%;'>" +
+    "<img class='bubble' src='img/happy2.png' style='left: 60%;'>" +
+  "</div></center>"
+
 // Instruction slides
 instructions1 = "<center><p>In the following game, you will be taking care of three aliens. " +
   "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +
@@ -20,9 +62,11 @@ instructions2 = "<center><p>The aliens' planet goes through different seasons, "
   "<p>For example, in order to grow, one alien might need to sleep in a bed in the hot season, " +
   "but it might need to chew on a shiny rock during the rainy season.</p>" +
   "There are three seasons on the aliens' planet: <i>hot, cold, and rainy</i>:" +
-  "<img src='img/hot.png' style='border: 10px solid transparent;' height=" + alien_height + ">" +
-  "<img src='img/cold.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + ">" +
-  "<img src='img/rainy.png' style='border: 10px solid transparent;' hspace='40' height=" + alien_height + "></center>" +
+  "<div class='alien_box'>" +
+    "<img class='season' src='img/hot.png'>" +
+    "<img class='season' src='img/cold.png'>" +
+    "<img class='season' src='img/rainy.png'>" +
+  "</div></center>" +
   move_on
 
 instructions3 = "<center><p>Before the actual game, let's practice with these three aliens:</p>" +
@@ -74,8 +118,8 @@ var training_block = {
   type: "phase1",
   phase: "training",
   season: "training",
-  choices: [74, 75, 76],
-  aliens: practice_aliens,
+  choices: [left_key, middle_key, right_key],
+  aliens: ph1_alien_names,
   feedback_amounts: training_rewards,
   show_stim_with_feedback: true,
   randomize_order: true,
