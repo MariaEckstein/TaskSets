@@ -47,6 +47,11 @@ happy_aliens =
     "<img class='bubble' src='img/happy2.png' style='left: 60%;'>" +
   "</div></center>"
 
+// Rest
+var reward = "<p class='reward'> +5"
+var move_on = "<center><p><i>Click next or press the right-arrow key to move on.</i></p></center>"
+var welcome_block = "<center><p>Welcome to the experiment!</p></center>" + move_on
+
 // Instruction slides
 instructions1 = "<center><p>In the following game, you will be taking care of three aliens. " +
   "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +

@@ -5,15 +5,10 @@ var max_RT_train = max_RT
 var feedback_duration_train = 1000
 
 // Positions on the screen
-// var alien_height = 240
-// var alien_height_point_counter = 60
 var sad_lefts = [0, 280, 520]
 var sad_left = 260
-// var reward_top = - 27
-// var reward_left = sad_left + 15
-// var button_height = 50
-// var big_button_height = alien_height
 var points = [0, 0, 0]
+
 // point counters
 var c_alien_tops = [20, 80, 140, 200, 260]
 var point_tops = [0, 60, 120, 180, 240]
@@ -65,12 +60,3 @@ for (se = 0; se < season_names.length; se ++) {
     alien_season_buttons.push(button)
   }
 }
-
-// Rest
-// var speech = "<img class='bubble' src='img/speech.png'>"
-// var exclamation_points = "<p class='bubble' style='color:red; position:absolute; left:" + reward_left + "px; top:" + reward_top + "px; font-size:46px;'> !!!!"
-var reward = "<p class='reward'> +5"
-
-var move_on = "<center><p><i>Click next or press the right-arrow key to move on.</i></p></center>"
-
-var welcome_block = "<center><p>Welcome to the experiment!</p></center>" + move_on
