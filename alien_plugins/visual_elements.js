@@ -1,6 +1,6 @@
 // Timing variables
 var max_RT = 3000
-var feedback_duration = 750
+var feedback_duration = 500
 var max_RT_train = max_RT
 var feedback_duration_train = 1000
 

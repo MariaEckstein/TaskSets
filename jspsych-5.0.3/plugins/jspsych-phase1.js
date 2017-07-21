@@ -103,16 +103,17 @@ jsPsych.plugins["phase1"] = (function() {
       console.log(info.key, trial.key_answer, trial.key_answer == info.key)
 
       // get feedback amount
-      feedback_amount = 0  // incorrect response or no answer
+      amount = 1  // incorrect response or no answer
       if (correct) {  // correct response
         for (i = 0; i < button_names.length; i++) {
           if (item_chosen == button_names[i]) {
-            noised_amount = trial.feedback_amounts[i] + 0.3 * randn_bm()
-            rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
-            feedback_amount = Math.max(0, rounded_amount)
+            amount = trial.feedback_amounts[i]
           }
         }
       }
+      noised_amount = amount + 0.3 * randn_bm()
+      rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
+      feedback_amount = Math.max(0, rounded_amount)
 
       // update points
       points[trial.sad_alien] += feedback_amount

@@ -24,7 +24,7 @@ var start_hot_season = {
   show_clickable_nav: true,
   pages: [
     "<img class='background' src='img/hot.png'>" +
-    "<p class='start_new_season'><i>The season has changed.</i></p>"
+    "<p class='start_new_season'><i>It is now the hot season!</i></p>"
   ]
 }
 var start_rainy_season = {
@@ -32,7 +32,7 @@ var start_rainy_season = {
   show_clickable_nav: true,
   pages: [
     "<img class='background' src='img/rainy.png'>" +
-    "<p class='start_new_season'><i>The season has changed.</i></p>"
+    "<p class='start_new_season'><i>It is now the rainy season!</i></p>"
   ]
 }
 var start_cold_season = {
@@ -40,7 +40,7 @@ var start_cold_season = {
   show_clickable_nav: true,
   pages: [
     "<img class='background' src='img/cold.png'>" +
-    "<p class='start_new_season'><i>The season has changed.</i></p>"
+    "<p class='start_new_season'><i>It is now the cold season!</i></p>"
   ]
 }
 

@@ -2,16 +2,16 @@
 // Get demographics
 var get_subj_data = {
   type: "survey-text",
-  questions: ["SubjID:", "Date of birth (mm/dd/yyyy):", "Occupation:", "Highest degree:"]
+  questions: ["SubjID:", "Date of birth (mm/dd/yyyy):", "Occupation:", "Highest degree (obtained or currently getting):"]
 }
 
 // Put things together
-shuffled_buttons = shuffle(item_buttons)
+item_buttons
 response_buttons =
   "<center><div class='response_buttons'>" +
-    shuffled_buttons[0] +
-    shuffled_buttons[1] +
-    shuffled_buttons[2] +
+    item_buttons[0] +
+    item_buttons[1] +
+    item_buttons[2] +
   "</div></center>"
 
 var aliens =
@@ -77,7 +77,7 @@ instructions2 = "<center><p>The aliens' planet goes through different seasons, "
 instructions3 = "<center><p>Before the actual game, let's practice with these three aliens:</p>" +
   aliens +
   "<p>Try to make each one of them grow as much as you can, by learning what each one needs! " +
-  "There will not be different seasons in the practice round.</center>" +
+  "(This is a practice round, so seasons will not change yet.)</center>" +
   move_on
 
 instructions4 =
@@ -86,8 +86,9 @@ instructions4 =
   "<div style='position:relative; top=50px'" +
     "<p>When this happens, you can offer the alien one of several things to help it grow.</p>" +
     "<p>How about a nap in the cozy bed? " +
-    "In the game, you'll be able to click on an item to offer it to the alien.</p>" +
-    "<p>Let's pretend you offered the alien a nap in the green bed - click Next to see what happens.</p>" +
+    "In the game, you'll be able to select an item using the keys <i>'j', 'k', and 'l'</i> on your keyboard. " +
+    "'j' will select the left-most item (bed in this case), 'k' middle one (umbrella), and 'l' the right one (plant).</p>" +
+    "<p>Let's pretend you pressed 'j' and offered the alien a nap in the green bed - click Next to see what happens.</p>" +
   "</div>" +
   response_buttons +
   "</center>"
@@ -97,7 +98,8 @@ instructions5 = "<center><p> The green alien liked the nap a lot! It is all happ
   response_buttons +
   "</center>"
 
-instructions6 = "<center><p> When you are ready, you can press Next for a practice round of the game.</p>" +
+instructions6 = "<center><p> When you are ready, you can press Next for a practice round of the game. " +
+  "Remember, you'll use the keys <i>'j', 'k', and 'l'</i> to select the items.</p>" +
   "<p>Press Previous if you'd like to review the instructions before you start.</p>" +
   aliens +
   "<p>Try to learn which item makes each alien grow most!</p></center>"
