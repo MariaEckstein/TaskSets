@@ -41,7 +41,7 @@ exmpl_alien_season_buttons =
 intro_slide_alien_same_season =
   "<center><p>In the selection process, you will first select which aliens you would prefer in each season. " +
   "For example, you might see the two aliens in the season below. Which alien would you pick, given the season? " +
-  "In the following slides, you'll press 'j' to select the picture on top and 'l' for the picture on button.</p>"
+  "In the following slides, you'll press 'j' to select the picture on top and 'l' for the picture on bottom.</p>"
   "<p>Your opponent will automatically get the alien you did not select.</p>" +
   exmpl_alien_season_buttons +
   "<p>Press 'Next' when you are ready to select your aliens! Press 'Previous' if you want to review the instructions."

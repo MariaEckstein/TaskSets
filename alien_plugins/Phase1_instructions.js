@@ -2,8 +2,45 @@
 // Get demographics
 var get_subj_data = {
   type: "survey-text",
-  questions: ["SubjID:", "Date of birth (mm/dd/yyyy):", "Occupation:", "Highest degree (obtained or currently getting):"]
+  questions: [
+    "SubjID:",
+    "Date of birth (mm/dd/yyyy):",
+    "Occupation:",
+    "Highest degree (obtained or currently obtaining):"
+  ]
 }
+
+// Goodbye block
+var goodbye = {
+  type: 'instructions',
+  pages: ["<center><p>The game is now over, you did a great job!</p>" +
+    "<p>Thank you for participating in the experiment!</p>" +
+    "<p>Please fill out the questionnaire on the next page; then click Next to download the data!</p></center>"],
+  show_clickable_nav: true
+}
+
+// questionnaire
+var strategy_questionnaire = {
+  type: "survey-text",
+  questions: [
+    "<center><p>Plase fill out the following questions. " +
+      "You can adjust the size of the text boxes by pulling on the right bottom corners. " +
+      "You don't need to answer all questions if you don't want to. " +
+      "<i>Please still click Submit Answers at the bottom of the page because your data will not be saved otherwise.</i></p></center>" +
+    "In the first part of this experiment (helping aliens grow in different seasons), " +
+      "how did you learn which items go with which aliens?",
+    "In the second part (selecting aliens and seasons for the competition), " +
+      "how did you decide which seasons to pick? How did you decide which aliens and items to pick?",
+    "In the next part (taking care of unknown aliens without feedback), " +
+      "how did you decide which items to give to which aliens?",
+    "In the last part (rainbow season), " +
+      "how did you decide which items to give to each alien?",
+    "In general, did you have a gut feeling for which aliens / seasons / items were better or worse?",
+    "Did you have preferences for certain aliens / seasons / items? Why?",
+    "What made learning easy or hard for you in this task?"
+  ]
+}
+
 
 // Put things together
 item_buttons
@@ -150,13 +187,4 @@ var phase1_instructions_post = {
   pages: [instructions7],
   show_clickable_nav: true,
   timing_post_trial: 200
-}
-
-// Goodbye block
-var goodbye = {
-  type: 'instructions',
-  pages: ["<center><p>The game is now over, you did a great job!</p>" +
-    "<p>Thank you for participating in the experiment!</p>" +
-    "<p>Click Next to finish and download the data!</p></center>"],
-  show_clickable_nav: true
 }
