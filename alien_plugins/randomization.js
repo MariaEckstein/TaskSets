@@ -21,7 +21,7 @@ alien_ids = shuffle([0, 1, 2])
 // Button names and order
 var button_names = ["bed", "umbrella", "plant"]
 var season_names = ["hot", "cold", "rainy"]
-var aliens = ["alien1", "alien2", "alien4"]
+// var aliens = ["alien1", "alien2", "alien4"]
 
 // Define maximum rewards for each season and alien
 training_rewards = [6, 6, 6]

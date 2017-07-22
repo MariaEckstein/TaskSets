@@ -72,6 +72,19 @@ intro_slide_alien =
   exmpl_alien_buttons +
   "<p>Your opponent will automatically get the other alien! "
 
+exmpl_item_buttons =
+  "<center><div class='response_buttons'>" +
+    item_buttons[0] +
+    item_buttons[1] +
+  "</div></center>"
+
+intro_slide_item =
+  "<center><p>Thank you for selecting your aliens!<p>" +
+  "<p>Next in the selection process, you will select which items you would prefer for the competition. " +
+  "For example, you might see the two items below. Which one would you pick?</p>" +
+  exmpl_item_buttons +
+  "<p>Your opponent will automatically get the other alien! "
+
 exmpl_alien_season_buttons_rest =
   "<center><div class='response_buttons'>" +
     alien_season_buttons[0] +
@@ -100,6 +113,11 @@ show_clickable_nav: true,
 intro_alien = {
 type: "instructions",
 pages: [intro_slide_alien],
+show_clickable_nav: true,
+}
+intro_item = {
+type: "instructions",
+pages: [intro_slide_item],
 show_clickable_nav: true,
 }
 intro_alien_rest_season = {

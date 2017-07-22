@@ -9,6 +9,11 @@ alien_timeline = [
   {buttons: [alien_buttons[0], alien_buttons[2]]},
   {buttons: [alien_buttons[1], alien_buttons[2]]},
 ]
+item_timeline = [
+  {buttons: [item_buttons[0], item_buttons[1]]},
+  {buttons: [item_buttons[0], item_buttons[2]]},
+  {buttons: [item_buttons[1], item_buttons[2]]},
+]
 same_season_timeline = []
 rest_timeline = []
 for (a1 = 0; a1 < alien_season_buttons.length; a1 ++) {
@@ -56,6 +61,11 @@ alien = {
   randomize_order: true,
   timeline: alien_timeline
 }
+item = {
+  assess: "item",
+  randomize_order: true,
+  timeline: item_timeline
+}
 alien_rest_season = {
   assess: "alien-rest-season",
   randomize_order: true,
@@ -78,6 +88,8 @@ phase2_trials = {
     season, season,
     intro_alien,
     alien, alien,
+    intro_item,
+    item, item,
     intro_alien_rest_season,
     alien_rest_season, alien_rest_season
   )

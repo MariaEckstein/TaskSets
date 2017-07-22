@@ -35,7 +35,7 @@ for (i = 0; i < 3; i ++) {
   item_buttons.push(button)
 }
 
-// Phase 2: alien-season buttons
+// Phase 2: alien-season-item buttons
 season_buttons = []
 all_sa_button_names = []
 for (se = 0; se < season_names.length; se ++) {
@@ -47,6 +47,12 @@ alien_buttons = []
 for (al = 0; al < ph1_alien_names.length; al ++) {
   button = "<img class='phase2_button' src='img/" + ph1_alien_names[al] + ".png' id='" + ph1_alien_names[al] + "-button'>"
   alien_buttons.push(button)
+}
+
+item_buttons = []
+for (it = 0; it < button_names.length; it ++) {
+  button = "<img class='phase2_button' src='img/" + button_names[it] + ".png' id='" + button_names[it] + "-button'>"
+  item_buttons.push(button)
 }
 
 alien_season_buttons = []
