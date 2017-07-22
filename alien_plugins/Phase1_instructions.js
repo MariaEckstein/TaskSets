@@ -41,7 +41,6 @@ var strategy_questionnaire = {
   ]
 }
 
-
 // Put things together
 item_buttons
 response_buttons =
@@ -169,8 +168,7 @@ var training_block = {
   randomize_order: true,
   timing_feedback_duration: feedback_duration_train,
   timing_response: max_RT_train,
-  timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
-                   "Please respond faster next time! </p>",
+  timeout_message: timeout_message,
   timeline: TS_train
 }
 

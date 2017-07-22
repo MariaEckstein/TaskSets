@@ -105,7 +105,6 @@ var all_seasons_phase4 = {
   show_stim_with_feedback: false,
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
-  timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
-                   "Please respond faster next time! </p>",
+  timeout_message: timeout_message,
   timeline: seasons_in_order_phase4
 }

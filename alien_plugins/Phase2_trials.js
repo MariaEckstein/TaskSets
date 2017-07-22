@@ -77,11 +77,9 @@ phase2_trials = {
   type: "phase2",
   phase: 2,
   choices: [left_key, middle_key, right_key],
-  show_feedback_on_timeout: true,
   timing_feedback_duration: feedback_duration,
   timing_response: max_RT,
-  timeout_message: "<p style='text-align:center; font-size:40px; z=10'>" +
-                   "Please respond faster next time! </p>",
+  timeout_message: timeout_message,
   timeline: [].concat(
     alien_same_season, alien_same_season,
     intro_season,

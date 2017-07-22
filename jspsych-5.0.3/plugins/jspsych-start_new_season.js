@@ -40,7 +40,7 @@ jsPsych.plugins["start_new_season"] = (function() {
 
       if (trial.show_clickable_nav) {
 
-        var nav_html = "<div class='jspsych-instructions-nav' style='position:relative; z=10'>";
+        var nav_html = "<div class='jspsych-instructions-nav'>";//" style='position:relative; z=10'>";
         if (current_page != 0 && trial.allow_backward) {
           nav_html += "<button id='jspsych-instructions-back' class='jspsych-btn'>&lt; Previous</button>";
         }

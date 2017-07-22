@@ -83,10 +83,11 @@
 /* Instruction texts */
 .start_new_season {
   position: relative;
-  border-width: 250px;
+  border-width: 100px;
   border-style: solid;
   border-color: transparent;
-  z-index: 10;
+  z-index: 20;
   font-size: 50px;
   line-height: 1.5;
+  text-align: center;
 }

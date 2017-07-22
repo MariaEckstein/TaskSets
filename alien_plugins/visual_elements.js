@@ -18,6 +18,8 @@ left_key = 74;
 middle_key = 75;
 right_key = 76;
 
+var timeout_message = "<p class='start_new_season'>Please respond faster next time!</p>"
+
 // Aliens
 ph1_alien_names = ["alien1", "alien2", "alien4"]
 ph1_alien_names = [
