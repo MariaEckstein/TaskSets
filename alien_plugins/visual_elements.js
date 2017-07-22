@@ -1,6 +1,6 @@
 // Timing variables
 var max_RT = 3000
-var feedback_duration = 500
+var feedback_duration = 750
 var max_RT_train = max_RT
 var feedback_duration_train = 1000
 
@@ -18,7 +18,7 @@ left_key = 74;
 middle_key = 75;
 right_key = 76;
 
-var timeout_message = "<p class='start_new_season'>Please respond faster next time!</p>"
+var timeout_message = "<p class='start_new_season'>Too slow!<br><br><i>Respond using the keys j, k, and l.</i></p>"
 
 // Aliens
 ph1_alien_names = ["alien1", "alien2", "alien4"]
@@ -50,12 +50,6 @@ for (al = 0; al < ph1_alien_names.length; al ++) {
   button = "<img class='phase2_button' src='img/" + ph1_alien_names[al] + ".png' id='" + ph1_alien_names[al] + "-button'>"
   alien_buttons.push(button)
 }
-
-// item_buttons = []
-// for (it = 0; it < button_names.length; it ++) {
-//   button = "<img class='phase2_button' src='img/" + button_names[it] + ".png' id='" + button_names[it] + "-button'>"
-//   item_buttons.push(button)
-// }
 
 alien_season_buttons = []
 for (se = 0; se < season_names.length; se ++) {

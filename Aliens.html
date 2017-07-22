@@ -41,7 +41,6 @@
       - Do they learn values, i.e., do they pay attention to the numbers?
         -> can they tell me which alien-season-combos are better?
       -
-    - add too late message in phase 2
     - make it two decisions -> right or wrong? -> how much?
     - make distributions wider -> right now, people just remember closest number anyway
     - make sure distributions don't shift over time
@@ -49,6 +48,7 @@
     - add all the pics for instructions(?)
     - respond "as fast and accurately as possible"
     - read the novelty paper with the crops and planets -> similar?
+    - CHECK add too late message in phase 2
     - CHECK move button higher up on next-season slides! it's invisible on the old laptop!
     - CHECK update instruction texts for keyboard
     - CHECK also ask for item preferences in phase 2!
@@ -82,12 +82,12 @@
 
     /* create experiment timeline array */
     var timeline = [];
-    timeline.push(get_subj_data);
-    timeline.push(phase1_instructions);
-    timeline.push(training_block, training_block, training_block);
-    timeline.push(phase1_instructions_post);
-    timeline.push(all_seasons);
-    timeline.push(phase2_instructions);
+    // timeline.push(get_subj_data);
+    // timeline.push(phase1_instructions);
+    // timeline.push(training_block, training_block, training_block);
+    // timeline.push(phase1_instructions_post);
+    // timeline.push(all_seasons);
+    // timeline.push(phase2_instructions);
     timeline.push(phase2_trials);
     timeline.push(phase3_instructions);
     timeline.push(all_seasons_phase3);
@@ -101,7 +101,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      fullscreen: true,
+      // fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }

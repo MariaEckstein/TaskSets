@@ -109,7 +109,7 @@ jsPsych.plugins["phase2"] = (function() {
     function doFeedback(timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
-        console.log("too late!", trial.timeout_message)
+        display_element.html("");
         display_element.append(trial.timeout_message);
       } else {
         // hide non-selected stimulus
