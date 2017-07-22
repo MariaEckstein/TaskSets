@@ -33,13 +33,22 @@
   <script>
 
     /* TDs
+    - Things to check when looking at data:
+      - Do people learn or do they get everything right on the first try (in the second season)?
+        -> do they learn or do they do inference? -> reduce mutual information? Add more aliens?
+      - Do they remember TS?
+        -> do they get it faster in subsequent repetitions? do they answer phase 2 right?
+      - Do they learn values, i.e., do they pay attention to the numbers?
+        -> can they tell me which alien-season-combos are better?
+      - 
+    - move button higher up on next-season slides! it's invisible on the old laptop!
     - add too late message in phase 2
     - in phase 2, put everything side-by-side or everything on top of each other
-    - update instruction texts for keyboard
-    - also ask for item preferences in phase 2!
     - add all the pics for instructions(?)
     - respond "as fast and accurately as possible"
     - read the novelty paper with the crops and planets -> similar?
+    - CHECK update instruction texts for keyboard
+    - CHECK also ask for item preferences in phase 2!
     - CHECK let chosen button remain on the screen longer? -> hide things: $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
     - CHECK don't get points if no reward!
     - CHECK change visual appearance of phase 2 for keyboard!
@@ -89,7 +98,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      // fullscreen: true,
+      fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }

@@ -133,9 +133,9 @@ jsPsych.plugins["phase1"] = (function() {
         "item_right": shuffled_buttons[2],
         "item_chosen": item_chosen,
         "key": info.key,
-        "points1": points[0],
-        "points2": points[1],
-        "points3": points[2],
+        "points0": points[0],
+        "points1": points[1],
+        "points2": points[2],
         "phase": trial.phase,
       };
 

@@ -49,11 +49,11 @@ for (al = 0; al < ph1_alien_names.length; al ++) {
   alien_buttons.push(button)
 }
 
-item_buttons = []
-for (it = 0; it < button_names.length; it ++) {
-  button = "<img class='phase2_button' src='img/" + button_names[it] + ".png' id='" + button_names[it] + "-button'>"
-  item_buttons.push(button)
-}
+// item_buttons = []
+// for (it = 0; it < button_names.length; it ++) {
+//   button = "<img class='phase2_button' src='img/" + button_names[it] + ".png' id='" + button_names[it] + "-button'>"
+//   item_buttons.push(button)
+// }
 
 alien_season_buttons = []
 for (se = 0; se < season_names.length; se ++) {

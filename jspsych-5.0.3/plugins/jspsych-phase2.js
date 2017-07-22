@@ -76,9 +76,10 @@ jsPsych.plugins["phase2"] = (function() {
         "rt": info.rt,
         "key": info.key,
         "assess": trial.assess,
-        "stim_left": shuffled_buttons[0],
-        "stim_right": shuffled_buttons[1],
-        "stim_selected": pressed_button_id
+        "item_left": shuffled_buttons[0],
+        "item_right": shuffled_buttons[1],
+        "item_chosen": pressed_button_id,
+        "phase": 2,
       };
 
       var timeout = info.rt == -1;
