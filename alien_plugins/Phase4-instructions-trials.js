@@ -10,7 +10,7 @@ instructions2 =
   "<center><p>There is a big party after the annual competition, " +
   "which attracts visitors from many different planets. " +
   "You decide to stay for this party to help the old and new aliens grow.</p>" +
-  "<p>Note that after the annual competition, aliens won't show how you much they grow. " +
+  "<p>Note that after the annual competition, aliens won't show you how much they grow. " +
   "This means that you won't see the effects of your actions. " +
   "Still do your best to help each alien grow as much as possible!</p>" +
   "<p>Press Next when you are ready to start!</p></center>"
@@ -101,7 +101,7 @@ var all_seasons_phase4 = {
   type: "phase1",
   phase: 4,
   choices: [left_key, middle_key, right_key],
-  aliens: ph1_alien_names.concat("alien7", "alien8"),
+  aliens: ph1_alien_names.concat("alien10", "alien8"),
   show_stim_with_feedback: false,
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,

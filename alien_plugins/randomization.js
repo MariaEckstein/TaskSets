@@ -15,13 +15,12 @@ TS_rands = [
 ]
 
 // IDs of non-practice aliens (["alien1", "alien2", "alien4"])
-alien_ids = shuffle([0, 1, 2])
+alien_ids = shuffle([0, 1, 2, 3])
 
 // DEFINITIONS
 // Button names and order
 var button_names = ["bed", "umbrella", "plant"]
 var season_names = ["hot", "cold", "rainy"]
-// var aliens = ["alien1", "alien2", "alien4"]
 
 // Define maximum rewards for each season and alien
 training_rewards = [6, 6, 6]
@@ -44,35 +43,43 @@ TS_train = [
   {key_answer: button_names[0], sad_alien: 0},
   {key_answer: button_names[1], sad_alien: 1},
   {key_answer: button_names[2], sad_alien: 2},
+  {key_answer: button_names[2], sad_alien: 3},
   {key_answer: button_names[0], sad_alien: 0},
   {key_answer: button_names[1], sad_alien: 1},
   {key_answer: button_names[2], sad_alien: 2},
+  {key_answer: button_names[2], sad_alien: 3},
 ]
 
 // Phase-1 task sets
 TS1 = [
+  {key_answer: button_names[1], sad_alien: 0},
+  {key_answer: button_names[2], sad_alien: 1},
   {key_answer: button_names[0], sad_alien: 2},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: button_names[0], sad_alien: 3},
+  {key_answer: button_names[1], sad_alien: 0},
+  {key_answer: button_names[2], sad_alien: 1},
   {key_answer: button_names[0], sad_alien: 2},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: button_names[0], sad_alien: 3},
 ]
 TS2 = [
-  {key_answer: button_names[0], sad_alien: 1},
-  {key_answer: button_names[1], sad_alien: 0},
+  {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: button_names[1], sad_alien: 1},
   {key_answer: button_names[2], sad_alien: 2},
-  {key_answer: button_names[0], sad_alien: 1},
-  {key_answer: button_names[1], sad_alien: 0},
+  {key_answer: button_names[1], sad_alien: 3},
+  {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: button_names[1], sad_alien: 1},
   {key_answer: button_names[2], sad_alien: 2},
+  {key_answer: button_names[1], sad_alien: 3},
 ]
 TS3 = [
-  {key_answer: button_names[0], sad_alien: 0},
+  {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: button_names[0], sad_alien: 1},
   {key_answer: button_names[1], sad_alien: 2},
-  {key_answer: button_names[2], sad_alien: 1},
-  {key_answer: button_names[0], sad_alien: 0},
+  {key_answer: button_names[0], sad_alien: 3},
+  {key_answer: button_names[2], sad_alien: 0},
+  {key_answer: button_names[0], sad_alien: 1},
   {key_answer: button_names[1], sad_alien: 2},
-  {key_answer: button_names[2], sad_alien: 1},
+  {key_answer: button_names[0], sad_alien: 3},
 ]
 TSs = [TS1, TS2, TS3]
 

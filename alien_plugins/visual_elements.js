@@ -1,13 +1,13 @@
 // Timing variables
-var max_RT = 3000
+var max_RT = 2000
 var feedback_duration = 750
-var max_RT_train = max_RT
+var max_RT_train = 3000
 var feedback_duration_train = 1000
 
 // Positions on the screen
 var sad_lefts = [0, 280, 520]
 var sad_left = 260
-var points = [0, 0, 0]
+var points = [0, 0, 0, 0]
 
 // point counters
 var c_alien_tops = [20, 80, 140, 200, 260]
@@ -21,13 +21,14 @@ right_key = 76;
 var timeout_message = "<p class='start_new_season'>Too slow!<br><br><i>Respond using the keys j, k, and l.</i></p>"
 
 // Aliens
-ph1_alien_names = ["alien1", "alien2", "alien4"]
+ph1_alien_names = ["alien1", "alien2", "alien3", "alien4"]
 ph1_alien_names = [
   ph1_alien_names[alien_ids[0]],
   ph1_alien_names[alien_ids[1]],
-  ph1_alien_names[alien_ids[2]]
+  ph1_alien_names[alien_ids[2]],
+  ph1_alien_names[alien_ids[3]]
 ]
-pr_alien_names = ["alien3", "alien5", "alien6"]
+pr_alien_names = ["alien5", "alien6", "alien7", "alien9"]
 pr_alien_names = shuffle(pr_alien_names)
 
 // Phase 1: Item buttons

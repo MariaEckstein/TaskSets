@@ -35,9 +35,10 @@ jsPsych.plugins["phase1"] = (function() {
     // get background, alien, point counters, and response buttons
     background = "<img class='background' src=img/" + trial.season + ".png>"
     sad_alien = "<img class='alien' id='sad_alien' src='img/" + trial.aliens[trial.sad_alien] + ".png'>"
+    console.log(points)
 
     point_counters = "<div class='counter_box' id='counter_box'>"
-    for (i = 0; i < 3; i ++) {
+    for (i = 0; i < trial.aliens.length; i ++) {
       point_counters = point_counters.concat(
         "<img class='counter_alien' style='top: ", c_alien_tops[i], "px' src='img/", trial.aliens[i], ".png'>",
         "<p class='counter_number' style='top: ", point_tops[i], "px'>", points[i], "</p>"
@@ -177,7 +178,7 @@ jsPsych.plugins["phase1"] = (function() {
 
       // update point counters
       point_counters = "<div class='counter_box' id='counter_box'>"
-      for (i = 0; i < 3; i ++) {
+      for (i = 0; i < trial.aliens.length; i ++) {
         point_counters = point_counters.concat(
           "<img class='counter_alien' style='top: ", c_alien_tops[i], "px' src='img/", trial.aliens[i], ".png'>",
           "<p class='counter_number' style='top: ", point_tops[i], "px'>", points[i], "</p>"

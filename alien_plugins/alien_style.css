@@ -22,7 +22,11 @@
 
 /* Aliens etc. */
 .alien {
-  height: 240px;
+  height: 250px;
+  z-index: 5;
+}
+.smallalien {
+  height: 200px;
   z-index: 5;
 }
 .season {
@@ -42,6 +46,11 @@
   position: absolute;
   left: 25%;
   top: 0px;
+  height: 120px;
+}
+.lovebubble {
+  position: absolute;
+  left: 35%;
   height: 120px;
 }
 .reward {

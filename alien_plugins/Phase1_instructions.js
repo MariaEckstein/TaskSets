@@ -4,7 +4,7 @@ var get_subj_data = {
   type: "survey-text",
   questions: [
     "SubjID:",
-    "Date of birth (mm/dd/yyyy):",
+    "Age:",  // Date of birth (mm/dd/yyyy):
     "Occupation:",
     "Highest degree (obtained or currently obtaining):"
   ]
@@ -55,11 +55,12 @@ var aliens =
     "<img class='alien' src='img/" + pr_alien_names[0] + ".png'>" +
     "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
     "<img class='alien' src='img/" + pr_alien_names[2] + ".png'>" +
+    "<img class='alien' src='img/" + pr_alien_names[3] + ".png'>" +
   "</div></center>"
 
 var sad_alien =
   "<center><div class='alien_box'>" +
-    "<img class='alien' src='img/alien6.png'>" +
+    "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
   "</div></center>"
 
 reward_bubble = "<div>" +
@@ -69,18 +70,23 @@ reward_bubble = "<div>" +
 
 var happy_alien =
   "<center><div class='alien_box'>" +
-    "<img class='alien' src='img/alien6.png'>" +
+    "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
     reward_bubble +
   "</div></center>"
 
 happy_aliens =
   "<center><div class='alien_box'>" +
-    "<img class='alien' src='img/" + pr_alien_names[0] + ".png'>" +
-    "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
-    "<img class='alien' src='img/" + pr_alien_names[2] + ".png'>" +
-    "<img class='bubble' src='img/happy2.png' style='left: 0%;'>" +
-    "<img class='bubble' src='img/happy2.png' style='left: 30%;'>" +
-    "<img class='bubble' src='img/happy2.png' style='left: 60%;'>" +
+    "<div>" +
+      "<img class='alien' src='img/" + pr_alien_names[0] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
+      "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
+    "</div><div>" +
+      "<img class='alien' src='img/" + pr_alien_names[2] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
+      "<img class='alien' src='img/" + pr_alien_names[3] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
+    "</div>" +
   "</div></center>"
 
 // Rest
@@ -110,7 +116,7 @@ instructions2 = "<center><p>The aliens' planet goes through different seasons, "
   "</div></center>" +
   move_on
 
-instructions3 = "<center><p>Before the actual game, let's practice with these three aliens:</p>" +
+instructions3 = "<center><p>Before the actual game, let's practice with these four aliens:</p>" +
   aliens +
   "<p>Try to make each one of them grow as much as you can, by learning what each one needs! " +
   "(This is a practice round, so seasons will not change yet.)</center>" +
@@ -162,7 +168,7 @@ var training_block = {
   phase: "training",
   season: "training",
   choices: [left_key, middle_key, right_key],
-  aliens: ph1_alien_names,
+  aliens: pr_alien_names,
   feedback_amounts: training_rewards,
   show_stim_with_feedback: true,
   randomize_order: true,
@@ -178,7 +184,10 @@ instructions7 =
   happy_aliens +
   "<p> When you're ready, press Next to move on to the real game. </p>" +
   "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +
-  "Keep in mind that the aliens' preferences change with the seasons! </p></center>"
+  "Keep in mind that the aliens' preferences change with the seasons! </p>" +
+  "<p> You will notice that aliens grow differently in different seasons - " +
+  "pay attention to how much each alien grows in each season! </p>" +
+  "</center>"
 
 var phase1_instructions_post = {
   type: 'instructions',
