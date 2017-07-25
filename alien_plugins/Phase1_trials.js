@@ -46,24 +46,24 @@ var start_cold_season = {
 
 // Define the numbers of trials for each repetition of each season
 zeroeth_rep_chunks = [
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season],
+  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
+]
+first_rep_chunks = [
   [start_hot_season, hot_season, hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season, cold_season, cold_season],
   [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
 ]
-first_rep_chunks = [
+second_rep_chunks = [
   [start_hot_season, hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season, cold_season],
   [start_rainy_season, rainy_season, rainy_season, rainy_season]
 ]
-second_rep_chunks = [
+third_rep_chunks = [
   [start_hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season],
   [start_rainy_season, rainy_season, rainy_season]
-]
-third_rep_chunks = [
-  [start_hot_season, hot_season],
-  [start_cold_season, cold_season],
-  [start_rainy_season, rainy_season]
 ]
 
 // Get the seasons in the pre-randomized order

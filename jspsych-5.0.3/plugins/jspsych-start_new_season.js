@@ -35,7 +35,7 @@ jsPsych.plugins["start_new_season"] = (function() {
     var last_page_update_time = start_time;
 
     function show_current_page() {
-      for (i = 0; i = points.length; i ++) {
+      for (i = 0; i < points.length; i ++) {
         points[i] = 0
       }
       display_element.html(trial.pages[current_page]);

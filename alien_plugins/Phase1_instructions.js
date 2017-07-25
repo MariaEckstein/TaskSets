@@ -41,7 +41,7 @@ var strategy_questionnaire = {
   ]
 }
 
-// Put things together
+// Put pics together
 item_buttons
 response_buttons =
   "<center><div class='response_buttons'>" +
@@ -95,7 +95,7 @@ var move_on = "<center><p><i>Click next or press the right-arrow key to move on.
 var welcome_block = "<center><p>Welcome to the experiment!</p></center>" + move_on
 
 // Instruction slides
-instructions1 = "<center><p>In the following game, you will be taking care of three aliens. " +
+instructions1 = "<center><p>In the following game, you will be taking care of four aliens. " +
   "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +
   "<p>Each alien needs different things to thrive. " +
   "One alien might need to chew on a shiny rock in order grow, " +
@@ -123,7 +123,7 @@ instructions3 = "<center><p>Before the actual game, let's practice with these fo
   move_on
 
 instructions4 =
-  "<center><p>Whenever an alien needs something, it will pop up on the screen, like the green alien below:</p>" +
+  "<center><p>Whenever an alien needs something, it will pop up on the screen, like the alien below:</p>" +
   sad_alien +
   "<div style='position:relative; top=50px'" +
     "<p>When this happens, you can offer the alien one of several things to help it grow.</p>" +
@@ -142,9 +142,10 @@ instructions5 = "<center><p> The green alien liked the nap a lot! It is all happ
 
 instructions6 = "<center><p> When you are ready, you can press Next for a practice round of the game. " +
   "Remember, you'll use the keys <i>'j', 'k', and 'l'</i> to select the items.</p>" +
+  "<p>You'll need to decide quickly to win points, the aliens are impatient.</p>"
   "<p>Press Previous if you'd like to review the instructions before you start.</p>" +
   aliens +
-  "<p>Try to learn which item makes each alien grow most!</p></center>"
+  "</center>"
 
 // Put instruction slides together
 var phase1_instructions = {
@@ -180,7 +181,7 @@ var training_block = {
 
 // More instructions
 instructions7 =
-  "<center><p> Great job! You helped these three aliens grow a lot! </p>" +
+  "<center><p> Great job! You helped these aliens grow a lot! </p>" +
   happy_aliens +
   "<p> When you're ready, press Next to move on to the real game. </p>" +
   "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +

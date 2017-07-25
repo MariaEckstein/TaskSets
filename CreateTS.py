@@ -37,18 +37,18 @@ def create_balanced_TS(iterations):
 
     return TSs
 
-create_balanced_TS(10**7)
+create_balanced_TS(10**8)
 
-TS1 = np.array([[4, 6, 8, 5],
-                [1, 4, 2, 6],
-                [7, 2, 2, 1]])
-TS2 = np.array([[5, 3, 6, 5],    # 19
-                [6, 4, 7, 9],    # 26
-                [4, 8, 2, 1]])   # 15
-
-np.sum(TS1, 0)
-[np.sum(TS1[action_matrix == action]) for action in ['A', 'B', 'C']]
-np.sum(TS1, 1)
-np.sum(TS2, 0)
-[np.sum(TS2[action_matrix == action]) for action in ['A', 'B', 'C']]
-np.sum(TS2, 1)
+# TS1 = np.array([[4, 6, 8, 5],
+#                 [1, 4, 2, 6],
+#                 [7, 2, 2, 1]])
+# TS2 = np.array([[5, 3, 6, 5],    # 19
+#                 [6, 4, 7, 9],    # 26
+#                 [4, 8, 2, 1]])   # 15
+#
+# np.sum(TS1, 0)
+# [np.sum(TS1[action_matrix == action]) for action in ['A', 'B', 'C']]
+# np.sum(TS1, 1)
+# np.sum(TS2, 0)
+# [np.sum(TS2[action_matrix == action]) for action in ['A', 'B', 'C']]
+# np.sum(TS2, 1)

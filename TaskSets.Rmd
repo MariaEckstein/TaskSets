@@ -95,6 +95,7 @@ learning_curves + aes(color = sad_alien, group = sad_alien)
 ```
 ```{r Phase 2}
 
+
 ```
 ```{r Phase 3}
 phase3 = subset(all_files, trial_type == "phase1" & season != "rainbow" & trial_index > 140 & trial_index < 246)

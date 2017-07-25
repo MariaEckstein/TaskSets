@@ -41,7 +41,7 @@ jsPsych.plugins["phase1"] = (function() {
     for (i = 0; i < trial.aliens.length; i ++) {
       point_counters = point_counters.concat(
         "<img class='counter_alien' style='top: ", c_alien_tops[i], "px' src='img/", trial.aliens[i], ".png'>",
-        "<p class='counter_number' style='top: ", point_tops[i], "px'>", points[i], "</p>"
+        "<p class='counter_number' style='top: ", point_tops[i], "px;'>", points[i], "</p>"
       )
     }
     point_counters = point_counters.concat("</div>")
@@ -171,9 +171,12 @@ jsPsych.plugins["phase1"] = (function() {
       } else {
 
       // add reward bubble
+      font_size = 20 + 5 * feedback_amount;  // [20; 50]
+      bubble_height = 45 + 15 * feedback_amount;
+      console.log(font_size)
       reward_bubble = "<div>" +
-          "<img class='bubble' src='img/speech.png'>" +
-          "<p class='reward'> +" + feedback_amount +
+          "<img class='bubble' src='img/speech.png' style='height: " + bubble_height + "px;'>" +
+          "<p class='reward' style='font-size: " + font_size + "px;'> +" + feedback_amount +
         "</div>"
 
       // update point counters

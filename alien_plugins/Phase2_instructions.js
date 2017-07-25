@@ -2,16 +2,21 @@
 // Instruction slides
 happy_aliens =
   "<center><div class='alien_box'>" +
-    "<img class='alien' src='img/" + ph1_alien_names[0] + ".png'>" +
-    "<img class='alien' src='img/" + ph1_alien_names[1] + ".png'>" +
-    "<img class='alien' src='img/" + ph1_alien_names[2] + ".png'>" +
-    "<img class='bubble' src='img/happy2.png' style='left: 0%;'>" +
-    "<img class='bubble' src='img/happy2.png' style='left: 30%;'>" +
-    "<img class='bubble' src='img/happy2.png' style='left: 60%;'>" +
+    "<div>" +
+      "<img class='alien' src='img/" + ph1_alien_names[0] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
+      "<img class='alien' src='img/" + ph1_alien_names[1] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
+    "</div><div>" +
+      "<img class='alien' src='img/" + ph1_alien_names[2] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
+      "<img class='alien' src='img/" + ph1_alien_names[3] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
+    "</div>" +
   "</div></center>"
 
 instructions1 =
-  "<center><p> Great job! You helped these three aliens grow a lot! </p>" +
+  "<center><p> Great job! You helped these aliens grow a lot! </p>" +
   happy_aliens +
   move_on +
   "</center>"
