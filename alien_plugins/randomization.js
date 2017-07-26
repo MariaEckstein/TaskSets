@@ -44,10 +44,10 @@ TS_train = [
   {key_answer: button_names[1], sad_alien: 1},
   {key_answer: button_names[2], sad_alien: 2},
   {key_answer: button_names[2], sad_alien: 3},
-  {key_answer: button_names[0], sad_alien: 0},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 2},
-  {key_answer: button_names[2], sad_alien: 3},
+  // {key_answer: button_names[0], sad_alien: 0},
+  // {key_answer: button_names[1], sad_alien: 1},
+  // {key_answer: button_names[2], sad_alien: 2},
+  // {key_answer: button_names[2], sad_alien: 3},
 ]
 
 // Phase-1 task sets
@@ -56,30 +56,30 @@ TS1 = [
   {key_answer: button_names[2], sad_alien: 1},
   {key_answer: button_names[0], sad_alien: 2},
   {key_answer: button_names[0], sad_alien: 3},
-  {key_answer: button_names[1], sad_alien: 0},
-  {key_answer: button_names[2], sad_alien: 1},
-  {key_answer: button_names[0], sad_alien: 2},
-  {key_answer: button_names[0], sad_alien: 3},
+  // {key_answer: button_names[1], sad_alien: 0},
+  // {key_answer: button_names[2], sad_alien: 1},
+  // {key_answer: button_names[0], sad_alien: 2},
+  // {key_answer: button_names[0], sad_alien: 3},
 ]
 TS2 = [
   {key_answer: button_names[2], sad_alien: 0},
   {key_answer: button_names[1], sad_alien: 1},
   {key_answer: button_names[2], sad_alien: 2},
   {key_answer: button_names[1], sad_alien: 3},
-  {key_answer: button_names[2], sad_alien: 0},
-  {key_answer: button_names[1], sad_alien: 1},
-  {key_answer: button_names[2], sad_alien: 2},
-  {key_answer: button_names[1], sad_alien: 3},
+  // {key_answer: button_names[2], sad_alien: 0},
+  // {key_answer: button_names[1], sad_alien: 1},
+  // {key_answer: button_names[2], sad_alien: 2},
+  // {key_answer: button_names[1], sad_alien: 3},
 ]
 TS3 = [
   {key_answer: button_names[2], sad_alien: 0},
   {key_answer: button_names[0], sad_alien: 1},
   {key_answer: button_names[1], sad_alien: 2},
   {key_answer: button_names[0], sad_alien: 3},
-  {key_answer: button_names[2], sad_alien: 0},
-  {key_answer: button_names[0], sad_alien: 1},
-  {key_answer: button_names[1], sad_alien: 2},
-  {key_answer: button_names[0], sad_alien: 3},
+  // {key_answer: button_names[2], sad_alien: 0},
+  // {key_answer: button_names[0], sad_alien: 1},
+  // {key_answer: button_names[1], sad_alien: 2},
+  // {key_answer: button_names[0], sad_alien: 3},
 ]
 TSs = [TS1, TS2, TS3]
 

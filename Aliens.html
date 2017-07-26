@@ -47,6 +47,7 @@
       - Enough trials?
         -> Do learning curves plateau at the end? In phase 3?
     - Criterion?
+    - remove non-selected buttons in instructions
     - Make explicit that you don't get the aliens you requested in the competition?
     - Better stimuli -> color interference?
     - explain how aliens can grow so much?
@@ -100,11 +101,11 @@
 
     /* create experiment timeline array */
     var timeline = [];
-    // timeline.push(get_subj_data);
-    // timeline.push(phase1_instructions);
-    // timeline.push(training_block, training_block, training_block);
-    // timeline.push(phase1_instructions_post);
-    timeline.push(all_seasons);
+    timeline.push(get_subj_data);
+    timeline.push(phase1_instructions);
+    timeline.push(training_block);  // 10 per alien
+    timeline.push(phase1_instructions_post);
+    timeline.push(all_seasons);  // blocks of 10; 8; 6; 4 per alien
     timeline.push(phase2_instructions);
     timeline.push(phase2_trials);
     timeline.push(phase3_instructions);
@@ -112,7 +113,7 @@
     timeline.push(phase4_instructions);
     timeline.push(all_seasons_phase4);
     timeline.push(phase5_instructions);
-    timeline.push(rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5);
+    timeline.push(rainbow_season_phase5);  // 3 per alien
     timeline.push(strategy_questionnaire);
     timeline.push(goodbye);
 

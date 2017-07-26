@@ -52,5 +52,7 @@ var rainbow_season_phase5 = {
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
   timeout_message: timeout_message,
-  timeline: rainbow_timeline
+  timeline: [
+    rainbow_timeline, rainbow_timeline, rainbow_timeline
+  ]
 }

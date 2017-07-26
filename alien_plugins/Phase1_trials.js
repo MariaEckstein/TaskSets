@@ -24,7 +24,7 @@ var start_hot_season = {
   show_clickable_nav: true,
   pages: [
     "<img class='background' src='img/hot.png'>" +
-    "<p class='start_new_season'><i>It is now the hot season!</i></p>"
+    "<p class='start_new_season'><i>This is the hot season!</i></p>"
   ]
 }
 var start_rainy_season = {
@@ -32,7 +32,7 @@ var start_rainy_season = {
   show_clickable_nav: true,
   pages: [
     "<img class='background' src='img/rainy.png'>" +
-    "<p class='start_new_season'><i>It is now the rainy season!</i></p>"
+    "<p class='start_new_season'><i>This is the rainy season!</i></p>"
   ]
 }
 var start_cold_season = {
@@ -40,30 +40,39 @@ var start_cold_season = {
   show_clickable_nav: true,
   pages: [
     "<img class='background' src='img/cold.png'>" +
-    "<p class='start_new_season'><i>It is now the cold season!</i></p>"
+    "<p class='start_new_season'><i>This is the cold season!</i></p>"
   ]
 }
 
 // Define the numbers of trials for each repetition of each season
 zeroeth_rep_chunks = [
-  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season],
-  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season],
-  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season,
+                     hot_season, hot_season, hot_season, hot_season, hot_season],  // 10 per alien
+  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season,
+                      cold_season, cold_season, cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
+                       rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
 ]
 first_rep_chunks = [
-  [start_hot_season, hot_season, hot_season, hot_season, hot_season],
-  [start_cold_season, cold_season, cold_season, cold_season, cold_season],
-  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season,
+                     hot_season, hot_season, hot_season, hot_season],  // 8 per alien
+  [start_cold_season, cold_season, cold_season, cold_season, cold_season,
+                      cold_season, cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
+                       rainy_season, rainy_season, rainy_season, rainy_season]
 ]
 second_rep_chunks = [
-  [start_hot_season, hot_season, hot_season, hot_season],
-  [start_cold_season, cold_season, cold_season, cold_season],
-  [start_rainy_season, rainy_season, rainy_season, rainy_season]
+  [start_hot_season, hot_season, hot_season, hot_season,
+                     hot_season, hot_season, hot_season],  // 6 per alien
+  [start_cold_season, cold_season, cold_season, cold_season,
+                      cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season,
+                       rainy_season, rainy_season, rainy_season]
 ]
 third_rep_chunks = [
-  [start_hot_season, hot_season, hot_season],
-  [start_cold_season, cold_season, cold_season],
-  [start_rainy_season, rainy_season, rainy_season]
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season],  // 4 per alien
+  [start_cold_season, cold_season, cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
 ]
 
 // Get the seasons in the pre-randomized order

@@ -42,7 +42,6 @@ var strategy_questionnaire = {
 }
 
 // Put pics together
-item_buttons
 response_buttons =
   "<center><div class='response_buttons'>" +
     item_buttons[0] +
@@ -135,9 +134,14 @@ instructions4 =
   response_buttons +
   "</center>"
 
+bed_button =
+  "<center><div class='response_buttons'>" +
+    item_buttons[1] +  // is NOT the bed!
+  "</div></center>"
+
 instructions5 = "<center><p> The green alien liked the nap a lot! It is all happy now and it grew by 5 centimeters! </p>" +
   happy_alien +
-  response_buttons +
+  bed_button +
   "</center>"
 
 instructions6 = "<center><p> When you are ready, you can press Next for a practice round of the game. " +
@@ -176,7 +180,10 @@ var training_block = {
   timing_feedback_duration: feedback_duration_train,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
-  timeline: TS_train
+  timeline: [
+    TS_train, TS_train, TS_train, TS_train, TS_train,
+    TS_train, TS_train, TS_train, TS_train, TS_train,
+  ]
 }
 
 // More instructions

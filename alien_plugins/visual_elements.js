@@ -1,7 +1,7 @@
 // Timing variables
-var max_RT = 2000
+var max_RT = 7000
 var feedback_duration = 750
-var max_RT_train = 3000
+var max_RT_train = 10000
 var feedback_duration_train = 1000
 
 // Positions on the screen

@@ -61,14 +61,25 @@ all_files = subset(all_files, select = -c(responses, internal_node_id, view_hist
 
 all_files$subjID = as.numeric(as.character(all_files$subjID))
 all_files$sad_alien = factor(all_files$sad_alien)
+all_files$ACC = ifelse(all_files$correct == "true", 1, 0)
 
-all_files$key.left = as.character(all_files$key.left)
-all_files$key.left[!is.na(all_files$key.left)] = substr(all_files$key.left[!is.na(all_files$key.left)], 13, 21)
-all_files$key.left = factor(all_files$key.left)
+all_files$item_left = as.character(all_files$item_left)
+all_files$item_right = as.character(all_files$item_right)
+all_files$item_center = as.character(all_files$item_center)
 
-all_files$key.right = as.character(all_files$key.right)
-all_files$key.right[!is.na(all_files$key.right)] = substr(all_files$key.right[!is.na(all_files$key.right)], 13, 21)
-all_files$key.right = factor(all_files$key.right)
+for (row in 1:nrow(all_files)) {
+  left_item = as.character(all_files$item_left[row])
+  left_item_name = ifelse(is.na(left_item), NA, strsplit(strsplit(left_item, "id=\'")[[1]][2], "-button")[[1]])
+  all_files$item_left[row] = left_item_name
+  
+  center_item = as.character(all_files$item_center[row])
+  center_item_name = ifelse(is.na(center_item), NA, strsplit(strsplit(center_item, "id=\'")[[1]][2], "-button")[[1]])
+  all_files$item_center[row] = center_item_name
+  
+  right_item = as.character(all_files$item_right[row])
+  right_item_name = ifelse(is.na(right_item), NA, strsplit(strsplit(right_item, "id=\'")[[1]][2], "-button")[[1]])
+  all_files$item_right[row] = right_item_name
+}
 
 all_files
 summary(all_files)
@@ -82,16 +93,24 @@ summary(all_files)
 
 ```
 ```{r Phase 1}
-phase1 = subset(all_files, trial_type == "phase1" & season != "rainbow" & trial_index < 140)
+phase1 = subset(all_files, phase %in% c("training", "1"))
 phase1$block = factor(phase1$block)
 
-learning_curves = ggplot(phase1, aes(alien_trial, correct)) +  #, color = block
+learning_curves = ggplot(phase1, aes(alien_trial, ACC)) +  #, color = block
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "point") +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
   coord_cartesian(x = c(0, 12)) +
   facet_grid(~ season)
 learning_curves
 learning_curves + aes(color = sad_alien, group = sad_alien)
+
+
+RTs = ggplot(phase1, aes(alien_trial, rt)) +  #, color = block
+  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "pointrange") +
+  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
+  coord_cartesian(x = c(0, 12)) +
+  facet_grid(~ season)
+RTs
 ```
 ```{r Phase 2}
 
