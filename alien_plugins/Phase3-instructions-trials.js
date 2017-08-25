@@ -7,7 +7,7 @@ instructions1 =
   "Everything works the same as when you were taking care of aliens before.</p>" +
   "<p>Note: You will only see your own score during the competition and not your opponent's score.</p>" +
   "<p>Now do your best and good luck!</p>" +
-  "<p>Press Next when you are ready.</p></center>"
+  "<p>Press 'Next' when you are ready.</p></center>"
 
 var phase3_instructions = {
   type: 'instructions',

@@ -10,37 +10,6 @@ var get_subj_data = {
   ]
 }
 
-// Goodbye block
-var goodbye = {
-  type: 'instructions',
-  pages: ["<center><p>The game is now over, you did a great job!</p>" +
-    "<p>Thank you for participating in the experiment!</p>" +
-    "<p>Please fill out the questionnaire on the next page; then click Next to download the data!</p></center>"],
-  show_clickable_nav: true
-}
-
-// questionnaire
-var strategy_questionnaire = {
-  type: "survey-text",
-  questions: [
-    "<center><p>Plase fill out the following questions. " +
-      "You can adjust the size of the text boxes by pulling on the right bottom corners. " +
-      "You don't need to answer all questions if you don't want to. " +
-      "<i>Please still click Submit Answers at the bottom of the page because your data will not be saved otherwise.</i></p></center>" +
-    "In the first part of this experiment (helping aliens grow in different seasons), " +
-      "how did you learn which items go with which aliens?",
-    "In the second part (selecting aliens and seasons for the competition), " +
-      "how did you decide which seasons to pick? How did you decide which aliens and items to pick?",
-    "In the next part (taking care of unknown aliens without feedback), " +
-      "how did you decide which items to give to which aliens?",
-    "In the last part (rainbow season), " +
-      "how did you decide which items to give to each alien?",
-    "In general, did you have a gut feeling for which aliens / seasons / items were better or worse?",
-    "Did you have preferences for certain aliens / seasons / items? Why?",
-    "What made learning easy or hard for you in this task?"
-  ]
-}
-
 // Put pics together
 response_buttons =
   "<center><div class='response_buttons'>" +
@@ -90,23 +59,23 @@ happy_aliens =
 
 // Rest
 var reward = "<p class='reward'> +5"
-var move_on = "<center><p><i>Click next or press the right-arrow key to move on.</i></p></center>"
+var move_on = "<center><p><i>Click 'Next' or press the right-arrow key to move on.</i></p></center>"
 var welcome_block = "<center><p>Welcome to the experiment!</p></center>" + move_on
 
 // Instruction slides
 instructions1 = "<center><p>In the following game, you will be taking care of four aliens. " +
-  "The aliens live on a strange planet and your goal is to help them grow as fast as possible.</p>" +
+  "The aliens live on a strange planet and your goal is to <i>help them grow as much as possible</i>.</p>" +
   "<p>Each alien needs different things to thrive. " +
-  "One alien might need to chew on a shiny rock in order grow, " +
-  "whereas another might need to catch cosmic rays with its red umbrella.</p>" +
-  "<p>Over time, you will learn what each alien needs in order to grow.</p></center>" +
+  "One alien might need to chew on a juicy plant in order grow, " +
+  "whereas another might need to catch cosmic rays with its big umbrella.</p>" +
+  "<p>Over time, <i>you will learn what each alien needs in order to grow</i>.</p></center>" +
   aliens +
   move_on
 
 instructions2 = "<center><p>The aliens' planet goes through different seasons, " +
-  "and aliens will need different things depending on these seasons.</p>" +
-  "<p>For example, in order to grow, one alien might need to sleep in a bed in the hot season, " +
-  "but it might need to chew on a shiny rock during the rainy season.</p>" +
+  "and <i>aliens need different things depending on these seasons</i>.</p>" +
+  "<p>For example, in order to grow, an alien might need to cuddle in a bed in the hot season, " +
+  "but it might need to chew on a green plant during the rainy season.</p>" +
   "There are three seasons on the aliens' planet: <i>hot, cold, and rainy</i>:" +
   "<div class='alien_box'>" +
     "<img class='season' src='img/hot.png'>" +
@@ -115,40 +84,44 @@ instructions2 = "<center><p>The aliens' planet goes through different seasons, "
   "</div></center>" +
   move_on
 
-instructions3 = "<center><p>Before the actual game, let's practice with these four aliens:</p>" +
+instructions3 = "<center><p>Before the actual game starts, let's practice with these four aliens:</p>" +
   aliens +
-  "<p>Try to make each one of them grow as much as you can, by learning what each one needs! " +
-  "(This is a practice round, so seasons will not change yet.)</center>" +
+  "<p><i>Your job will be to make each one of them grow as much as you can, by learning what each one needs!</i> " +
+  "(In the practice round, seasons will not change yet.)</center>" +
   move_on
 
 instructions4 =
   "<center><p>Whenever an alien needs something, it will pop up on the screen, like the alien below:</p>" +
   sad_alien +
   "<div style='position:relative; top=50px'" +
-    "<p>When this happens, you can offer the alien one of several things to help it grow.</p>" +
+    "<p>When this happens, you can offer it one of several things to help it grow.</p>" +
     "<p>How about a nap in the cozy bed? " +
-    "In the game, you'll be able to select an item using the keys <i>'j', 'k', and 'l'</i> on your keyboard. " +
+    "In the game, you'll be able to <i>select an item using the keys 'j', 'k', and 'l'</i> on your keyboard. " +
     "'j' will select the left-most item (bed in this case), 'k' middle one (umbrella), and 'l' the right one (plant).</p>" +
-    "<p>Let's pretend you pressed 'j' and offered the alien a nap in the green bed - click Next to see what happens.</p>" +
+    "<p>Let's pretend you pressed 'k' and offered the alien the red umbrella - click 'Next' to see what happens.</p>" +
   "</div>" +
   response_buttons +
   "</center>"
 
 bed_button =
   "<center><div class='response_buttons'>" +
-    item_buttons[1] +  // is NOT the bed!
+    item_buttons[1] +
   "</div></center>"
 
-instructions5 = "<center><p> The green alien liked the nap a lot! It is all happy now and it grew by 5 centimeters! </p>" +
+instructions5 = "<center><p> The alien liked the umbrella a lot! It grew by 5 centimeters and is very happy! </p>" +
   happy_alien +
   bed_button +
   "</center>"
 
-instructions6 = "<center><p> When you are ready, you can press Next for a practice round of the game. " +
-  "Remember, you'll use the keys <i>'j', 'k', and 'l'</i> to select the items.</p>" +
-  "<p>You'll need to decide quickly to win points, the aliens are impatient.</p>"
-  "<p>Press Previous if you'd like to review the instructions before you start.</p>" +
+instructions6 =
+  "<center><p>Here's a hint before you start the practice round: " +
+  "<i>Each alien's preferences are completely independent of all the other aliens' preferences.</i> " +
+  "This means that knowing which item one alien likes does not help you figure out which item another alien likes.</p>" +
+  "<p>You'll need to decide quickly to win points. Good luck!</p>" +
+  "<p>When you are ready, press 'Next' for the practice round. " +
+  "Remember, you'll use the keys <i>'j', 'k', and 'l'</i> to select items.</p>" +
   aliens +
+  "<p>Press 'Previous' if you'd like to review the instructions before you start.</p>" +
   "</center>"
 
 // Put instruction slides together
@@ -168,33 +141,29 @@ var phase1_instructions = {
 }
 
 // Training trials
-var training_block = {
+training_block = {
   type: "phase1",
   phase: "training",
   season: "training",
   choices: [left_key, middle_key, right_key],
   aliens: pr_alien_names,
-  feedback_amounts: training_rewards,
   show_stim_with_feedback: true,
   randomize_order: true,
   timing_feedback_duration: feedback_duration_train,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
-  timeline: [
-    TS_train, TS_train, TS_train, TS_train, TS_train,
-    TS_train, TS_train, TS_train, TS_train, TS_train,
-  ]
+  timeline: TS_train
 }
 
 // More instructions
 instructions7 =
   "<center><p> Great job! You helped these aliens grow a lot! </p>" +
   happy_aliens +
-  "<p> When you're ready, press Next to move on to the real game. </p>" +
+  "<p> When you're ready, press 'Next' to move on to the real game, with <i>four new aliens</i>. </p>" +
   "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +
-  "Keep in mind that the aliens' preferences change with the seasons! </p>" +
+  "Keep in mind that <i>aliens' preferences depend on the season</i>! </p>" +
   "<p> You will notice that aliens grow differently in different seasons - " +
-  "pay attention to how much each alien grows in each season! </p>" +
+  "<i>pay attention to how much each alien grows in each season!</i> </p>" +
   "</center>"
 
 var phase1_instructions_post = {

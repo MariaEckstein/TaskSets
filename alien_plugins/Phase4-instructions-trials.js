@@ -1,7 +1,6 @@
-
 // Instruction slides
 instructions1 =
-  "<center><p>Congratulations! You won the competition!</p>" +
+  "<center><p>Congratulations! <i>You won</i> the competition!</p>" +
   "[cheering?]" +
   "<p>The aliens reward you with all kinds of beautiful prizes. " +
   "You feel honored.</p>"
@@ -9,11 +8,16 @@ instructions1 =
 instructions2 =
   "<center><p>There is a big party after the annual competition, " +
   "which attracts visitors from many different planets. " +
-  "You decide to stay for this party to help the old and new aliens grow.</p>" +
+  "You decide to stay for the party. You will <i>not only help the aliens grow " +
+  "that you already know, but also the visiting aliens that you haven't met yet</i>.</p>" +
   "<p>Note that after the annual competition, aliens won't show you how much they grow. " +
-  "This means that you won't see the effects of your actions. " +
-  "Still do your best to help each alien grow as much as possible!</p>" +
-  "<p>Press Next when you are ready to start!</p></center>"
+  "This means that <i>you won't see the effects of your actions</i>. " +
+  "Still do your best to <i>help each alien grow as much as possible!</i></p>" +
+  "<p>Press 'Next' when you are ready to start!</p></center>"
+
+after_phase4 =
+  "<center><p>Thank you for taking care of all these aliens and their visitors! You did a fantastic job!</p>" +
+  "[happy aliens?]"
 
 var phase4_instructions = {
   type: 'instructions',
@@ -25,69 +29,69 @@ var phase4_instructions = {
   timing_post_trial: 200
 }
 
+var phase4_after = {
+  type: 'instructions',
+  pages: [
+      after_phase4,
+  ],
+  show_clickable_nav: true,
+  timing_post_trial: 200
+}
+
 // Get the seasons in the pre-randomized order
 if (!short_version) {  // long version
-  TS1_phase4 = [
-    TS1[0],  // {key_answer: button_names[0], sad_alien: 2},
-    TS1[1],  // {key_answer: button_names[1], sad_alien: 1},
-    TS1[2],  // {key_answer: button_names[2], sad_alien: 0},
-    {key_answer: "", sad_alien: 3},
+  TS1_phase4 = [].concat(
+    TS1,
     {key_answer: "", sad_alien: 4},
-  ]
-  TS2_phase4 = [
-    TS2[0],
-    TS2[1],
-    TS2[2],
-    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 5},
+  )
+  TS2_phase4 = [].concat(
+    TS2,
     {key_answer: "", sad_alien: 4},
-  ]
-  TS3_phase4 = [
-    TS3[0],
-    TS3[1],
-    TS3[2],
-    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 5},
+  )
+  TS3_phase4 = [].concat(
+    TS3,
     {key_answer: "", sad_alien: 4},
-  ]
+    {key_answer: "", sad_alien: 5},
+  )
 } else {  // short version
   TS1_phase4 = [
     TS1[0],
-    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
   ]
   TS2_phase4 = [
     TS2[0],
-    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
   ]
   TS3_phase4 = [
     TS3[0],
-    {key_answer: "", sad_alien: 3},
+    {key_answer: "", sad_alien: 4},
   ]
 }
 TSs_phase4 = [TS1_phase4, TS2_phase4, TS3_phase4]
 
 hot_season_phase4 = {
   season: "hot",
-  feedback_amounts: season_rewards[0],
   randomize_order: true,
   timeline: TSs_phase4[TS_rand[0]]
 }
 cold_season_phase4 = {
   season: "cold",
-  feedback_amounts: season_rewards[1],
   randomize_order: true,
   timeline: TSs_phase4[TS_rand[1]]
 }
 rainy_season_phase4 = {
   season: "rainy",
-  feedback_amounts: season_rewards[2],
   randomize_order: true,
   timeline: TSs_phase4[TS_rand[2]]
 }
 
 // Define the numbers of trials for each repetition of each season
-third_rep_chunks = [
-  [start_hot_season, hot_season_phase4],  // 5 trials
-  [start_cold_season, cold_season_phase4],  // 5 trials
-  [start_rainy_season, rainy_season_phase4]  // 5 trials
+third_rep_chunks = [  // 1 trial per alien in each season
+  [start_hot_season, hot_season_phase4],
+  [start_cold_season, cold_season_phase4],
+  [start_rainy_season, rainy_season_phase4]
 ]
 
 // Get the seasons in the pre-randomized order

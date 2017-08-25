@@ -1,0 +1,42 @@
+
+// questionnaire
+questionnaire_instructions =
+  "<center><p>Plase fill out the following questions. " +
+  "Adjust the size of the text boxes by pulling on the three lines in the right bottom corners.</p>" +
+  "<p>You don't need to answer all questions if you don't want to. " +
+  "<i>Please still click Submit Answers at the bottom of the page because your data will not be saved otherwise.</i></p></center>"
+quest1 =
+  "<p>Recall the first part of this experiment, in which you learned to help the aliens grow in different seasons.</p>" +
+  "<p><i>How did you learn which items go with which aliens?</i><p>"
+quest2 =
+  "<p>Now recall the second part, in which you selected your aliens and seasons for the competition.<p>" +
+  "<p><i>How did you decide which seasons to pick? How did you decide which aliens and items to pick?</i></p>"
+quest3 =
+  "<p>Now recall the next part, in which you took care of some aliens that you had not seen before, without getting feedback.</p> " +
+  "<p><i>How did you decide which items you would give to each alien?</i></p>"
+quest4 =
+  "<p>Finally, recall the last part of the experiment, the rainbow season.</p>" +
+  "<p><i>How did you decide which items you would give to each alien?</i></p>"
+
+var strategy_questionnaire = {
+  type: "survey-text",
+  questions: [
+    questionnaire_instructions +
+    quest1,
+    quest2,
+    // quest3,  // only if I present phase 3
+    quest4,
+    "In general, did you have a gut feeling for which aliens / seasons / items were better and worse?",
+    "Did you have preferences for certain aliens / seasons / items? Why?",
+    "What made learning difficult (or easy) in this task?"
+  ]
+}
+
+// Goodbye block
+var goodbye = {
+  type: 'instructions',
+  pages: ["<center><p>The game is now over, you did a great job!</p>" +
+    "<p>Thank you for participating in the experiment!</p>" +
+    "<p>Please fill out the questionnaire on the next page; then click 'Next' to download the data!</p></center>"],
+  show_clickable_nav: true
+}

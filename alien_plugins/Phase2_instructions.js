@@ -28,14 +28,14 @@ instructions2 =
   "[add pic?]" +
   "<p>In the competition, two opponents play against each other. " +
   "Each opponent is taking care of one alien. " +
-  "The goal is to make the own alien grow more than the opponent's alien, " +
+  "<i>The goal is to make the own aliens grow more than the opponent's aliens</i>, " +
   "for the amusement of the spectators.</p></center>"
 instructions2b =
   "<center><p>Before the competition starts, " +
   "each competitor is allowed to pick the aliens and seasons they want to use in the competition. " +
-  "You wil be one of the competitors! Make sure you pick the best aliens and seasons, " +
+  "You wil be one of the competitors! Make sure you <i>pick the best aliens and seasons</i>, " +
   "using your experience on the planet so far!</p>" +
-  "<p>Click next to learn how the selection process works!</p></center>"
+  "<p>Click 'Next' to learn how the selection process works!</p></center>"
 
 exmpl_alien_season_buttons =
   "<center><div class='response_buttons'>" +
@@ -46,10 +46,10 @@ exmpl_alien_season_buttons =
 intro_slide_alien_same_season =
   "<center><p>In the selection process, you will first select which aliens you would prefer in each season. " +
   "For example, you might see the two aliens in the season below. Which alien would you pick, given the season? " +
-  "In the following slides, you'll press 'j' to select the picture on top and 'l' for the picture on bottom.</p>"
+  "In the following slides, you'll press <i>'j' for the alien on top and 'l' for the alien on bottom</i>.</p>"
   "<p>Your opponent will automatically get the alien you did not select.</p>" +
   exmpl_alien_season_buttons +
-  "<p>Press 'Next' when you are ready to select your aliens! Press 'Previous' if you want to review the instructions."
+  "<p>Press 'Next' when you are ready to select your aliens! Press 'Previous' to review the instructions."
 
 exmpl_season_buttons =
   "<center><div class='response_buttons'>" +
@@ -59,7 +59,7 @@ exmpl_season_buttons =
 
 intro_slide_season =
   "<center><p>Great job selecting your aliens!</p>" +
-  "<p>Next in the selection process, you will select which seasons you would prefer for the competition. " +
+  "<p>Next in the selection process, you will select which <i>seasons</i> you want for the competition. " +
   "For example, you might see the two seasons below. Which one would you rather have?</p>" +
   exmpl_season_buttons +
   "<p>Your opponent will automatically get the other season!"
@@ -72,7 +72,7 @@ exmpl_alien_buttons =
 
 intro_slide_alien =
   "<center><p>Thank you for selecting your seasons!<p>" +
-  "<p>Next in the selection process, you will select which aliens you would prefer for the competition, independent of the season. " +
+  "<p>Next in the selection process, you will select which <i>aliens</i> you would prefer for the competition, independent of the season. " +
   "For example, you might see the two aliens below. Which one would you pick?</p>" +
   exmpl_alien_buttons +
   "<p>Your opponent will automatically get the other alien! "
@@ -85,7 +85,7 @@ exmpl_item_buttons =
 
 intro_slide_item =
   "<center><p>Thank you for selecting your aliens!<p>" +
-  "<p>Next in the selection process, you will select which items you would prefer for the competition. " +
+  "<p>Next in the selection process, you will select which <i>items</i> you would prefer for the competition. " +
   "For example, you might see the two items below. Which one would you pick?</p>" +
   exmpl_item_buttons +
   "<p>Your opponent will automatically get the other alien! "
@@ -98,7 +98,7 @@ exmpl_alien_season_buttons_rest =
 
 intro_slide_alien_rest_season =
   "<center><p>Last in the selection process, " +
-  "you can indicate which combinations of aliens and seasons you would prefer for the competition. " +
+  "you can indicate which <i>combinations of aliens and seasons</i> you would prefer for the competition. " +
   "For example, you might see two aliens in two different seasons, like below. " +
   "Which combination of alien and season would you pick?</p>" +
   exmpl_alien_season_buttons_rest +

@@ -1,10 +1,6 @@
 
 // Instruction slides
 instructions1 =
-  "<center><p>Thank you for taking care of all these aliens and their visitors! You did a fantastic job!</p>" +
-  "[happy aliens?]"
-
-instructions2 =
   "<center><p>The annual competition has now long passed, " +
   "and most visitors have left to go back to their home planets. " +
   "Your bags are packed as well. " +
@@ -12,24 +8,37 @@ instructions2 =
   "<p>But suddenly, you see your alien friend running toward you, waving its arms. " +
   "It excitedly tells you that a very special event is about to happen, " +
   "which has not happened in many decades: the beautiful <i>rainbow season</i>!<p>" +
-  "[pic of rainbow]" +
+  "<img class='alien' src='img/rainbow.png'>" +
   "<p>Excited by the prospect of seeing this legendary event in person, " +
-  "you decide to miss your space ship and spend just a few more days here!</p></center>"
+  "you decide to miss your space ship and spend just a few more days with the aliens!</p></center>"
 
-instructions3 =
+instructions2 =
   "<center><p>You will now play the rainbow season. " +
   "Continue helping the aliens grow, selecting the right items for each one. " +
-  "All the guests and spectators have left, so you will only need to take care of your three original aliens.<p>" +
-  "<p>In the rainbow season, it is impossible to see how much aliens grow. " +
-  "Still do your best to help each alien grow as much as you can!<p>" +
-  "<p>Press Next when you are ready to start!</p>"
+  "All the guests and spectators have left, so you will only need to take care of your original aliens.<p>" +
+  "<p>In the rainbow season, it is impossible to see how much aliens grow, " +
+  "so <i>you will not see the effects of your actions. " +
+  "Still do your best to help each alien grow as much as you can!</i><p>" +
+  "<p>Press 'Next' when you are ready to start!</p>"
+
+after_phase5 =
+  "<center><p>Thank you for taking care of all the aliens! You did a fantastic job!</p>" +
+  "[happy aliens?]"
 
 var phase5_instructions = {
   type: 'instructions',
   pages: [
       instructions1,
       instructions2,
-      instructions3,
+  ],
+  show_clickable_nav: true,
+  timing_post_trial: 200
+}
+
+var phase5_after = {
+  type: 'instructions',
+  pages: [
+      after_phase5,
   ],
   show_clickable_nav: true,
   timing_post_trial: 200
@@ -40,6 +49,7 @@ rainbow_timeline = [
   {sad_alien: 0},
   {sad_alien: 1},
   {sad_alien: 2},
+  {sad_alien: 3},
 ]
 var rainbow_season_phase5 = {
   type: "phase1",
@@ -52,7 +62,5 @@ var rainbow_season_phase5 = {
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
   timeout_message: timeout_message,
-  timeline: [
-    rainbow_timeline, rainbow_timeline, rainbow_timeline
-  ]
+  timeline: rainbow_timeline,
 }

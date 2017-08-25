@@ -1,19 +1,16 @@
 // Assign reward schedule and TS to each season
 var hot_season = {
   season: "hot",
-  feedback_amounts: season_rewards[0],
   randomize_order: true,
   timeline: TSs[TS_rand[0]]
 }
 var cold_season = {
   season: "cold",
-  feedback_amounts: season_rewards[1],
   randomize_order: true,
   timeline: TSs[TS_rand[1]]
 }
 var rainy_season = {
   season: "rainy",
-  feedback_amounts: season_rewards[2],
   randomize_order: true,
   timeline: TSs[TS_rand[2]]
 }
@@ -45,32 +42,32 @@ var start_cold_season = {
 }
 
 // Define the numbers of trials for each repetition of each season
-zeroeth_rep_chunks = [
+zeroeth_rep_chunks = [  // 10 per alien
   [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season,
-                     hot_season, hot_season, hot_season, hot_season, hot_season],  // 10 per alien
+                     hot_season, hot_season, hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season,
                       cold_season, cold_season, cold_season, cold_season, cold_season],
   [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
                        rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
 ]
-first_rep_chunks = [
+first_rep_chunks = [  // 8 per alien
   [start_hot_season, hot_season, hot_season, hot_season, hot_season,
-                     hot_season, hot_season, hot_season, hot_season],  // 8 per alien
+                     hot_season, hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season, cold_season, cold_season,
                       cold_season, cold_season, cold_season, cold_season],
   [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
                        rainy_season, rainy_season, rainy_season, rainy_season]
 ]
-second_rep_chunks = [
+second_rep_chunks = [  // 6 per alien
   [start_hot_season, hot_season, hot_season, hot_season,
-                     hot_season, hot_season, hot_season],  // 6 per alien
+                     hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season, cold_season,
                       cold_season, cold_season, cold_season],
   [start_rainy_season, rainy_season, rainy_season, rainy_season,
                        rainy_season, rainy_season, rainy_season]
 ]
-third_rep_chunks = [
-  [start_hot_season, hot_season, hot_season, hot_season, hot_season],  // 4 per alien
+third_rep_chunks = [  // 4 per alien
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season],
   [start_cold_season, cold_season, cold_season, cold_season, cold_season],
   [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
 ]

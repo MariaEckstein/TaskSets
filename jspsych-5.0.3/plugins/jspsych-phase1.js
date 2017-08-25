@@ -35,7 +35,6 @@ jsPsych.plugins["phase1"] = (function() {
     // get background, alien, point counters, and response buttons
     background = "<img class='background' src=img/" + trial.season + ".png>"
     sad_alien = "<img class='alien' id='sad_alien' src='img/" + trial.aliens[trial.sad_alien] + ".png'>"
-    console.log(points)
 
     point_counters = "<div class='counter_box' id='counter_box'>"
     for (i = 0; i < trial.aliens.length; i ++) {
@@ -108,7 +107,7 @@ jsPsych.plugins["phase1"] = (function() {
       if (correct) {  // correct response
         for (i = 0; i < button_names.length; i++) {
           if (item_chosen == button_names[i]) {
-            amount = trial.feedback_amounts[i]
+            amount = trial.reward
           }
         }
       }

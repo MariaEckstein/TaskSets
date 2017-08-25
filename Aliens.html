@@ -5,7 +5,7 @@
     <script>
       // IMPORTANT PARAMETERS
       var short_version = false;  // false or true
-      var input_device = "keyboard";  // "mouse" OR "keyboard"
+      // var input_device = "keyboard";  // "mouse" OR "keyboard"
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="jspsych-5.0.3/jspsych.js"></script>
@@ -24,6 +24,7 @@
     <script src="alien_plugins/Phase3-instructions-trials.js"></script>
     <script src="alien_plugins/Phase4-instructions-trials.js"></script>
     <script src="alien_plugins/Phase5-instructions-trials.js"></script>
+    <script src="alien_plugins/StrategyQuestionnaire.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
     <link href="alien_plugins/alien_style.css" rel="stylesheet" type="text/css"></link>
   </head>
@@ -33,6 +34,9 @@
   <script>
 
     /* TDs
+    - Tell people explicitly that colors and shapes do not determine aliens' preferences
+    - Make button pictures black-and-white?
+    - Train until criterion rather than fixed number of trials
     - Things to check when looking at data:
       - Do people learn or do they get everything right on the first try (in the second season)?
         -> do they learn or do they do inference? -> reduce mutual information? Add more aliens?
@@ -46,74 +50,48 @@
         -> Do participants make the most points in the right seasons / aliens? Equal for actions?
       - Enough trials?
         -> Do learning curves plateau at the end? In phase 3?
-    - Criterion?
-    - remove non-selected buttons in instructions
-    - Make explicit that you don't get the aliens you requested in the competition?
-    - Better stimuli -> color interference?
-    - explain how aliens can grow so much?
+      - Phase 1: Do we have nice learning curves?
+      - Phase 2: Do participants' responses agree with actual values?
+      - Phase 4: Do participants select the most-valuable action? Or the not-yet used action?
+        Or the most popular action? Or do they select each action once to make sure they got it right at least once?
+        Does this make sense at all if one action can be applied to more than one alien, with different values?
+      - Phase 5: Do participants select the most valuable TS in the new context?
+        Or do they select the single best action for each alien?
+        (This would mean that participants prefer marginalizing out seasons to marginalizing out aliens;
+        that they prefer to keep the info about aliens, rather than about seasons
+        ["which action was best for this alien (ignoring seasons)?" rather than
+         "which season was best and which action went with which seasons there?"])
+        Or do they do something random?
+        In this case, it could be that (a) participants learn each season-alien-action association separately)
     - monetary bonus: we will pick one alien randomly and your payment will be based on that
-    - Randomize which aliens are new vs old
     - make distributions wider -> right now, people just remember closest number anyway
     - add new TS to google slides!
     - make sure distributions don't shift over time
     - in phase 2, put everything side-by-side or everything on top of each other
     - add all the pics for instructions(?)
     - respond "as fast and accurately as possible"
-    - NO read the novelty paper with the crops and planets -> similar?
-    - NO make it two decisions -> right or wrong? -> how much?
-    - CHECK make 4 aliens, so that TS do overlap? so that knowledge about one alien-stimulus-season pairing has no info about another pairing?
-    - CHECK adjust font size / bubble size to number!
-    - CHECK get TS for 4 aliens, 3 buttons
-    - CHECK "Different aliens do better in different seasons." / "Pay attention to how much each alien grows!"
-    - CHECK ask for age instead of DOB
-    - CHECK "Show you <-> how much"
-    - CHECK add too late message in phase 2
-    - CHECK move button higher up on next-season slides! it's invisible on the old laptop!
-    - CHECK update instruction texts for keyboard
-    - CHECK also ask for item preferences in phase 2!
-    - CHECK let chosen button remain on the screen longer? -> hide things: $('#jspsych-categorize-stimulus').css('visibility', 'hidden');
-    - CHECK don't get points if no reward!
-    - CHECK change visual appearance of phase 2 for keyboard!
-    - CHECK use keyboard, give them less time
-    - CHECK make RTs etc. variables and define at the beginning!
-    - CHECK make new aliens transparent
-    - CHECK make background images same size (for buttons)
-    - CHECK add debug subject
-    - CHECK add the other levels
-    - CHECK fix location of point counter and points in bubbles
-    - CHECK Add transitions between assess blocks
-    - CHECK Make seasons the background in the alien-season buttons
-    - CHECK randomize association betweenn seasons and TS
-    - CHECK pseudo-randomize season order
-    - CHECK randomize association between season-pic and reward amounts
-    - CHECK better reward schedule (right now, contexts can be recognized just because of the amounts)
-    - CHECK draw rewards from distribution
-    - CHECK make sure background comes on before aliens
-    - CHECK add counter
-    - CHECK only 3 actions
-    - CHECK record data
-    - CHECK mouse instead of keys
-    - CHECK instructions: use example trial in stead of hard-coded slides?
-    - CHECK add for SubjectID, etc.
-    - CHECK display only one alien at a time
-    - CHECK permute response buttons each time
     */
 
     /* create experiment timeline array */
     var timeline = [];
     timeline.push(get_subj_data);
     timeline.push(phase1_instructions);
-    timeline.push(training_block);  // 10 per alien
+    timeline.push(  // each training_block has 1 trial per alien
+      training_block, training_block, training_block, training_block, training_block,
+      training_block, training_block, training_block, training_block, training_block
+    );
     timeline.push(phase1_instructions_post);
     timeline.push(all_seasons);  // blocks of 10; 8; 6; 4 per alien
     timeline.push(phase2_instructions);
     timeline.push(phase2_trials);
     timeline.push(phase3_instructions);
     timeline.push(all_seasons_phase3);
-    timeline.push(phase4_instructions);
-    timeline.push(all_seasons_phase4);
+    // timeline.push(phase4_instructions);  // phase 4 makes no sense
+    // timeline.push(all_seasons_phase4);
+    // timeline.push(phase4_after);
     timeline.push(phase5_instructions);
-    timeline.push(rainbow_season_phase5);  // 3 per alien
+    timeline.push(rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5);
+    timeline.push(phase5_after);  // Necessary to get rid of rainbow background
     timeline.push(strategy_questionnaire);
     timeline.push(goodbye);
 
