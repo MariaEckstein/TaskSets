@@ -34,8 +34,8 @@
   <script>
 
     /* TDs
-    - Tell people explicitly that colors and shapes do not determine aliens' preferences
-    - Make button pictures black-and-white?
+    - CHECK Tell people explicitly that colors and shapes do not determine aliens' preferences
+    - CHECK Make button pictures black-and-white?
     - Train until criterion rather than fixed number of trials
     - Things to check when looking at data:
       - Do people learn or do they get everything right on the first try (in the second season)?
@@ -68,7 +68,7 @@
     - add new TS to google slides!
     - make sure distributions don't shift over time
     - in phase 2, put everything side-by-side or everything on top of each other
-    - add all the pics for instructions(?)
+    - add pics in instructions
     - respond "as fast and accurately as possible"
     */
 
@@ -98,7 +98,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      // fullscreen: true,
+      fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }
