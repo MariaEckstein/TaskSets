@@ -81,7 +81,7 @@ seasons_in_order = [].concat(
 )
 
 // Define a jsPsych object for all the trials; pick aliens; max RT; timing
-var all_seasons = {
+var phase1_initial_learn = {
   type: "phase1",
   phase: 1,
   choices: [left_key, middle_key, right_key],

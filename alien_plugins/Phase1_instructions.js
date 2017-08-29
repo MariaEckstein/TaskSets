@@ -81,7 +81,10 @@ instructions2 = "<center><p>The aliens' planet goes through different seasons, "
     "<img class='season' src='img/hot.png'>" +
     "<img class='season' src='img/cold.png'>" +
     "<img class='season' src='img/rainy.png'>" +
-  "</div></center>" +
+  "</div>" +
+  "<p>Seasons change unpredictably. " +
+  "This means that there is <i>no fixed order to seasons</i>, like on our planet. " +
+  "Seasons might even differ in length!</p></center>" +
   move_on
 
 instructions3 = "<center><p>Before the actual game starts, let's practice with these four aliens:</p>" +
@@ -95,7 +98,7 @@ instructions4 =
   sad_alien +
   "<div style='position:relative; top=50px'" +
     "<p>When this happens, you can offer it one of several things to help it grow.</p>" +
-    "<p>How about a nap in the cozy bed? " +
+    "<p>How an umbrella for catching cosmic rays? " +
     "In the game, you'll be able to <i>select an item using the keys 'j', 'k', and 'l'</i> on your keyboard. " +
     "'j' will select the left-most item (bed in this case), 'k' middle one (umbrella), and 'l' the right one (plant).</p>" +
     "<p>Let's pretend you pressed 'k' and offered the alien the red umbrella - click 'Next' to see what happens.</p>" +
@@ -117,6 +120,8 @@ instructions6 =
   "<center><p>Here's a hint before you start the practice round: " +
   "<i>Each alien's preferences are completely independent of all the other aliens' preferences.</i> " +
   "This means that knowing which item one alien likes does not help you figure out which item another alien likes.</p>" +
+  "<p>Also remember that seasons change randomly! " +
+  "This means that <i>seasons don't come in order</i>, like on our planet.</p>" +
   "<p>You'll need to decide quickly to win points. Good luck!</p>" +
   "<p>When you are ready, press 'Next' for the practice round. " +
   "Remember, you'll use the keys <i>'j', 'k', and 'l'</i> to select items.</p>" +
@@ -166,9 +171,37 @@ instructions7 =
   "<i>pay attention to how much each alien grows in each season!</i> </p>" +
   "</center>"
 
-var phase1_instructions_post = {
+var training_instructions_post = {
   type: 'instructions',
   pages: [instructions7],
+  show_clickable_nav: true,
+  timing_post_trial: 200
+}
+
+happy_aliens =
+  "<center><div class='alien_box'>" +
+    "<div>" +
+      "<img class='alien' src='img/" + ph1_alien_names[0] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
+      "<img class='alien' src='img/" + ph1_alien_names[1] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
+    "</div><div>" +
+      "<img class='alien' src='img/" + ph1_alien_names[2] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
+      "<img class='alien' src='img/" + ph1_alien_names[3] + ".png'>" +
+      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
+    "</div>" +
+  "</div></center>"
+
+instructions1 =
+  "<center><p> Great job! You helped these aliens grow a lot! </p>" +
+  happy_aliens +
+  move_on +
+  "</center>"
+
+var phase1_instructions_post = {
+  type: 'instructions',
+  pages: [instructions1],
   show_clickable_nav: true,
   timing_post_trial: 200
 }

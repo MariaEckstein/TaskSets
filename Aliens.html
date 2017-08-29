@@ -18,7 +18,9 @@
     <script src="alien_plugins/randomization.js"></script>
     <script src="alien_plugins/visual_elements.js"></script>
     <script src="alien_plugins/Phase1_instructions.js"></script>
+    <script src="alien_plugins/Phase1b_instructions.js"></script>
     <script src="alien_plugins/Phase1_trials.js"></script>
+    <script src="alien_plugins/Phase1b_trials.js"></script>
     <script src="alien_plugins/Phase2_instructions.js"></script>
     <script src="alien_plugins/Phase2_trials.js"></script>
     <script src="alien_plugins/Phase3-instructions-trials.js"></script>
@@ -80,12 +82,17 @@
       training_block, training_block, training_block, training_block, training_block,
       training_block, training_block, training_block, training_block, training_block
     );
+    timeline.push(training_instructions_post);
+    timeline.push(phase1_initial_learn);  // blocks of 10; 8; 6; 4 per alien
     timeline.push(phase1_instructions_post);
-    timeline.push(all_seasons);  // blocks of 10; 8; 6; 4 per alien
+    timeline.push(phase1b_instructions);
+    timeline.push(phase1b_cloudy);
+    timeline.push(phase1b_instructions_post);
+    timeline.push(refresher_block_2b);
     timeline.push(phase2_instructions);
     timeline.push(phase2_trials);
     timeline.push(phase3_instructions);
-    timeline.push(all_seasons_phase3);
+    timeline.push(refresher_block_3);
     // timeline.push(phase4_instructions);  // phase 4 makes no sense
     // timeline.push(all_seasons_phase4);
     // timeline.push(phase4_after);

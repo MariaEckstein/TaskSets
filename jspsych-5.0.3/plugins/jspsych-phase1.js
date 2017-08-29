@@ -111,7 +111,7 @@ jsPsych.plugins["phase1"] = (function() {
           }
         }
       }
-      noised_amount = amount + 0.3 * randn_bm()
+      noised_amount = amount + 0.5 * randn_bm()
       rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
       feedback_amount = Math.max(0, rounded_amount)
 

@@ -31,23 +31,23 @@ TS_train = [
 ]
 
 // Phase-1 task sets
-TS1 = [
-  {key_answer: button_names[1], sad_alien: 0, reward: 2},
+TS1 = [  // sum: 25
+  {key_answer: button_names[1], sad_alien: 0, reward: 6},
   {key_answer: button_names[2], sad_alien: 1, reward: 4},
-  {key_answer: button_names[0], sad_alien: 2, reward: 9},
-  {key_answer: button_names[0], sad_alien: 3, reward: 5},
+  {key_answer: button_names[0], sad_alien: 2, reward: 5},
+  {key_answer: button_names[0], sad_alien: 3, reward: 10}, //
 ]
-TS2 = [
-  {key_answer: button_names[2], sad_alien: 0, reward: 7},
-  {key_answer: button_names[1], sad_alien: 1, reward: 9},
-  {key_answer: button_names[2], sad_alien: 2, reward: 3},
-  {key_answer: button_names[1], sad_alien: 3, reward: 6},
+TS2 = [  // sum: 20
+  {key_answer: button_names[2], sad_alien: 0, reward: 2},
+  {key_answer: button_names[1], sad_alien: 1, reward: 8},  //
+  {key_answer: button_names[2], sad_alien: 2, reward: 7},  //
+  {key_answer: button_names[1], sad_alien: 3, reward: 3},
 ]
-TS3 = [
-  {key_answer: button_names[2], sad_alien: 0, reward: 6},
-  {key_answer: button_names[0], sad_alien: 1, reward: 2},
+TS3 = [  // sum: 15
+  {key_answer: button_names[2], sad_alien: 0, reward: 7},  //
+  {key_answer: button_names[0], sad_alien: 1, reward: 3},
   {key_answer: button_names[1], sad_alien: 2, reward: 3},
-  {key_answer: button_names[0], sad_alien: 3, reward: 4},
+  {key_answer: button_names[0], sad_alien: 3, reward: 2},
 ]
 TSs = [TS1, TS2, TS3]
 
@@ -64,5 +64,7 @@ if (short_version) {
 sa_order = shuffle([0, 1, 2])
 TS_rand = TS_rands[Math.floor(Math.random() * TS_rands.length)];
 season_order = season_orders[Math.floor(Math.random() * season_orders.length)];
+season_order_phase1b = season_orders[Math.floor(Math.random() * season_orders.length)];
+season_order_phase2b = season_orders[Math.floor(Math.random() * season_orders.length)];
 season_order_phase3 = season_orders[Math.floor(Math.random() * season_orders.length)];
 season_order_phase4 = season_orders[Math.floor(Math.random() * season_orders.length)];

@@ -1,40 +1,16 @@
 
 // Instruction slides
-happy_aliens =
-  "<center><div class='alien_box'>" +
-    "<div>" +
-      "<img class='alien' src='img/" + ph1_alien_names[0] + ".png'>" +
-      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
-      "<img class='alien' src='img/" + ph1_alien_names[1] + ".png'>" +
-      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
-    "</div><div>" +
-      "<img class='alien' src='img/" + ph1_alien_names[2] + ".png'>" +
-      "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
-      "<img class='alien' src='img/" + ph1_alien_names[3] + ".png'>" +
-      "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
-    "</div>" +
-  "</div></center>"
-
 instructions1 =
-  "<center><p> Great job! You helped these aliens grow a lot! </p>" +
-  happy_aliens +
-  move_on +
-  "</center>"
-
-instructions2 =
-  "<center><p>Once a year, the aliens celebrate a very special holiday.</p>" +
-  "<p>In honor of this day, they hold an extraordinary and amusing competition, " +
-  "and they invited <i>you</i> to be part of it!</p>" +
-  "[add pic?]" +
+  "<center><p>Now, the time for the competition has finally come!</p>" +
   "<p>In the competition, two opponents play against each other. " +
-  "Each opponent is taking care of one alien. " +
+  "Each opponent is taking care of some aliens. " +
   "<i>The goal is to make the own aliens grow more than the opponent's aliens</i>, " +
   "for the amusement of the spectators.</p></center>"
-instructions2b =
+instructions2 =
   "<center><p>Before the competition starts, " +
   "each competitor is allowed to pick the aliens and seasons they want to use in the competition. " +
   "You wil be one of the competitors! Make sure you <i>pick the best aliens and seasons</i>, " +
-  "using your experience on the planet so far!</p>" +
+  "using your experience with the aliens!</p>" +
   "<p>Click 'Next' to learn how the selection process works!</p></center>"
 
 exmpl_alien_season_buttons =
@@ -44,12 +20,11 @@ exmpl_alien_season_buttons =
   "</div></center>"
 
 intro_slide_alien_same_season =
-  "<center><p>In the selection process, you will first select which aliens you would prefer in each season. " +
-  "For example, you might see the two aliens in the season below. Which alien would you pick, given the season? " +
-  "In the following slides, you'll press <i>'j' for the alien on top and 'l' for the alien on bottom</i>.</p>"
+  "<center><p>You can now select which aliens you would prefer in each season. " +
+  "For example, you might see the two aliens in the season below. Which alien would you pick, given the season?</p>" +
+  "<p><i>Press 'j' for the alien on top and 'l' for the alien on bottom</i>.</p>" +
   "<p>Your opponent will automatically get the alien you did not select.</p>" +
-  exmpl_alien_season_buttons +
-  "<p>Press 'Next' when you are ready to select your aliens! Press 'Previous' to review the instructions."
+  exmpl_alien_season_buttons
 
 exmpl_season_buttons =
   "<center><div class='response_buttons'>" +
@@ -58,9 +33,9 @@ exmpl_season_buttons =
   "</div></center>"
 
 intro_slide_season =
-  "<center><p>Great job selecting your aliens!</p>" +
-  "<p>Next in the selection process, you will select which <i>seasons</i> you want for the competition. " +
+  "<center><p>You can now select which <i>seasons</i> you want for the competition. " +
   "For example, you might see the two seasons below. Which one would you rather have?</p>" +
+  "<p><i>Press 'j' for the season on top and 'l' for the season on bottom</i>.</p>" +
   exmpl_season_buttons +
   "<p>Your opponent will automatically get the other season!"
 
@@ -136,8 +111,6 @@ var phase2_instructions = {
   pages: [
       instructions1,
       instructions2,
-      instructions2b,
-      intro_slide_alien_same_season,
   ],
   show_clickable_nav: true,
   timing_post_trial: 200
