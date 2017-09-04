@@ -18,6 +18,7 @@ jsPsych.plugins["phase1"] = (function() {
     trial.show_stim_with_feedback = (typeof trial.show_stim_with_feedback === 'undefined') ? true : trial.show_stim_with_feedback;
     trial.show_feedback_on_timeout = (typeof trial.show_feedback_on_timeout === 'undefined') ? false : trial.show_feedback_on_timeout;
     trial.timeout_message = trial.timeout_message || "<p>Please respond faster.</p>";
+    trial.hide_alien_counter = (typeof trial.hide_alien_counter === 'undefined') ? true : trial.hide_alien_counter;
     // timing params
     trial.timing_stim = trial.timing_stim || -1; // default is to show image until response
     trial.timing_response = trial.timing_response || -1; // default is no max response time
@@ -44,7 +45,7 @@ jsPsych.plugins["phase1"] = (function() {
       )
     }
     point_counters = point_counters.concat("</div>")
-    if (!trial.show_stim_with_feedback) {
+    if (!trial.show_stim_with_feedback || trial.hide_alien_counter) {
       point_counters = " ";
     }
 
@@ -190,6 +191,9 @@ jsPsych.plugins["phase1"] = (function() {
       if (!trial.show_stim_with_feedback) {
         point_counters = " ";
         reward_bubble = " ";
+      }
+      if (trial.hide_alien_counter) {
+        point_counters = " ";
       }
 
       alien_counters_buttons =
