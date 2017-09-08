@@ -5,8 +5,8 @@ var get_subj_data = {
   questions: [
     "SubjID:",
     "Age:",  // Date of birth (mm/dd/yyyy):
-    "Occupation:",
-    "Highest degree (obtained or currently obtaining):"
+    // "Occupation:",
+    // "Highest degree (obtained or currently obtaining):"
   ]
 }
 
@@ -98,7 +98,7 @@ instructions4 =
   sad_alien +
   "<div style='position:relative; top=50px'" +
     "<p>When this happens, you can offer it one of several things to help it grow.</p>" +
-    "<p>How an umbrella for catching cosmic rays? " +
+    "<p>How about an umbrella for catching cosmic rays? " +
     "In the game, you'll be able to <i>select an item using the keys 'j', 'k', and 'l'</i> on your keyboard. " +
     "'j' will select the left-most item (bed in this case), 'k' middle one (umbrella), and 'l' the right one (plant).</p>" +
     "<p>Let's pretend you pressed 'k' and offered the alien the red umbrella - click 'Next' to see what happens.</p>" +
