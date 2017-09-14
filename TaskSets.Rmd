@@ -6,12 +6,10 @@ output: html_document
 ---
 
 ```{r Set parameters, load packages, etc.}
-
 library("ggplot2"); library("plyr")
 theme_set(theme_bw())
 
 n_aliens = 4
-
 data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-09-13"
 ```
 ```{r Read in data}
@@ -101,17 +99,24 @@ summary(all_files)
 ```
 ```{r Feed-alien phases}
 
+correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
+                      .(subjID, season, sad_alien), summarize,
+                      av_reward = mean(reward, na.rm = T),
+                      item_chosen = item_chosen[1])
+correct_values  # should agree with the TS!
+
 # Get data frames for each phase (training, learning & refreshing, cloudy)
 feed_aliens = subset(all_files, trial_type == "phase1")  #"feed-aliens")
 training = subset(feed_aliens, season == "training")
 learning = subset(feed_aliens, season %in% c("cold", "hot", "rainy"))
 cloudy = subset(feed_aliens, season %in% paste(c("cold", "hot", "rainy"), "_cloudy", sep = ""))
+rainbow = subset(feed_aliens, season == "rainbow")
 
 # Plot learning curves (and RTs) for each phase
 learning_curves = ggplot(training, aes(alien_trial, ACC)) +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "point") +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
-  facet_grid(~ season)
+  facet_grid(~ season)  #~TS
 learning_curves
 learning_curves + facet_grid(sad_alien ~ season)  # Observation: Participants learn one alien after the other, rather than at the same time...
 
@@ -129,7 +134,7 @@ learning_curves + facet_grid(sad_alien ~ season)
 
 # Calcuate "learnt values" (average reward for each alien/season/item obtained during the refresher right before picking)
 learnt_values = subset(all_files, phase == "2b")  #"Refresher2"
-alien_season_values = ddply(learnt_values, .(subjID, sad_alien, season), summarize,
+alien_season_values = ddply(learnt_values, .(subjID, sad_alien, season), summarize,  # replace season with TS
                             av_reward = mean(reward, na.rm = T))
 alien_season_values$pickee = with(alien_season_values, paste("alien", as.numeric(as.character(sad_alien)) + 1, season, sep = ""))
 alien_season_values$assess = "alien-same-season"
@@ -154,10 +159,24 @@ item_values$assess = "item"
 item_values$item_chosen = NULL
 
 all_values = rbind(alien_season_values, alien_values, season_values, item_values)
+all_values
 
-ggplot(all_values, aes(assess, av_reward, color = pickee)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  coord_flip()
+value_plot = ggplot(all_values, aes(assess, av_reward, color = pickee)) +
+              geom_bar(stat = "identity", position = "dodge") +
+              coord_flip()
+value_plot
+
+all_values_obj = data.frame(pickee = c("alien1TS1", "alien2TS1", "alien3TS1", "alien4TS1",
+                                       "alien1TS2", "alien2TS2", "alien3TS2", "alien4TS2",
+                                       "alien1TS3", "alien2TS3", "alien3TS3", "alien4TS3"),
+                            assess = c(rep("alien-same-season", 12)),
+                            av_reward = c(6, 4, 5, 10,
+                                          2, 8, 7, 3,
+                                          7, 3, 3, 2))
+all_values_obj
+
+value_plot$data = all_values_obj
+value_plot
 ```
 ```{r Phase 3: Pick aliens, seasons, items}
 # Add learnt values to all_files
@@ -179,6 +198,18 @@ pick_aliens$value_unchosen = with(pick_aliens, ifelse(item_chosen == item_left, 
 pick_aliens$value_diff = with(pick_aliens, value_chosen - value_unchosen)
 
 ggplot(pick_aliens, aes(trial_index, value_diff, color = assess)) +
-  geom_point()
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+```{r Rainbow season}
+
+# Combine OPTIMAL CHOICES (not necessarily subject's choices) with subject's choices in the rainbow season
+comb_dat = merge(correct_values, rainbow, by = c("subjID", "sad_alien", "season", "item_chosen"), all = T)
+comb_dat
+
+# Plot OPTIMAL CHOICES in every season together with subject's choices in the rainbow season
+ggplot(comb_dat, aes(sad_alien, item_chosen, color = season)) +
+  geom_point() +
+  facet_grid(~ season)  #TS
 
 ```
