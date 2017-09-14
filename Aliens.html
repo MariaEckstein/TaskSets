@@ -88,31 +88,31 @@ rules% that% are% maintained% by% EF% provide% a% hierarchical% state% and% acti
 
     /* create experiment timeline array */
     var timeline = [];
-    // timeline.push(get_subj_data);
-    // timeline.push(phase1_instructions);
-    // timeline.push(  // each training_block has 1 trial per alien
-    //   training_block, training_block, training_block, training_block, training_block,
-    //   training_block, training_block, training_block, training_block, training_block,
-    // );
-    // timeline.push(training_instructions_post);
+    timeline.push(get_subj_data);
+    timeline.push(phase1_instructions);
+    timeline.push(  // each training_block has 1 trial per alien
+      training_block, training_block, training_block, training_block, training_block,
+      training_block, training_block, training_block, training_block, training_block,
+    );
+    timeline.push(training_instructions_post);
     timeline.push(phase1_initial_learn);  // blocks of 10; 10; 10 per alien
-    // timeline.push(phase1_instructions_post);
-    // timeline.push(phase2_instructions);
-    // timeline.push(phase2_cloudy);
-    // timeline.push(phase2_instructions_post);
-    // timeline.push(refresher_block_2);
-    // timeline.push(phase3_instructions);
-    // timeline.push(phase3_pick_aliens);
-    // timeline.push(phase3_post);
-    // timeline.push(refresher_block_3);
-    // // timeline.push(phase4_instructions);  // phase 4 makes no sense
-    // // timeline.push(all_seasons_phase4);
-    // // timeline.push(phase4_after);
-    // timeline.push(phase5_instructions);
-    // timeline.push(rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5);
-    // timeline.push(phase5_after);  // Necessary to get rid of rainbow background
-    // timeline.push(strategy_questionnaire);
-    // timeline.push(goodbye);
+    timeline.push(phase1_instructions_post);
+    timeline.push(phase2_instructions);
+    timeline.push(phase2_cloudy);
+    timeline.push(phase2_instructions_post);
+    timeline.push(refresher_block_2);
+    timeline.push(phase3_instructions);
+    timeline.push(phase3_pick_aliens);
+    timeline.push(phase3_post);
+    timeline.push(refresher_block_3);
+    // timeline.push(phase4_instructions);  // phase 4 makes no sense
+    // timeline.push(all_seasons_phase4);
+    // timeline.push(phase4_after);
+    timeline.push(phase5_instructions);
+    timeline.push(rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5);
+    timeline.push(phase5_after);  // Necessary to get rid of rainbow background
+    timeline.push(strategy_questionnaire);
+    timeline.push(goodbye);
 
     /* start the experiment */
     jsPsych.init({
