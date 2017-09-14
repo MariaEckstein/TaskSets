@@ -5,43 +5,56 @@ date: "July 19, 2017"
 output: html_document
 ---
 
-```{r Read in data}
+```{r Set parameters, load packages, etc.}
 
-data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data"
+library("ggplot2"); library("plyr")
+theme_set(theme_bw())
+
+n_aliens = 4
+
+data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-09-13"
+```
+```{r Read in data}
 filenames = list.files(data_dir, pattern = "*.csv")
 all_files = data.frame()
 for (filename in filenames) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "-1"))
   subj_file$subjID = strsplit(substr(as.character(subj_file$responses), 8, 10), "[^0-9]")[[1]][[1]]
+  subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
   
   # Add trial column: counter within blocks
   subj_file$trial = NA
   for (row in 2:nrow(subj_file)) {
-    if (!is.na(subj_file$season[row]) & is.na(subj_file$season[row-1])) {
-      trial = 1
-    } else if (!is.na(subj_file$season[row]) & !is.na(subj_file$season[row-1])) {
-      trial = trial + 1
-    } else if (is.na(subj_file$season[row])) {
+    if (is.na(subj_file$season[row])) {
       trial = NA
+    } else {
+      if (is.na(subj_file$season[row-1])) {
+        trial = 1
+      } else {
+        trial = trial + 1
+      }
     }
     subj_file$trial[row] = trial
   }
   
-  # Add block column
-  subj_file$block = 0
-  block = 0
-  for (row in 2:nrow(subj_file)) {
-    if (!is.na(subj_file$trial[row])) {
-      if (subj_file$trial[row] == 1) {
-        block = block + 1
-      }
-    }
-    subj_file$block[row] = block
-  }
+  # # Add block column
+  # subj_file$block = NA
+  # block = 0
+  # for (row in 2:nrow(subj_file)) {
+  #   if (!is.na(subj_file$trial[row])) {
+  #     if (subj_file$trial[row] == 1) {
+  #       block = block + 1
+  #     }
+  #   }
+  #   subj_file$block[row] = block
+  # }
   
   # Add alien-trial column
   subj_file$alien_trial = NA
-  alien_season_counter = data.frame(training = c(0, 0, 0), hot = c(0, 0, 0), cold = c(0, 0, 0), rainy = c(0, 0, 0), rainbow = c(0, 0, 0))
+  alien_season_counter = data.frame(training = rep(0, n_aliens),
+                                    hot = rep(0, n_aliens), cold = rep(0, n_aliens), rainy = rep(0, n_aliens),
+                                    hot_cloudy = rep(0, n_aliens), cold_cloudy = rep(0, n_aliens), rainy_cloudy = rep(0, n_aliens),
+                                    rainbow = rep(0, n_aliens))
   for (row in 1:nrow(subj_file)) {
     sad_alien = subj_file$sad_alien[row] + 1
     if (!is.na(sad_alien)) {
@@ -54,11 +67,6 @@ for (filename in filenames) {
   all_files = rbind(all_files, subj_file)
 }
 
-library("ggplot2"); library("plyr")
-theme_set(theme_bw())
-
-all_files = subset(all_files, select = -c(responses, internal_node_id, view_history))
-
 all_files$subjID = as.numeric(as.character(all_files$subjID))
 all_files$sad_alien = factor(all_files$sad_alien)
 all_files$ACC = ifelse(all_files$correct == "true", 1, 0)
@@ -66,7 +74,6 @@ all_files$ACC = ifelse(all_files$correct == "true", 1, 0)
 all_files$item_left = as.character(all_files$item_left)
 all_files$item_right = as.character(all_files$item_right)
 all_files$item_center = as.character(all_files$item_center)
-
 for (row in 1:nrow(all_files)) {
   left_item = as.character(all_files$item_left[row])
   left_item_name = ifelse(is.na(left_item), NA, strsplit(strsplit(left_item, "id=\'")[[1]][2], "-button")[[1]])
@@ -86,51 +93,92 @@ summary(all_files)
 ```
 ```{r Clean data and create summary dataframe}
 
-# all_files = subset(all_files, rt < 5000 & rt < 150)
+# all_files = subset(all_files, rt < 5000 & rt > 150)
 # sum_data = ddply(all_files, .(subjID, trial_type, sad_alien, season), summarize,
 #                  ACC = mean(correct, na.rm = T))
 # summary(sum_data)
 
 ```
-```{r Phase 1}
-phase1 = subset(all_files, phase %in% c("training", "1"))
-phase1$block = factor(phase1$block)
+```{r Feed-alien phases}
 
-learning_curves = ggplot(phase1, aes(alien_trial, ACC)) +  #, color = block
+# Get data frames for each phase (training, learning & refreshing, cloudy)
+feed_aliens = subset(all_files, trial_type == "phase1")  #"feed-aliens")
+training = subset(feed_aliens, season == "training")
+learning = subset(feed_aliens, season %in% c("cold", "hot", "rainy"))
+cloudy = subset(feed_aliens, season %in% paste(c("cold", "hot", "rainy"), "_cloudy", sep = ""))
+
+# Plot learning curves (and RTs) for each phase
+learning_curves = ggplot(training, aes(alien_trial, ACC)) +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "point") +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
-  coord_cartesian(x = c(0, 12)) +
   facet_grid(~ season)
 learning_curves
-learning_curves + aes(color = sad_alien, group = sad_alien)
+learning_curves + facet_grid(sad_alien ~ season)  # Observation: Participants learn one alien after the other, rather than at the same time...
 
+learning_curves$data = learning
+learning_curves + aes(color = phase)
+learning_curves + aes(color = phase) + facet_grid(sad_alien ~ season)
+learning_curves + aes(alien_trial, rt, color = phase)
+learning_curves + aes(alien_trial, rt, color = phase) + facet_grid(sad_alien ~ season)  # Observation: RTs are slowest when performance is worst
 
-RTs = ggplot(phase1, aes(alien_trial, rt)) +  #, color = block
-  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "pointrange") +
-  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
-  coord_cartesian(x = c(0, 12)) +
-  facet_grid(~ season)
-RTs
-```
-```{r Phase 2}
-
-
-```
-```{r Phase 3}
-phase3 = subset(all_files, trial_type == "phase1" & season != "rainbow" & trial_index > 140 & trial_index < 246)
-phase3$block = factor(phase3$block)
-
-learning_curves = ggplot(phase3, aes(alien_trial, correct)) +  #, color = block
-  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "point") +
-  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
-  coord_cartesian(x = c(13, 18)) +
-  facet_grid(~ season)
+learning_curves$data = cloudy
 learning_curves
-learning_curves + aes(color = sad_alien, group = sad_alien)
+learning_curves + facet_grid(sad_alien ~ season)
 ```
-```{r Phase 4}
+```{r Calculate empirical values for aliens, seasons, items}
+
+# Calcuate "learnt values" (average reward for each alien/season/item obtained during the refresher right before picking)
+learnt_values = subset(all_files, phase == "2b")  #"Refresher2"
+alien_season_values = ddply(learnt_values, .(subjID, sad_alien, season), summarize,
+                            av_reward = mean(reward, na.rm = T))
+alien_season_values$pickee = with(alien_season_values, paste("alien", as.numeric(as.character(sad_alien)) + 1, season, sep = ""))
+alien_season_values$assess = "alien-same-season"
+alien_season_values$sad_alien = alien_season_values$season = NULL
+
+alien_values = ddply(learnt_values, .(subjID, sad_alien), summarize,
+                     av_reward = mean(reward, na.rm = T))
+alien_values$pickee = with(alien_values, paste("alien", as.numeric(as.character(sad_alien)) + 1, sep = ""))
+alien_values$assess = "alien"
+alien_values$sad_alien = NULL
+
+season_values = ddply(learnt_values, .(subjID, season), summarize,
+                      av_reward = mean(reward, na.rm = T))
+season_values$pickee = season_values$season
+season_values$assess = "season"
+season_values$season = NULL
+
+item_values = ddply(learnt_values, .(subjID, item_chosen), summarize,
+                    av_reward = mean(reward, na.rm = T))
+item_values$pickee = item_values$item_chosen
+item_values$assess = "item"
+item_values$item_chosen = NULL
+
+all_values = rbind(alien_season_values, alien_values, season_values, item_values)
+
+ggplot(all_values, aes(assess, av_reward, color = pickee)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()
+```
+```{r Phase 3: Pick aliens, seasons, items}
+# Add learnt values to all_files
+pick_aliens = subset(all_files, trial_type == "phase2")  #"pick-aliens"
+pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
+for (row in 1:nrow(pick_aliens)) {
+  chosen_item = as.character(pick_aliens$item_chosen[row])
+  chosen_item_name = ifelse(is.na(chosen_item), NA, strsplit(strsplit(chosen_item, "#")[[1]][2], "-button")[[1]])
+  pick_aliens$item_chosen[row] = chosen_item_name
+}
+
+for (which in c("left", "right", "chosen")) {
+  pick_aliens = merge(pick_aliens, all.x = T,
+                  subset(all_values, select = c("subjID", "pickee", "av_reward")),
+                  by.x = c("subjID", paste("item_", which, sep = "")), by.y = c("subjID", "pickee"))
+  colnames(pick_aliens)[colnames(pick_aliens) == "av_reward"] = paste("value_", which, sep = "")
+}
+pick_aliens$value_unchosen = with(pick_aliens, ifelse(item_chosen == item_left, value_right, value_left))
+pick_aliens$value_diff = with(pick_aliens, value_chosen - value_unchosen)
+
+ggplot(pick_aliens, aes(trial_index, value_diff, color = assess)) +
+  geom_point()
 
 ```
-
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
