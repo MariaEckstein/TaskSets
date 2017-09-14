@@ -41,6 +41,6 @@ var goodbye = {
   type: 'instructions',
   pages: ["<center><p>The game is now over, you did a great job!</p>" +
     "<p>Thank you for participating in the experiment!</p>" +
-    "<p>Please fill out the questionnaire on the next page; then click 'Next' to download the data!</p></center>"],
+    "<p>Please click 'Next' and let the experimenter know you are done!</p></center>"],
   show_clickable_nav: true
 }

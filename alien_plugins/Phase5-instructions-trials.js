@@ -27,7 +27,6 @@ instructions2 =
 
 after_phase5 =
   "<center><p>Thank you for taking care of all the aliens! You did a fantastic job!</p>" +
-  "[happy aliens?]" +
   "<p>The game is now over! " +
   "Please take a few minutes to fill out the questionnaire on the following screen.</p>"
 
@@ -59,8 +58,8 @@ rainbow_timeline = [
   {sad_alien: 3},
 ]
 var rainbow_season_phase5 = {
-  type: "phase1",
-  phase: 5,
+  type: "feed-aliens",
+  phase: "5RainbowSeason",
   season: "rainbow",
   aliens: ph1_alien_names,
   choices: [left_key, middle_key, right_key],

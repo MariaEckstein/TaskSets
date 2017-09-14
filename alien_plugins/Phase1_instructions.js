@@ -147,8 +147,8 @@ var phase1_instructions = {
 
 // Training trials
 training_block = {
-  type: "phase1",
-  phase: "training",
+  type: "feed-aliens",
+  phase: "0Training",
   season: "training",
   choices: [left_key, middle_key, right_key],
   aliens: pr_alien_names,

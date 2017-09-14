@@ -1,7 +1,6 @@
 // Instruction slides
 instructions1 =
   "<center><p>Congratulations! <i>You won</i> the competition!</p>" +
-  "[cheering?]" +
   "<p>The aliens reward you with all kinds of beautiful prizes. " +
   "You feel honored.</p>"
 
@@ -88,7 +87,7 @@ rainy_season_phase4 = {
 }
 
 // Define the numbers of trials for each repetition of each season
-third_rep_chunks = [  // 1 trial per alien in each season
+one_trial_chunk = [  // 1 trial per alien in each season
   [start_hot_season, hot_season_phase4],
   [start_cold_season, cold_season_phase4],
   [start_rainy_season, rainy_season_phase4]
@@ -96,14 +95,14 @@ third_rep_chunks = [  // 1 trial per alien in each season
 
 // Get the seasons in the pre-randomized order
 seasons_in_order_phase4 = [].concat(
-  third_rep_chunks[season_order_phase4[1][0]], third_rep_chunks[season_order_phase4[1][1]], third_rep_chunks[season_order_phase4[1][2]],
-  third_rep_chunks[season_order_phase4[2][0]], third_rep_chunks[season_order_phase4[2][1]], third_rep_chunks[season_order_phase4[2][2]]
+  one_trial_chunk[season_order_phase4[1][0]], one_trial_chunk[season_order_phase4[1][1]], one_trial_chunk[season_order_phase4[1][2]],
+  one_trial_chunk[season_order_phase4[2][0]], one_trial_chunk[season_order_phase4[2][1]], one_trial_chunk[season_order_phase4[2][2]]
 )
 
 // Define a jsPsych object for all the trials; pick aliens; max RT; timing
 var all_seasons_phase4 = {
-  type: "phase1",
-  phase: 4,
+  type: "feed-aliens",
+  phase: "4NewAliens",
   choices: [left_key, middle_key, right_key],
   aliens: ph1_alien_names.concat("alien10", "alien8"),
   show_stim_with_feedback: false,
