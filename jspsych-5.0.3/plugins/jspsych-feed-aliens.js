@@ -101,7 +101,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
       if (trial.key_answer == item_chosen) {
         correct = true;
       }
-      console.log(info.key, trial.key_answer, trial.key_answer == item_chosen)
+      console.log(info.key, trial.key_answer, trial.key_answer == item_chosen, TS_rand[season2number[trial.season]])
 
       // get feedback amount
       amount = 1  // incorrect response or no answer
@@ -122,6 +122,12 @@ jsPsych.plugins["feed-aliens"] = (function() {
           points[i] = Math.round(10 * points[i]) / 10
       }
 
+      season2number = {
+        "hot": 0,
+        "cold": 1,
+        "rainy": 2
+      }
+
       // save data
       trial_data = {
         "rt": info.rt,
@@ -129,6 +135,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
         "reward": feedback_amount,
         "sad_alien": trial.sad_alien,
         "season": trial.season,
+        "TS": TS_rand[season2number[trial.season]],
         "item_left": shuffled_buttons[0],
         "item_center": shuffled_buttons[1],
         "item_right": shuffled_buttons[2],
