@@ -101,7 +101,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
       if (trial.key_answer == item_chosen) {
         correct = true;
       }
-      console.log(info.key, trial.key_answer, trial.key_answer == item_chosen, TS_rand[season2number[trial.season]])
+      console.log(info.key, trial.key_answer, trial.key_answer == item_chosen)
 
       // get feedback amount
       amount = 1  // incorrect response or no answer
