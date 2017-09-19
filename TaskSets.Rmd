@@ -18,6 +18,9 @@ all_files = data.frame()
 for (filename in filenames) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "-1"))
   subj_file$subjID = strsplit(substr(as.character(subj_file$responses), 8, 10), "[^0-9]")[[1]][[1]]
+  if (!"TS" %in% colnames(subj_file)) {
+    subj_file$TS = NA
+  }
   subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
   
   # Add trial column: counter within blocks
@@ -106,7 +109,7 @@ correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot",
 correct_values  # should agree with the TS!
 
 # Get data frames for each phase (training, learning & refreshing, cloudy)
-feed_aliens = subset(all_files, trial_type == "phase1")  #"feed-aliens")
+feed_aliens = subset(all_files, trial_type == "feed-aliens")  #)"phase1"
 training = subset(feed_aliens, season == "training")
 learning = subset(feed_aliens, season %in% c("cold", "hot", "rainy"))
 cloudy = subset(feed_aliens, season %in% paste(c("cold", "hot", "rainy"), "_cloudy", sep = ""))
@@ -116,19 +119,19 @@ rainbow = subset(feed_aliens, season == "rainbow")
 learning_curves = ggplot(training, aes(alien_trial, ACC)) +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "point") +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
-  facet_grid(~ season)  #~TS
+  facet_grid(~ TS)  #~season
 learning_curves
-learning_curves + facet_grid(sad_alien ~ season)  # Observation: Participants learn one alien after the other, rather than at the same time...
+learning_curves + facet_grid(sad_alien ~ TS)  # Observation: Participants learn one alien after the other, rather than at the same time...
 
 learning_curves$data = learning
 learning_curves + aes(color = phase)
-learning_curves + aes(color = phase) + facet_grid(sad_alien ~ season)
+learning_curves + aes(color = phase) + facet_grid(sad_alien ~ TS)
 learning_curves + aes(alien_trial, rt, color = phase)
-learning_curves + aes(alien_trial, rt, color = phase) + facet_grid(sad_alien ~ season)  # Observation: RTs are slowest when performance is worst
+learning_curves + aes(alien_trial, rt, color = phase) + facet_grid(sad_alien ~ TS)  # Observation: RTs are slowest when performance is worst
 
 learning_curves$data = cloudy
 learning_curves
-learning_curves + facet_grid(sad_alien ~ season)
+learning_curves + facet_grid(sad_alien ~ TS)
 ```
 ```{r Calculate empirical values for aliens, seasons, items}
 
@@ -203,12 +206,14 @@ ggplot(pick_aliens, aes(trial_index, value_diff, color = assess)) +
 ```
 ```{r Rainbow season}
 
+# MAKE SIZE OF DOTS REPRESENT THE VALUE IN THE 3 SEASONS!
+
 # Combine OPTIMAL CHOICES (not necessarily subject's choices) with subject's choices in the rainbow season
 comb_dat = merge(correct_values, rainbow, by = c("subjID", "sad_alien", "season", "item_chosen"), all = T)
 comb_dat
 
 # Plot OPTIMAL CHOICES in every season together with subject's choices in the rainbow season
-ggplot(comb_dat, aes(sad_alien, item_chosen, color = season)) +
+ggplot(comb_dat, aes(sad_alien, item_chosen, color = season)) +  #, size = value
   geom_point() +
   facet_grid(~ season)  #TS
 
