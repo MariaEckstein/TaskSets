@@ -17,8 +17,8 @@ var phase3_post = {
 
 // Define trials
 seasons_in_order = [].concat(
-  ten_trial_chunk[season_order_phase2b[1][0]], ten_trial_chunk[season_order_phase2b[1][1]], ten_trial_chunk[season_order_phase2b[1][2]],
-  ten_trial_chunk[season_order_phase2b[2][0]], ten_trial_chunk[season_order_phase2b[2][1]], ten_trial_chunk[season_order_phase3[2][2]]
+  ten_trial_chunk[season_order_refresher2[0][0]], ten_trial_chunk[season_order_refresher2[0][1]], ten_trial_chunk[season_order_refresher2[0][2]],
+  ten_trial_chunk[season_order_refresher2[1][0]], ten_trial_chunk[season_order_refresher2[1][1]], ten_trial_chunk[season_order_refresher3[1][2]]
 )
 
 var refresher_block_2 = {
@@ -33,8 +33,8 @@ var refresher_block_2 = {
 }
 
 seasons_in_order = [].concat(
-  ten_trial_chunk[season_order_phase3[1][0]], ten_trial_chunk[season_order_phase3[1][1]], ten_trial_chunk[season_order_phase3[1][2]],
-  ten_trial_chunk[season_order_phase3[2][0]], ten_trial_chunk[season_order_phase3[2][1]], ten_trial_chunk[season_order_phase3[2][2]]
+  ten_trial_chunk[season_order_refresher3[0][0]], ten_trial_chunk[season_order_refresher3[0][1]], ten_trial_chunk[season_order_refresher3[0][2]],
+  ten_trial_chunk[season_order_refresher3[1][0]], ten_trial_chunk[season_order_refresher3[1][1]], ten_trial_chunk[season_order_refresher3[1][2]]
 )
 
 var refresher_block_3 = {

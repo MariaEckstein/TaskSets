@@ -1,9 +1,13 @@
 // Timing variables
-var max_RT = 3000
+// Main experiment
+var max_RT = 1500
+var feedback_duration = 500
+var ITI_duration = 250
+// Training block
 max_RT_phase2 = max_RT
-var feedback_duration = 750
 var max_RT_train = 2 * max_RT
-var feedback_duration_train = 1000
+var feedback_duration_train = 1.5 * feedback_duration
+var ITI_duration_train = 1.5 * ITI_duration
 
 // Positions on the screen
 var sad_lefts = [0, 280, 520]

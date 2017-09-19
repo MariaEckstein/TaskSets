@@ -66,6 +66,7 @@ var phase1_initial_learn = {
   aliens: ph1_alien_names,
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
+  timing_post_trial: ITI_duration,
   timeout_message: timeout_message,
   timeline: seasons_in_order
 }

@@ -19,6 +19,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
     trial.show_feedback_on_timeout = (typeof trial.show_feedback_on_timeout === 'undefined') ? false : trial.show_feedback_on_timeout;
     trial.timeout_message = trial.timeout_message || "<p>Please respond faster.</p>";
     trial.hide_alien_counter = (typeof trial.hide_alien_counter === 'undefined') ? true : trial.hide_alien_counter;
+    trial.shuffle_buttons = (typeof trial.shuffle_buttons === 'undefined') ? false : trial.shuffle_buttons;  // default: don't shuffle buttons
     // timing params
     trial.timing_stim = trial.timing_stim || -1; // default is to show image until response
     trial.timing_response = trial.timing_response || -1; // default is no max response time
@@ -49,7 +50,11 @@ jsPsych.plugins["feed-aliens"] = (function() {
       point_counters = " ";
     }
 
-    button_order = shuffle([0, 1, 2])
+    if (trial.shuffle_buttons) {
+      button_order = shuffle([0, 1, 2])
+    } else {
+      button_order = [0, 1, 2]
+    }
     shuffled_buttons = [
       item_buttons[button_order[0]],
       item_buttons[button_order[1]],
@@ -180,9 +185,10 @@ jsPsych.plugins["feed-aliens"] = (function() {
       // add reward bubble
       font_size = 20 + 5 * feedback_amount;  // [20; 50]
       bubble_height = 45 + 15 * feedback_amount;
-      console.log(font_size)
+      // console.log(font_size)
       reward_bubble = "<div>" +
           "<img class='bubble' src='img/speech.png' style='height: " + bubble_height + "px;'>" +
+          // "<img class='bubble' src='img/measuringtape.png' style='height: " + bubble_height + "px;'>" +
           "<p class='reward' style='font-size: " + font_size + "px;'> +" + feedback_amount +
         "</div>"
 
