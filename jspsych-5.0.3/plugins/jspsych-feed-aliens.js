@@ -187,8 +187,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
       bubble_height = 45 + 15 * feedback_amount;
       // console.log(font_size)
       reward_bubble = "<div>" +
-          "<img class='bubble' src='img/speech.png' style='height: " + bubble_height + "px;'>" +
+          // "<img class='bubble' src='img/speech.png' style='height: " + bubble_height + "px;'>" +
           // "<img class='bubble' src='img/measuringtape.png' style='height: " + bubble_height + "px;'>" +
+          "<img class='bubble' src='img/measuringtape_small.png' style='height: " + bubble_height + "px;'>" +
           "<p class='reward' style='font-size: " + font_size + "px;'> +" + feedback_amount +
         "</div>"
 

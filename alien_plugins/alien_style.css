@@ -45,7 +45,7 @@
 .bubble {
   position: absolute;
   left: 25%;
-  top: 0px;
+  top: 35%; // 0px;
   height: 120px;
 }
 .lovebubble {
@@ -55,8 +55,8 @@
 }
 .reward {
   position: absolute;
-  left: 26%;
-  top: -28px;
+  left: 30%; // 26%;
+  top: 35%; // -28px;
   color: green;
   font-size: 46px;
 }

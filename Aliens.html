@@ -88,13 +88,13 @@ rules% that% are% maintained% by% EF% provide% a% hierarchical% state% and% acti
 
     /* create experiment timeline array */
     var timeline = [];
-    timeline.push(get_subj_data);
-    timeline.push(phase1_instructions);
-    timeline.push(  // each training_block has 1 trial per alien
-      training_block, training_block, training_block, training_block, training_block,
-      training_block, training_block, training_block, training_block, training_block,
-    );
-    timeline.push(training_instructions_post);
+    // timeline.push(get_subj_data);
+    // timeline.push(phase1_instructions);
+    // timeline.push(  // each training_block has 1 trial per alien
+    //   training_block, training_block, training_block, training_block, training_block,
+    //   training_block, training_block, training_block, training_block, training_block,
+    // );
+    // timeline.push(training_instructions_post);
     timeline.push(phase1_initial_learn);  // blocks of 10; 10; 10 per alien
     timeline.push(phase1_instructions_post);
     timeline.push(phase2_instructions);
@@ -117,7 +117,7 @@ rules% that% are% maintained% by% EF% provide% a% hierarchical% state% and% acti
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      fullscreen: true,
+      // fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }
