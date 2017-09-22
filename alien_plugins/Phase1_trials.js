@@ -50,6 +50,11 @@ ten_trial_chunk = [
   [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
                        rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
 ]
+one_trial_chunk = [
+  [start_hot_season, hot_season],
+  [start_cold_season, cold_season],
+  [start_rainy_season, rainy_season]
+]
 
 // Get the seasons in the pre-randomized order
 seasons_in_order = [].concat(
