@@ -129,8 +129,11 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       season2number = {
         "hot": 0,
+        "hot_cloudy": 0,
         "cold": 1,
-        "rainy": 2
+        "cold_cloudy": 1,
+        "rainy": 2,
+        "rainy_cloudy": 2
       }
 
       // save data
