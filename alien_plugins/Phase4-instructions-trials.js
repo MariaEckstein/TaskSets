@@ -39,6 +39,11 @@ var phase4_after = {
 
 // Get the seasons in the pre-randomized order
 if (!short_version) {  // long version
+  TS0_phase4 = [].concat(
+    TS0,
+    {key_answer: "", sad_alien: 4},
+    {key_answer: "", sad_alien: 5},
+  )
   TS1_phase4 = [].concat(
     TS1,
     {key_answer: "", sad_alien: 4},
@@ -49,12 +54,11 @@ if (!short_version) {  // long version
     {key_answer: "", sad_alien: 4},
     {key_answer: "", sad_alien: 5},
   )
-  TS3_phase4 = [].concat(
-    TS3,
-    {key_answer: "", sad_alien: 4},
-    {key_answer: "", sad_alien: 5},
-  )
 } else {  // short version
+  TS0_phase4 = [
+    TS0[0],
+    {key_answer: "", sad_alien: 4},
+  ]
   TS1_phase4 = [
     TS1[0],
     {key_answer: "", sad_alien: 4},
@@ -63,12 +67,8 @@ if (!short_version) {  // long version
     TS2[0],
     {key_answer: "", sad_alien: 4},
   ]
-  TS3_phase4 = [
-    TS3[0],
-    {key_answer: "", sad_alien: 4},
-  ]
 }
-TSs_phase4 = [TS1_phase4, TS2_phase4, TS3_phase4]
+TSs_phase4 = [TS0_phase4, TS1_phase4, TS2_phase4]
 
 hot_season_phase4 = {
   season: "hot",
