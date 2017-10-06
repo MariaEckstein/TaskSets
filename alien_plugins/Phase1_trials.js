@@ -50,6 +50,19 @@ ten_trial_chunk = [
   [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
                        rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
 ]
+thirteen_trial_chunk = [
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season,
+                     hot_season, hot_season, hot_season, hot_season, hot_season, hot_season],
+  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season,
+                      cold_season, cold_season, cold_season, cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
+                       rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
+]
+seven_trial_chunk = [
+  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season],
+  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season],
+  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
+]
 one_trial_chunk = [
   [start_hot_season, hot_season],
   [start_cold_season, cold_season],
@@ -58,9 +71,9 @@ one_trial_chunk = [
 
 // Get the seasons in the pre-randomized order
 seasons_in_order = [].concat(
-  ten_trial_chunk[season_order[0][0]], ten_trial_chunk[season_order[0][1]], ten_trial_chunk[season_order[0][2]],
-  ten_trial_chunk[season_order[1][0]], ten_trial_chunk[season_order[1][1]], ten_trial_chunk[season_order[1][2]],
-  ten_trial_chunk[season_order[2][0]], ten_trial_chunk[season_order[2][1]], ten_trial_chunk[season_order[2][2]],
+  thirteen_trial_chunk[season_order[0][0]], thirteen_trial_chunk[season_order[0][1]], thirteen_trial_chunk[season_order[0][2]],
+  thirteen_trial_chunk[season_order[1][0]], thirteen_trial_chunk[season_order[1][1]], thirteen_trial_chunk[season_order[1][2]],
+  thirteen_trial_chunk[season_order[2][0]], thirteen_trial_chunk[season_order[2][1]], thirteen_trial_chunk[season_order[2][2]],
 )
 
 // Define a jsPsych object for all the trials; pick aliens; max RT; timing
