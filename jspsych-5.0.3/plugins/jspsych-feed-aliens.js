@@ -186,13 +186,15 @@ jsPsych.plugins["feed-aliens"] = (function() {
       } else {
 
       // add reward bubble
-      font_size = 20 + 5 * feedback_amount;  // [20; 50]
-      bubble_height = 45 + 15 * feedback_amount;
+      font_size = 25 //20 + 5 * feedback_amount;  // [20; 50]
+      ruler_length = 40 + 20 * feedback_amount;
       // console.log(font_size)
       reward_bubble = "<div>" +
-          "<img class='bubble' src='img/speech.png' style='height: " + bubble_height + "px;'>" +
-          // "<img class='bubble' src='img/measuringtape.png' style='height: " + bubble_height + "px;'>" +
-          "<p class='reward' style='font-size: " + font_size + "px;'> +" + feedback_amount +
+          // "<img class='bubble' src='img/speech.png' style='height: " + bubble_height + "px;'>" +
+          "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, "+ ruler_length +"px , 200px,0px);'>" +
+              //width: " + ruler_length + "px;
+          //"<img class='bubble' src='img/measuringtape_small.png' style='height: " + bubble_height + "px;'>" +
+          //"<p class='reward' style='font-size: " + font_size + "px;'> +" + feedback_amount +
         "</div>"
 
       // update point counters

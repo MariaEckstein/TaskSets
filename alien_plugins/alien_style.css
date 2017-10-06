@@ -45,8 +45,14 @@
 .bubble {
   position: absolute;
   left: 25%;
-  top: 0px;
+  top: 35%; // 0px;
   height: 120px;
+}
+.ruler {
+  position: absolute;
+  left: 25%;
+  top: 45%; // 0px;
+  height: 35px;
 }
 .lovebubble {
   position: absolute;
@@ -55,8 +61,8 @@
 }
 .reward {
   position: absolute;
-  left: 26%;
-  top: -28px;
+  left: 26%; // 26%;
+  top: 45%; // -28px;
   color: green;
   font-size: 46px;
 }
