@@ -45,7 +45,7 @@ reward_ruler = "<div>" +
 var happy_alien =
   "<center><div class='alien_box'>" +
     "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
-    reward_bubble +
+    reward_ruler +
   "</div></center>"
 
 happy_aliens =
