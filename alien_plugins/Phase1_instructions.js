@@ -32,10 +32,15 @@ var sad_alien =
     "<img class='alien' src='img/" + pr_alien_names[1] + ".png'>" +
   "</div></center>"
 
-reward_bubble = "<div>" +
+/* reward_bubble = "<div>" +
     "<img class='bubble' src='img/speech.png'>" +
     "<p class='reward'> +5" +
-  "</div>"
+  "</div>" */
+
+reward_ruler = "<div>" +
+    "<img class='ruler' src='img/measuringtape_5cm.png' style='top: 98%'>" +
+    //"<p class='reward'>" +
+    "</div>"
 
 var happy_alien =
   "<center><div class='alien_box'>" +

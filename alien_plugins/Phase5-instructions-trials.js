@@ -27,8 +27,8 @@ instructions2 =
 
 after_phase5 =
   "<center><p>Thank you for taking care of all the aliens! You did a fantastic job!</p>" +
-  "<p>The game is now over! " +
-  "Please take a few minutes to fill out the questionnaire on the following screen.</p>"
+  "<p>The game is now over! </p>"
+  //"Please take a few minutes to fill out the questionnaire on the following screen.</p>"
 
 var phase5_instructions = {
   type: 'instructions',
