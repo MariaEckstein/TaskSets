@@ -38,7 +38,7 @@ var sad_alien =
   "</div>" */
 
 reward_ruler = "<div>" +
-    "<img class='ruler' src='img/measuringtape_5cm.png' style='top: 98%'>" +
+    "<img class='ruler' src='img/Ruler_5cm.png' style='top: 98%'>" +
     //"<p class='reward'>" +
     "</div>"
 

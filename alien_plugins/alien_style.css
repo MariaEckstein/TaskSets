@@ -13,8 +13,10 @@
   height: 240px;
 }
 .response_buttons {
-  position: relative;
-  border-width: 100px;
+  position: fixed;
+  top: 55%;
+  left: 36%;
+  border-width: 1px;
   border-style: solid;
   border-color: transparent;
   z-index: 10;
@@ -49,10 +51,12 @@
   height: 120px;
 }
 .ruler {
-  position: absolute;
-  left: 25%;
-  top: 45%; // 0px;
-  height: 35px;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  /*left: 25%; */
+  top: 55%; // 0px;
+  height: 350px;      /*35*/
 }
 .lovebubble {
   position: absolute;
