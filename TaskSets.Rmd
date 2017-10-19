@@ -10,7 +10,7 @@ library("ggplot2"); library("plyr")
 theme_set(theme_bw())
 
 n_aliens = 4
-data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-10-03"
+data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-10-16"
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
 ```
 ```{r Read in data}
@@ -104,7 +104,7 @@ criterion_dat = subset(all_files, season == "training" & alien_trial %in% 8:10)
 perf_dat = ddply(criterion_dat, .(subjID), summarize,
                  ACC = mean(ACC, na.rm = T))
 perf_dat$below_criterion = perf_dat$ACC < perf_criterion
-chance_performers = subset(perf_dat, below_criterion == T)
+(chance_performers = subset(perf_dat, below_criterion == T))
 all_files = subset(all_files, !subjID %in% chance_performers$subjID)
 ```
 ```{r Feed-alien phases}
@@ -126,6 +126,7 @@ learning_curves + facet_grid(paste("Subj", subjID) ~ paste("Alien", sad_alien)) 
 
 learning_curves$data = learning
 learning_curves + aes(color = phase)
+learning_curves + aes(color = phase) + facet_grid(paste("Subj", subjID) ~ paste("Task set", TS))
 learning_curves + aes(color = phase) + facet_grid(~ paste("Task set", TS))
 learning_curves + aes(alien_trial, rt, color = phase)
 learning_curves + aes(alien_trial, rt, color = phase) + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))  # Observation: RTs are slowest when performance is worst
@@ -189,6 +190,10 @@ value_plot$data = alien_TS_obj
 value_plot
 ```
 ```{r Phase 3: Pick aliens, TSs, items}
+# TDs
+# Check that jsPsych is right
+# That this code is right
+# Plot means
 
 # Figure out which TS went with which season for each subject
 season_TS = ddply(subset(all_files, trial_type == "feed-aliens" & season %in% c("hot", "rainy", "cold")),
@@ -264,15 +269,21 @@ correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot",
                       item_chosen = item_chosen[1])
 correct_values  # should agree with the TS!
 
+rainbow_aliens = ddply(subset(rainbow, item_chosen != "NaN"),
+                       c("subjID", "sad_alien", "TS", "item_chosen"),
+                       summarize,
+                       av_reward = 2 * sum(!is.na(item_chosen)))  # add column that indicates in how many trials subject chose each item for each alien
+
 # Combine OPTIMAL CHOICES (not necessarily subject's choices) with subject's choices in the rainbow season
 comb_dat = merge(correct_values,
-                 subset(rainbow, item_chosen != "NaN"),
-                 by = c("subjID", "sad_alien", "TS", "item_chosen"), all = T)
+                 rainbow_aliens,
+                 by = c("subjID", "sad_alien", "TS", "item_chosen", "av_reward"), all = T)
 comb_dat
 
 # Plot OPTIMAL CHOICES in every season together with subject's choices in the rainbow season
-ggplot(comb_dat, aes(sad_alien, item_chosen, color = TS)) +
+ggplot(comb_dat, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
   geom_point() +
+  theme(legend.position = "none") +
   facet_grid(paste("Subj", subjID) ~ paste("TS", TS))
 ```
 ```{r Start button}
