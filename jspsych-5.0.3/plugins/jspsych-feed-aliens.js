@@ -186,11 +186,10 @@ jsPsych.plugins["feed-aliens"] = (function() {
       } else {
 
       // add reward bubble
-      ruler_length = 10 + 25 * feedback_amount;
+      ruler_length = 40 + 50 * feedback_amount;
       ruler =
         "<div>" +
-         // "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, "+ ruler_length +"px , 200px,0px);'>" +
-          "<img class='ruler' src='img/ruler.png' style= 'clip-path: inset(0px "+ ruler_length +"px 0px "+ ruler_length +"px);'>" +
+          "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, "+ ruler_length +"px , 200px,0px);'>" +
         "</div>"
 
       // update point counters
