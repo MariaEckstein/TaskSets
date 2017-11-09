@@ -22,7 +22,7 @@ exmpl_alien_season_buttons =
 intro_slide_alien_same_season =
   "<center><p>You can now select which aliens you would prefer in each season. " +
   "For example, you might see the two aliens in the season below. Which alien would you pick, given the season?</p>" +
-  "<p><i>Press 'j' for the alien on top and 'l' for the alien on bottom</i>.</p>" +
+  "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
   "<p>Your opponent will automatically get the alien you did not select.</p>" +
   exmpl_alien_season_buttons
 
@@ -35,7 +35,7 @@ exmpl_season_buttons =
 intro_slide_season =
   "<center><p>You can now select which <i>seasons</i> you want for the competition. " +
   "For example, you might see the two seasons below. Which one would you rather have?</p>" +
-  "<p><i>Press 'j' for the season on top and 'l' for the season on bottom</i>.</p>" +
+  "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
   exmpl_season_buttons +
   "<p>Your opponent will automatically get the other season!"
 
@@ -49,6 +49,7 @@ intro_slide_alien =
   "<center><p>Thank you for selecting your seasons!<p>" +
   "<p>Next in the selection process, you will select which <i>aliens</i> you would prefer for the competition, independent of the season. " +
   "For example, you might see the two aliens below. Which one would you pick?</p>" +
+  "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
   exmpl_alien_buttons +
   "<p>Your opponent will automatically get the other alien! "
 
@@ -62,6 +63,7 @@ intro_slide_item =
   "<center><p>Thank you for selecting your aliens!<p>" +
   "<p>Next in the selection process, you will select which <i>items</i> you would prefer for the competition. " +
   "For example, you might see the two items below. Which one would you pick?</p>" +
+  "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
   exmpl_item_buttons +
   "<p>Your opponent will automatically get the other alien! "
 
@@ -76,6 +78,7 @@ intro_slide_alien_rest_season =
   "you can indicate which <i>combinations of aliens and seasons</i> you would prefer for the competition. " +
   "For example, you might see two aliens in two different seasons, like below. " +
   "Which combination of alien and season would you pick?</p>" +
+  "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
   exmpl_alien_season_buttons_rest +
   "<p>Your opponent will automatically get the other one!"
 
