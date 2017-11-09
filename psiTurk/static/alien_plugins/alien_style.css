@@ -1,0 +1,108 @@
+
+/* Buttons */
+.phase1_button {
+  border-width: 20px;
+  border-style: solid;
+  border-color: transparent;
+  height: 100px;
+}
+.phase2_button {
+  border-width: 20px;
+  border-style: solid;
+  border-color: transparent;
+  height: 240px;
+}
+.response_buttons {
+  position: relative;
+  border-width: 100px;
+  border-style: solid;
+  border-color: transparent;
+  z-index: 10;
+}
+
+/* Aliens etc. */
+.alien {
+  height: 250px;
+  z-index: 5;
+}
+.smallalien {
+  height: 200px;
+  z-index: 5;
+}
+.season {
+  height: 240px;
+  z-index: 5;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent;
+}
+.alien_box {
+  position: relative;
+  border-width: 30px;
+  border-style: solid;
+  border-color: transparent;
+}
+.bubble {
+  position: absolute;
+  left: 25%;
+  top: 35%; // 0px;
+  height: 120px;
+}
+.ruler {
+  position: absolute;
+  left: 25%;
+  top: 45%; // 0px;
+  height: 35px;
+}
+.lovebubble {
+  position: absolute;
+  left: 35%;
+  height: 120px;
+}
+.reward {
+  position: absolute;
+  left: 26%; // 26%;
+  top: 45%; // -28px;
+  color: green;
+  font-size: 46px;
+}
+
+/* Point counter */
+.counter_alien {
+  position: absolute;
+  right: 100px;
+  height: 60px;
+}
+.counter_number {
+  position: absolute;
+  right: 0px;
+  font-size: 46px;
+}
+.counter_box {
+  position: absolute;
+  right: 0%;
+  top: 0%;
+}
+
+/* Phase-1 background */
+.background {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  height: 100%;
+  width: 100%;
+  z-index: -10;
+}
+
+/* Instruction texts */
+.start_new_season {
+  position: relative;
+  border-width: 100px;
+  border-style: solid;
+  border-color: transparent;
+  z-index: 20;
+  font-size: 50px;
+  line-height: 1.5;
+  text-align: center;
+}

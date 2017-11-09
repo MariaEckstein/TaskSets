@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Aliens</title>
+    <script>
+      // IMPORTANT PARAMETERS
+      var short_version = false;  // false or true
+      // var input_device = "keyboard";  // "mouse" OR "keyboard"
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="jspsych-5.0.3/jspsych.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-survey-text.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-instructions.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-feed-aliens.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-pick-aliens.js"></script>
+    <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
+    <script src="alien_plugins/helper_functions.js"></script>
+    <script src="alien_plugins/randomization.js"></script>
+    <script src="alien_plugins/visual_elements.js"></script>
+    <script src="alien_plugins/Phase1_instructions.js"></script>
+    <script src="alien_plugins/Phase1_trials.js"></script>
+    <script src="alien_plugins/Phase2_instructions.js"></script>
+    <script src="alien_plugins/Phase2_trials.js"></script>
+    <script src="alien_plugins/Phase3_instructions.js"></script>
+    <script src="alien_plugins/Phase3_trials.js"></script>
+    <script src="alien_plugins/Refreshers.js"></script>
+    <script src="alien_plugins/Phase4-instructions-trials.js"></script>
+    <script src="alien_plugins/Phase5-instructions-trials.js"></script>
+    <script src="alien_plugins/StrategyQuestionnaire.js"></script>
+    <script type="text/javascript">
+        // These fields provided by the psiTurk Server
+        var uniqueId = "{{ uniqueId }}"; // a unique string identifying the worker/task
+        var adServerLoc = "{{ adServerLoc }}"; // the location of your ad (so you can send user back at end of experiment)
+        var mode = "{{ mode }}"; // is this running live, sandbox, or in debug mode?
+    </script>
+
+    <!-- utils.js and psiturk.js provide the basic psiturk functionality -->
+    <script src="/static/js/utils.js" type="text/javascript"></script>
+    <script src="/static/js/psiturk.js" type="text/javascript"></script>
+
+    <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <link href="alien_plugins/alien_style.css" rel="stylesheet" type="text/css"></link>
+  </head>
+  <body>
+  </body>
+
+  <script>
+
+    /* Load psiturk */
+    var psituk = new PsiTurk(uniqueId, adServerLoc, mode);
+
+    /* create experiment timeline array */
+    var timeline = [];
+    timeline.push(get_subj_data);
+    timeline.push(phase1_instructions);
+    timeline.push(  // each training_block has 1 trial per alien
+      training_block, training_block, training_block, training_block, training_block,
+      training_block, training_block, training_block, training_block, training_block,
+    );
+    timeline.push(training_instructions_post);
+    timeline.push(phase1_initial_learn);  // blocks of 10; 10; 10 per alien
+    timeline.push(phase1_instructions_post);
+    timeline.push(phase2_instructions);
+    timeline.push(phase2_cloudy);  // blocks of 10 and 10s
+    timeline.push(phase2_instructions_post);
+    timeline.push(refresher_block_2);
+    timeline.push(phase3_instructions);
+    timeline.push(phase3_pick_aliens);
+    timeline.push(phase3_post);
+    timeline.push(refresher_block_3);
+    // timeline.push(phase4_instructions);  // phase 4 makes no sense
+    // timeline.push(all_seasons_phase4);
+    // timeline.push(phase4_after);
+    timeline.push(phase5_instructions);
+    timeline.push(rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5);
+    timeline.push(phase5_after);  // Necessary to get rid of rainbow background
+    // timeline.push(strategy_questionnaire);
+    timeline.push(goodbye);
+
+    /* start the experiment */
+    jsPsych.init({
+      timeline: timeline,
+      fullscreen: true,
+      on_finish: function() {
+        psiturk.saveData({
+          success: function() { psiturk.completeHIT(); }
+        });
+      },
+      on_data_update: function(data) {
+        psiturk.recordTrialData(data);
+      }
+    });
+
+  </script>
+</html>
