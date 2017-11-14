@@ -169,11 +169,11 @@ value_plot + facet_wrap(~ paste("Subj", subjID))
 # Values for alien-TS combinations
 alien_TS_values = ddply(learnt_values, .(subjID, TS, sad_alien), summarize,
                         av_reward = mean(reward, na.rm = T))
-alien_TS_values$selected = alien_TS_values$sad_alien
-alien_TS_values$assess = alien_TS_values$TS
+alien_TS_values$selected = with(alien_TS_values, paste("alien", as.numeric(as.character(sad_alien))+1, TS, sep = ""))
+alien_TS_values$assess = "AlienSameTS"
 
 value_plot$data = alien_TS_values
-value_plot = value_plot + labs(x = "TS", fill = "Alien")
+value_plot = value_plot + aes(fill = sad_alien) + labs(x = "TS", fill = "Alien")
 value_plot + facet_wrap(~ paste("Subj", subjID))
 
 alien_TS_obj = expand.grid(sad_alien = unique(alien_TS_values$sad_alien),
@@ -188,28 +188,33 @@ alien_TS_obj$assess = alien_TS_obj$TS
 alien_TS_obj
 
 value_plot$data = alien_TS_obj
-value_plot
+value_plot + labs(title = "True underlying TS")
 ```
 ```{r Phase 3: Pick aliens, TSs, items}
-# TDs
-# Check that jsPsych is right
-# That this code is right
-# Plot means
 
-# Figure out which TS went with which season for each subject
+# all_values: what are the experiences values of each alien, item, TS, and each alien-TS combo?
+all_values = rbind(subset(alien_TS_values, select = c("subjID", "assess", "selected", "av_reward")),
+                    subset(alien_values, select = c("subjID", "assess", "selected", "av_reward")),
+                    subset(TS_values, select = c("subjID", "assess", "selected", "av_reward")),
+                    subset(item_values, select = c("subjID", "assess", "selected", "av_reward")))
+
+# pick_aliens: Which choices did subjects make in phase 3?
+pick_aliens = subset(all_files, trial_type == "pick-aliens", select = c("subjID", "trial_index", "item_left", "item_right", "item_chosen", "assess"))
+
+# season_TS: which season for each subject corresponded to each TS?
 season_TS = ddply(subset(all_files, trial_type == "feed-aliens" & season %in% c("hot", "rainy", "cold")),
                   .(subjID, TS, season), summarize,
                   TS = TS[1])
 
-# Rename item_chosen, item_left, and item_right columns: instead of "hot", "cold", and "rainy", call them "TS0", "TS1", and "TS2", depending on participant's randomization
-pick_aliens = subset(all_files, trial_type == "pick-aliens", select = c("subjID", "trial_index", "item_left", "item_right", "item_chosen", "assess"))
+## Adjust pick_aliens
+### Remove "-button"
 pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
 for (row in 1:nrow(pick_aliens)) {
   chosen_item = as.character(pick_aliens$item_chosen[row])
   chosen_item_name = ifelse(is.na(chosen_item), NA, strsplit(strsplit(chosen_item, "#")[[1]][2], "-button")[[1]])
   pick_aliens$item_chosen[row] = chosen_item_name
 }
-
+### Replace "hot", "cold", "rainy" with participants' corresponding TS 
 for (subj in levels(factor(all_files$subjID))) {
   for (seas in c("hot", "cold", "rainy")) {
     sub = subset(season_TS, subjID == subj & season == seas)$TS
@@ -218,56 +223,36 @@ for (subj in levels(factor(all_files$subjID))) {
     pick_aliens$item_chosen = gsub(seas, sub, pick_aliens$item_chosen)
   }
 }
-
 pick_aliens$assess = as.character(pick_aliens$assess)
 pick_aliens$assess = gsub("season", "TS", pick_aliens$assess)
-
-for (row in 1:nrow(pick_aliens)) {
-  if (!is.na(pick_aliens$item_chosen[row])) {
-    if (nchar(pick_aliens$item_chosen[row]) == 1) {
-      pick_aliens$item_chosen[row] = paste("TS", pick_aliens$item_chosen[row], sep = "")
-    }
-  }
-  if (!is.na(pick_aliens$item_left[row])) {
-    if (nchar(pick_aliens$item_left[row]) == 1) {
-      pick_aliens$item_left[row] = paste("TS", pick_aliens$item_left[row], sep = "")
-    }
-  }
-  if (!is.na(pick_aliens$item_right[row])) {
-    if (nchar(pick_aliens$item_right[row]) == 1) {
-      pick_aliens$item_right[row] = paste("TS", pick_aliens$item_right[row], sep = "")
-    }
-  }
-}
-
-# Add learnt values
-alien_TS_values = ddply(learnt_values, .(subjID, sad_alien, TS), summarize,
-                        av_reward = mean(reward, na.rm = T))
-alien_TS_values$selected = with(alien_TS_values, paste("alien", as.numeric(as.character(sad_alien)) + 1, TS, sep = ""))
-alien_TS_values$assess = "alien-same-TS"
-alien_TS_values$sad_alien = alien_TS_values$TS = NULL
-all_values = rbind(all_values, alien_TS_values)
-
-for (which in c("left", "right", "chosen")) {
+pick_aliens$item_unchosen = ifelse(pick_aliens$item_chosen == pick_aliens$item_right, pick_aliens$item_left, pick_aliens$item_right)
+pick_aliens$item_left = pick_aliens$item_right = NULL
+### Rename "0", "1", "2" to "TS0", "TS1", "TS2"
+pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
+pick_aliens$item_chosen[pick_aliens$assess == "TS"] = paste("TS", pick_aliens$item_chosen[pick_aliens$assess == "TS"], sep = "")
+pick_aliens$item_unchosen = as.character(pick_aliens$item_unchosen)
+pick_aliens$item_unchosen[pick_aliens$assess == "TS"] = paste("TS", pick_aliens$item_unchosen[pick_aliens$assess == "TS"], sep = "")
+### Add columns for the values of each trial's chosen and unchosen items
+for (col in c("unchosen", "chosen")) {
   pick_aliens = merge(pick_aliens, all.x = T,
                       subset(all_values, select = c("subjID", "selected", "av_reward")),
-                      by.x = c("subjID", paste("item_", which, sep = "")), by.y = c("subjID", "selected"))
-  colnames(pick_aliens)[colnames(pick_aliens) == "av_reward"] = paste("value_", which, sep = "")
+                      by.x = c("subjID", paste("item_", col, sep = "")), by.y = c("subjID", "selected"))
+  colnames(pick_aliens)[colnames(pick_aliens) == "av_reward"] = paste("value_", col, sep = "")
 }
-pick_aliens$value_unchosen = with(pick_aliens, ifelse(item_chosen == item_left, value_right, value_left))
-pick_aliens$value_diff = with(pick_aliens, value_chosen - value_unchosen)
 
-ggplot(subset(pick_aliens, subjID < 15), aes(trial_index, value_diff, color = assess)) +
+ggplot(subset(pick_aliens, subjID < 20), aes(trial_index, value_chosen - value_unchosen, color = assess)) +
   geom_point() +
   geom_hline(yintercept = 0) +
+  labs(x = "Trial", y = "Value chosen minus unchosen", color = "") +
   facet_grid(~ subjID)
 
 pick_aliens_sum = ddply(subset(pick_aliens, !is.na(assess)), .(subjID, assess), summarize,
-                        value_diff = mean(value_diff, na.rm = T))
+                        value_diff = mean(value_chosen - value_unchosen, na.rm = T))
 
 ggplot(pick_aliens_sum, aes(assess, value_diff, color = assess)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
+  labs(x = "Trial", y = "Value chosen minus unchosen", color = "") +
   geom_point(position = "jitter", alpha = 0.3)
 ```
 ```{r Rainbow season}
@@ -302,7 +287,7 @@ ggplot(subset(comb_dat, TS == "rainbow"), aes(sad_alien, item_chosen, color = TS
 
 comb_dat_sum = ddply(comb_dat, .(sad_alien, item_chosen, TS), summarize,
                       av_reward = mean(av_reward, na.rm = T))
-comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] = 5 * comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] - 10  # to make differences in size more evident
+comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] = 7 * comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] - 15  # to make differences in size more evident
 
 ggplot(comb_dat_sum, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
   geom_point() +
