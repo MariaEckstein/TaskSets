@@ -10,7 +10,7 @@ library("ggplot2"); library("plyr")
 theme_set(theme_bw())
 
 n_aliens = 4
-data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-10-16"
+data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-11-13"
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
 ```
 ```{r Read in data}
@@ -119,17 +119,18 @@ all_files = subset(all_files, !subjID %in% chance_performers$subjID)
 # Plot learning curves (and RTs) for each phase (TD: different shapes for different repetitions? Brake line between repetitions (block of 10 trials)?)
 learning_curves = ggplot(training, aes(alien_trial, ACC)) +  # group = repetition
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "pointrange") +
-  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
+  # stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
   coord_cartesian(y = c(0, 1))
-learning_curves + facet_grid(paste("Subj", subjID) ~ .)
-learning_curves + facet_grid(paste("Subj", subjID) ~ paste("Alien", sad_alien))  # Observation: Participants learn one alien after the other, rather than at the same time...
+learning_curves
+# learning_curves + facet_grid(paste("Subj", subjID) ~ .)
+# learning_curves + facet_grid(paste("Subj", subjID) ~ paste("Alien", sad_alien))  # Observation: Participants learn one alien after the other, rather than at the same time...
 
 learning_curves$data = learning
 learning_curves + aes(color = phase)
-learning_curves + aes(color = phase) + facet_grid(paste("Subj", subjID) ~ paste("Task set", TS))
+# learning_curves + aes(color = phase) + facet_grid(paste("Subj", subjID) ~ paste("Task set", TS))
 learning_curves + aes(color = phase) + facet_grid(~ paste("Task set", TS))
-learning_curves + aes(alien_trial, rt, color = phase)
-learning_curves + aes(alien_trial, rt, color = phase) + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))  # Observation: RTs are slowest when performance is worst
+learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900))
+learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))  # Observation: RTs are slowest when performance is worst
 
 learning_curves$data = cloudy
 learning_curves
@@ -200,7 +201,7 @@ season_TS = ddply(subset(all_files, trial_type == "feed-aliens" & season %in% c(
                   .(subjID, TS, season), summarize,
                   TS = TS[1])
 
-# Fix item_chosen, item_left, and item_right columns
+# Rename item_chosen, item_left, and item_right columns: instead of "hot", "cold", and "rainy", call them "TS0", "TS1", and "TS2", depending on participant's randomization
 pick_aliens = subset(all_files, trial_type == "pick-aliens", select = c("subjID", "trial_index", "item_left", "item_right", "item_chosen", "assess"))
 pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
 for (row in 1:nrow(pick_aliens)) {
@@ -209,43 +210,43 @@ for (row in 1:nrow(pick_aliens)) {
   pick_aliens$item_chosen[row] = chosen_item_name
 }
 
-pick_aliens = merge(pick_aliens,
-                    season_TS,
-                    by.x = c("subjID", "item_chosen"),
-                    by.y = c("subjID", "season"), 
-                    all = T)
-pick_aliens$item_chosen = ifelse(pick_aliens$item_chosen %in% c("hot", "cold", "rainy"),
-                                 paste("TS", as.character(pick_aliens$TS), sep = ""),
-                                 pick_aliens$item_chosen)
-pick_aliens$TS = NULL
+for (subj in levels(factor(all_files$subjID))) {
+  for (seas in c("hot", "cold", "rainy")) {
+    sub = subset(season_TS, subjID == subj & season == seas)$TS
+    pick_aliens$item_right = gsub(seas, sub, pick_aliens$item_right)
+    pick_aliens$item_left = gsub(seas, sub, pick_aliens$item_left)
+    pick_aliens$item_chosen = gsub(seas, sub, pick_aliens$item_chosen)
+  }
+}
 
-pick_aliens = merge(pick_aliens,
-                    season_TS,
-                    by.x = c("subjID", "item_left"),
-                    by.y = c("subjID", "season"), 
-                    all = T)
-pick_aliens$item_left = ifelse(pick_aliens$item_left %in% c("hot", "cold", "rainy"),
-                                 paste("TS", as.character(pick_aliens$TS), sep = ""),
-                                 pick_aliens$item_left)
-pick_aliens$TS = NULL
+pick_aliens$assess = as.character(pick_aliens$assess)
+pick_aliens$assess = gsub("season", "TS", pick_aliens$assess)
 
-pick_aliens = merge(pick_aliens,
-                    season_TS,
-                    by.x = c("subjID", "item_right"),
-                    by.y = c("subjID", "season"), 
-                    all = T)
-pick_aliens$item_right = ifelse(pick_aliens$item_right %in% c("hot", "cold", "rainy"),
-                                 paste("TS", as.character(pick_aliens$TS), sep = ""),
-                                 pick_aliens$item_right)
-pick_aliens$TS = NULL
+for (row in 1:nrow(pick_aliens)) {
+  if (!is.na(pick_aliens$item_chosen[row])) {
+    if (nchar(pick_aliens$item_chosen[row]) == 1) {
+      pick_aliens$item_chosen[row] = paste("TS", pick_aliens$item_chosen[row], sep = "")
+    }
+  }
+  if (!is.na(pick_aliens$item_left[row])) {
+    if (nchar(pick_aliens$item_left[row]) == 1) {
+      pick_aliens$item_left[row] = paste("TS", pick_aliens$item_left[row], sep = "")
+    }
+  }
+  if (!is.na(pick_aliens$item_right[row])) {
+    if (nchar(pick_aliens$item_right[row]) == 1) {
+      pick_aliens$item_right[row] = paste("TS", pick_aliens$item_right[row], sep = "")
+    }
+  }
+}
 
 # Add learnt values
-alien_season_values = ddply(learnt_values, .(subjID, sad_alien, season), summarize,  # replace season with TS
-                            av_reward = mean(reward, na.rm = T))
-alien_season_values$selected = with(alien_season_values, paste("alien", as.numeric(as.character(sad_alien)) + 1, season, sep = ""))
-alien_season_values$assess = "alien-same-season"
-alien_season_values$sad_alien = alien_season_values$season = NULL
-all_values = rbind(all_values, alien_season_values)
+alien_TS_values = ddply(learnt_values, .(subjID, sad_alien, TS), summarize,
+                        av_reward = mean(reward, na.rm = T))
+alien_TS_values$selected = with(alien_TS_values, paste("alien", as.numeric(as.character(sad_alien)) + 1, TS, sep = ""))
+alien_TS_values$assess = "alien-same-TS"
+alien_TS_values$sad_alien = alien_TS_values$TS = NULL
+all_values = rbind(all_values, alien_TS_values)
 
 for (which in c("left", "right", "chosen")) {
   pick_aliens = merge(pick_aliens, all.x = T,
@@ -256,10 +257,18 @@ for (which in c("left", "right", "chosen")) {
 pick_aliens$value_unchosen = with(pick_aliens, ifelse(item_chosen == item_left, value_right, value_left))
 pick_aliens$value_diff = with(pick_aliens, value_chosen - value_unchosen)
 
-ggplot(pick_aliens, aes(trial_index, value_diff, color = assess)) +
+ggplot(subset(pick_aliens, subjID < 15), aes(trial_index, value_diff, color = assess)) +
   geom_point() +
   geom_hline(yintercept = 0) +
   facet_grid(~ subjID)
+
+pick_aliens_sum = ddply(subset(pick_aliens, !is.na(assess)), .(subjID, assess), summarize,
+                        value_diff = mean(value_diff, na.rm = T))
+
+ggplot(pick_aliens_sum, aes(assess, value_diff, color = assess)) +
+  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun.data = "mean_se", geom = "pointrange") +
+  geom_point(position = "jitter", alpha = 0.3)
 ```
 ```{r Rainbow season}
 
@@ -281,10 +290,24 @@ comb_dat = merge(correct_values,
 comb_dat
 
 # Plot OPTIMAL CHOICES in every season together with subject's choices in the rainbow season
-ggplot(comb_dat, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+ggplot(subset(comb_dat, subjID < 20), aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
   geom_point() +
   theme(legend.position = "none") +
   facet_grid(paste("Subj", subjID) ~ paste("TS", TS))
+
+ggplot(subset(comb_dat, TS == "rainbow"), aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  facet_wrap(~ paste("Subj", subjID))
+
+comb_dat_sum = ddply(comb_dat, .(sad_alien, item_chosen, TS), summarize,
+                      av_reward = mean(av_reward, na.rm = T))
+comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] = 5 * comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] - 10  # to make differences in size more evident
+
+ggplot(comb_dat_sum, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  facet_grid( ~ paste("TS", TS))
 ```
 ```{r Start button}
 ```
