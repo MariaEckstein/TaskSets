@@ -10,8 +10,12 @@ library("ggplot2"); library("plyr")
 theme_set(theme_bw())
 
 n_aliens = 4
-data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-11-13"
+data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-11-29"
+plot_dir = file.path(data_dir, "plots")
+unlink(plot_dir, recursive=TRUE)
+dir.create(plot_dir)
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
+gg_save = T
 ```
 ```{r Read in data}
 filenames = list.files(data_dir, pattern = "*.csv")
@@ -116,25 +120,31 @@ all_files = subset(all_files, !subjID %in% chance_performers$subjID)
 (cloudy = subset(feed_aliens, season %in% paste(c("cold", "hot", "rainy"), "_cloudy", sep = "")))
 (rainbow = subset(feed_aliens, season == "rainbow"))
 
-# Plot learning curves (and RTs) for each phase (TD: different shapes for different repetitions? Brake line between repetitions (block of 10 trials)?)
-learning_curves = ggplot(training, aes(alien_trial, ACC)) +  # group = repetition
+# Plot learning curves (and RTs) for each phase
+training_curves = ggplot(training, aes(alien_trial, 100 * ACC)) +
   stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "pointrange") +
-  # stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "line") +
-  coord_cartesian(y = c(0, 1))
-learning_curves
-# learning_curves + facet_grid(paste("Subj", subjID) ~ .)
-# learning_curves + facet_grid(paste("Subj", subjID) ~ paste("Alien", sad_alien))  # Observation: Participants learn one alien after the other, rather than at the same time...
+  labs(x = "Trial", y = "% correct", title = "Training phase") +
+  coord_cartesian(y = c(0, 100))
+# training_curves + facet_grid(paste("Subj", subjID) ~ .)
+# training_curves + facet_grid(paste("Subj", subjID) ~ paste("Alien", sad_alien))
 
+learning_curves = training_curves + aes(color = phase) + labs(title = "Learning phase")
 learning_curves$data = learning
-learning_curves + aes(color = phase)
-# learning_curves + aes(color = phase) + facet_grid(paste("Subj", subjID) ~ paste("Task set", TS))
-learning_curves + aes(color = phase) + facet_grid(~ paste("Task set", TS))
-learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900))
-learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))  # Observation: RTs are slowest when performance is worst
+learning_curves_TS = learning_curves + labs(title = "Learning phase") + facet_grid(~ paste("Task set", TS))
+RT_curves = learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + labs(y = "Response time (ms)")
+RT_TS_curves = learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + labs(x = "Trial", y = "Response time (ms)") + facet_grid(~ paste("Task set", TS))
 
-learning_curves$data = cloudy
-learning_curves
-learning_curves + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))
+cloudy_curves = learning_curves + theme(legend.position = "none") + labs(title = "Cloudy phase") + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))
+cloudy_curves$data = cloudy
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "1training_curves.png"), training_curves, width = 3, height = 3)
+  ggsave(file.path(plot_dir, "1learning_curves.png"), learning_curves, width = 7, height = 3)
+  ggsave(file.path(plot_dir, "1learning_curves_TS.png"), learning_curves_TS, width = 14, height = 3)
+  ggsave(file.path(plot_dir, "1RT_curves.png"), RT_curves, width = 7, height = 3)
+  ggsave(file.path(plot_dir, "1RT_TS_curves.png"), RT_TS_curves, width = 9, height = 3)
+  ggsave(file.path(plot_dir, "1cloudy_curves.png"), cloudy_curves, width = 9, height = 9)
+}
 ```
 ```{r Calculate empirical values for aliens, seasons, items}
 
@@ -162,9 +172,12 @@ all_values = rbind(alien_values, TS_values, item_values)
 all_values
 
 value_plot = ggplot(all_values, aes(assess, av_reward, fill = selected)) +
-  geom_bar(stat = "identity", position = "dodge") +
+  stat_summary(fun.data = "mean_cl_normal", geom = "bar", position = "dodge") +
+  stat_summary(fun.data = "mean_cl_normal", geom = "pointrange", position = position_dodge(width = 0.9)) +
+  # geom_bar(stat = "identity", position = "dodge") +
+  labs(y = "Average reward / trial", x = "", fill = "") +
   coord_flip()
-value_plot + facet_wrap(~ paste("Subj", subjID))
+value_plot_subj = value_plot + facet_wrap(~ paste("Subj", subjID))
 
 # Values for alien-TS combinations
 alien_TS_values = ddply(learnt_values, .(subjID, TS, sad_alien), summarize,
@@ -172,9 +185,9 @@ alien_TS_values = ddply(learnt_values, .(subjID, TS, sad_alien), summarize,
 alien_TS_values$selected = with(alien_TS_values, paste("alien", as.numeric(as.character(sad_alien))+1, TS, sep = ""))
 alien_TS_values$assess = "AlienSameTS"
 
-value_plot$data = alien_TS_values
-value_plot = value_plot + aes(fill = sad_alien) + labs(x = "TS", fill = "Alien")
-value_plot + facet_wrap(~ paste("Subj", subjID))
+alien_plot = value_plot + aes(x = TS, fill = sad_alien) + labs(x = "TS", fill = "Alien")
+alien_plot$data = alien_TS_values
+alien_plot2 = alien_plot + facet_wrap(~ paste("Subj", subjID))
 
 alien_TS_obj = expand.grid(sad_alien = unique(alien_TS_values$sad_alien),
                            TS = unique(alien_TS_values$TS),
@@ -187,8 +200,16 @@ alien_TS_obj$assess = alien_TS_obj$TS
 
 alien_TS_obj
 
-value_plot$data = alien_TS_obj
-value_plot + labs(title = "True underlying TS")
+true_values = value_plot + labs(title = "True underlying TS")
+true_values$data = alien_TS_obj
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "2value_plot.png"), value_plot, width = 3, height = 3)
+  ggsave(file.path(plot_dir, "2value_plot_subj.png"), value_plot_subj, width = 15, height = 15)
+  ggsave(file.path(plot_dir, "2alien_plot.png"), alien_plot, width = 3, height = 3)
+  ggsave(file.path(plot_dir, "2alien_plot2.png"), alien_plot2, width = 15, height = 15)
+  ggsave(file.path(plot_dir, "2true_values.png"), true_values, width = 3, height = 3)
+}
 ```
 ```{r Phase 3: Pick aliens, TSs, items}
 
@@ -240,20 +261,25 @@ for (col in c("unchosen", "chosen")) {
   colnames(pick_aliens)[colnames(pick_aliens) == "av_reward"] = paste("value_", col, sep = "")
 }
 
-ggplot(subset(pick_aliens, subjID < 20), aes(trial_index, value_chosen - value_unchosen, color = assess)) +
-  geom_point() +
-  geom_hline(yintercept = 0) +
-  labs(x = "Trial", y = "Value chosen minus unchosen", color = "") +
-  facet_grid(~ subjID)
-
 pick_aliens_sum = ddply(subset(pick_aliens, !is.na(assess)), .(subjID, assess), summarize,
                         value_diff = mean(value_chosen - value_unchosen, na.rm = T))
 
-ggplot(pick_aliens_sum, aes(assess, value_diff, color = assess)) +
+gg_pick_aliens = ggplot(pick_aliens_sum, aes(assess, value_diff, color = subjID)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
-  labs(x = "Trial", y = "Value chosen minus unchosen", color = "") +
+  labs(x = "Trial", y = "Value chosen minus unchosen", color = "Participant ID") +
   geom_point(position = "jitter", alpha = 0.3)
+
+gg_pick_aliens_subj = ggplot(subset(pick_aliens), aes(trial_index, value_chosen - value_unchosen, color = assess)) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  labs(x = "Trial", y = "Value chosen minus unchosen", color = "") +
+  facet_wrap(~ subjID)
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "3gg_pick_aliens.png"), gg_pick_aliens, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "3gg_pick_aliens_subj.png"), gg_pick_aliens_subj, width = 15, height = 15)
+}
 ```
 ```{r Rainbow season}
 
@@ -275,24 +301,25 @@ comb_dat = merge(correct_values,
 comb_dat
 
 # Plot OPTIMAL CHOICES in every season together with subject's choices in the rainbow season
-ggplot(subset(comb_dat, subjID < 20), aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
-  geom_point() +
-  theme(legend.position = "none") +
-  facet_grid(paste("Subj", subjID) ~ paste("TS", TS))
-
-ggplot(subset(comb_dat, TS == "rainbow"), aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
-  geom_point() +
-  theme(legend.position = "none") +
-  facet_wrap(~ paste("Subj", subjID))
-
 comb_dat_sum = ddply(comb_dat, .(sad_alien, item_chosen, TS), summarize,
                       av_reward = mean(av_reward, na.rm = T))
 comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] = 7 * comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] - 15  # to make differences in size more evident
 
-ggplot(comb_dat_sum, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+gg_rainbow_choice = ggplot(comb_dat_sum, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
   geom_point() +
   theme(legend.position = "none") +
+  labs(x = "Alien ID", y = "", color = "") +
   facet_grid( ~ paste("TS", TS))
+
+gg_rainbow_choice_subj = ggplot(subset(comb_dat, TS == "rainbow"), aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  facet_wrap(~ paste("Subj", subjID))
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "4gg_rainbow_choice.png"), gg_rainbow_choice, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "4gg_rainbow_choice_subj.png"), gg_rainbow_choice_subj, width = 15, height = 15)
+}
 ```
 ```{r Start button}
 ```
