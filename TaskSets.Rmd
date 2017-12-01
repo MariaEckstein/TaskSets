@@ -6,16 +6,28 @@ output: html_document
 ---
 
 ```{r Set parameters, load packages, etc.}
-library("ggplot2"); library("plyr")
+
+# TDs:
+# CHECK sort cloudy learning curves by the value of the TS-alien (average over 3 or so), rather than by TS ~ alien
+# CHECK check if participants learn the whole TS, or if they learn TS-alien values separately: run a logistic regression alien0_acc_t ~ alien0_acc_tminus1 + alien123_acc_tminus1 (+ TS)
+# discriminate rainbow strategies: 0 variance (all the same choice); variance 1 (pick a different one each time); closest to TS0 / TS1 / TS2
+# plot reward distributions for each TS (question: do they overlap more for the slower-learned, harder, lower-value TS?)
+# problems with current paradigm:
+  # 1) competition phase: according to what do they make selections?! -> check if it's memory (TS-alien performance during learning block beforehand); cuteness (are some aliens / TS / items preferred over others?)
+  # 2) learning speed: TS0 is learned faster than TS1, than TS2 -> this confounds inference in the cloudy season; and everything else too -> make incorrect-feedback totally informative, i.e., 0?
+
+library("ggplot2"); library("plyr"); library("lme4")
 theme_set(theme_bw())
 
 n_aliens = 4
 data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/17-11-29"
 plot_dir = file.path(data_dir, "plots")
-unlink(plot_dir, recursive=TRUE)
-dir.create(plot_dir)
+if (!dir.exists(plot_dir)) {
+  dir.create(plot_dir)
+}
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
 gg_save = T
+run_regression = F
 ```
 ```{r Read in data}
 filenames = list.files(data_dir, pattern = "*.csv")
@@ -111,41 +123,6 @@ perf_dat$below_criterion = perf_dat$ACC < perf_criterion
 (chance_performers = subset(perf_dat, below_criterion == T))
 all_files = subset(all_files, !subjID %in% chance_performers$subjID)
 ```
-```{r Feed-alien phases}
-
-# Get data frames for each phase (training, learning & refreshing, cloudy)
-(feed_aliens = subset(all_files, trial_type == "feed-aliens"))  #"phase1")
-(training = subset(feed_aliens, season == "training"))
-(learning = subset(feed_aliens, season %in% c("cold", "hot", "rainy")))
-(cloudy = subset(feed_aliens, season %in% paste(c("cold", "hot", "rainy"), "_cloudy", sep = "")))
-(rainbow = subset(feed_aliens, season == "rainbow"))
-
-# Plot learning curves (and RTs) for each phase
-training_curves = ggplot(training, aes(alien_trial, 100 * ACC)) +
-  stat_summary(fun.data = mean_cl_normal, fun.args = list(mult = 1), geom = "pointrange") +
-  labs(x = "Trial", y = "% correct", title = "Training phase") +
-  coord_cartesian(y = c(0, 100))
-# training_curves + facet_grid(paste("Subj", subjID) ~ .)
-# training_curves + facet_grid(paste("Subj", subjID) ~ paste("Alien", sad_alien))
-
-learning_curves = training_curves + aes(color = phase) + labs(title = "Learning phase")
-learning_curves$data = learning
-learning_curves_TS = learning_curves + labs(title = "Learning phase") + facet_grid(~ paste("Task set", TS))
-RT_curves = learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + labs(y = "Response time (ms)")
-RT_TS_curves = learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + labs(x = "Trial", y = "Response time (ms)") + facet_grid(~ paste("Task set", TS))
-
-cloudy_curves = learning_curves + theme(legend.position = "none") + labs(title = "Cloudy phase") + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))
-cloudy_curves$data = cloudy
-
-if (gg_save) {
-  ggsave(file.path(plot_dir, "1training_curves.png"), training_curves, width = 3, height = 3)
-  ggsave(file.path(plot_dir, "1learning_curves.png"), learning_curves, width = 7, height = 3)
-  ggsave(file.path(plot_dir, "1learning_curves_TS.png"), learning_curves_TS, width = 14, height = 3)
-  ggsave(file.path(plot_dir, "1RT_curves.png"), RT_curves, width = 7, height = 3)
-  ggsave(file.path(plot_dir, "1RT_TS_curves.png"), RT_TS_curves, width = 9, height = 3)
-  ggsave(file.path(plot_dir, "1cloudy_curves.png"), cloudy_curves, width = 9, height = 9)
-}
-```
 ```{r Calculate empirical values for aliens, seasons, items}
 
 # Calcuate "learnt values" (average reward for each alien/TS/item obtained during the refresher right before picking)
@@ -174,7 +151,6 @@ all_values
 value_plot = ggplot(all_values, aes(assess, av_reward, fill = selected)) +
   stat_summary(fun.data = "mean_cl_normal", geom = "bar", position = "dodge") +
   stat_summary(fun.data = "mean_cl_normal", geom = "pointrange", position = position_dodge(width = 0.9)) +
-  # geom_bar(stat = "identity", position = "dodge") +
   labs(y = "Average reward / trial", x = "", fill = "") +
   coord_flip()
 value_plot_subj = value_plot + facet_wrap(~ paste("Subj", subjID))
@@ -200,7 +176,7 @@ alien_TS_obj$assess = alien_TS_obj$TS
 
 alien_TS_obj
 
-true_values = value_plot + labs(title = "True underlying TS")
+true_values = value_plot + labs(title = "True underlying TS", fill = "Alien")
 true_values$data = alien_TS_obj
 
 if (gg_save) {
@@ -209,6 +185,133 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "2alien_plot.png"), alien_plot, width = 3, height = 3)
   ggsave(file.path(plot_dir, "2alien_plot2.png"), alien_plot2, width = 15, height = 15)
   ggsave(file.path(plot_dir, "2true_values.png"), true_values, width = 3, height = 3)
+}
+```
+```{r Feed-alien phases}
+
+# TD: run the same analyses on the learning phase as on the cloudy phase: influence of value / reward and acc_1back_self & acc_1back_other on learning; change in that over time; etc.
+
+# Get data frames for each phase (training, learning & refreshing, cloudy)
+(feed_aliens = subset(all_files, trial_type == "feed-aliens"))
+feed_aliens = merge(feed_aliens, all.x = T,  # add av_reward column
+                    subset(alien_TS_obj, select = c("sad_alien", "TS", "av_reward")),
+                    by = c("sad_alien", "TS"))
+# (training = subset(feed_aliens, phase == "Training"))
+# (learning = subset(feed_aliens, phase == "Learning"))
+# (rainbow = subset(feed_aliens, phase == "Rainbow"))
+# (cloudy = subset(feed_aliens, phase == "Cloudy"))
+
+# Plot learning curves (and RTs) for each phase
+basic_learning_curves = ggplot(feed_aliens, aes(trial_index, 100 * ACC, color = phase)) +
+  stat_summary(fun.data = mean_se, geom = "pointrange") +
+  geom_hline(yintercept = 100/3, linetype = "dotted") +
+  labs(x = "Trial", y = "% correct")
+training_curves = ggplot(training, aes(alien_trial, 100 * ACC)) +
+  stat_summary(fun.data = mean_se, geom = "pointrange") +
+  labs(x = "Trial", y = "% correct") +
+  coord_cartesian(y = c(0, 100))
+
+training_curves2 = training_curves + facet_wrap( ~ paste("Subj", subjID))
+training_curves3 = training_curves + facet_grid(paste("Subj", subjID) ~ paste("Alien", sad_alien))
+
+learning_curves = training_curves + aes(color = phase)
+learning_curves$data = learning
+learning_curves_TS = learning_curves + facet_grid(~ paste("Task set", TS))
+learning_curves_TS_aliens = learning_curves + facet_grid(paste("Alien", sad_alien) ~ paste("Task set", TS))
+RT_curves = learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + labs(y = "Response time (ms)")
+RT_TS_curves = learning_curves + aes(alien_trial, rt, color = phase) + coord_cartesian(y = c(400, 900)) + labs(x = "Trial", y = "Response time (ms)") + facet_grid(~ paste("Task set", TS))
+
+# cloudy_curves => see next block!
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "1training_curves.png"), training_curves, width = 3, height = 3)
+  ggsave(file.path(plot_dir, "1training_curves2.png"), training_curves2, width = 15, height = 10)
+  ggsave(file.path(plot_dir, "1training_curves3.png"), training_curves3, width = 3, height = 20)
+  ggsave(file.path(plot_dir, "1learning_curves.png"), learning_curves, width = 7, height = 3)
+  ggsave(file.path(plot_dir, "1learning_curves_TS.png"), learning_curves_TS, width = 14, height = 3)
+  ggsave(file.path(plot_dir, "1learning_curves_TS_aliens.png"), learning_curves_TS_aliens, width = 15, height = 15)
+  ggsave(file.path(plot_dir, "1RT_curves.png"), RT_curves, width = 7, height = 3)
+  ggsave(file.path(plot_dir, "1RT_TS_curves.png"), RT_TS_curves, width = 9, height = 3)
+}
+```
+```{r Cloudy season: Do participants infer whole TS or individual items}
+# 
+# cloudy = subset(feed_aliens, season %in% paste(c("cold", "hot", "rainy"), "_cloudy", sep = ""))
+# 
+# cloudy_curves1 = ggplot(cloudy, aes(trial_index, 100 * ACC)) +
+#   stat_summary(fun.data = mean_se, geom = "pointrange") +
+#   geom_hline(yintercept = 100/3, linetype = "dotted") +
+#   labs(x = "Trial", y = "% correct")
+# 
+# cloudy = merge(cloudy,
+#                subset(alien_TS_obj, select = c("sad_alien", "TS", "av_reward")),
+#                by = c("sad_alien", "TS"))
+cloudy$alien_trial[cloudy$alien_trial > 10] = cloudy$alien_trial[cloudy$alien_trial > 10] - 10
+cloudy = cloudy[order(cloudy$subjID, cloudy$sad_alien, cloudy$TS, cloudy$alien_trial),]  # bring in the right order for regression: each line must be the predictor of the immediate next line!
+
+cloudy_curves = learning_curves + aes(color = TS, shape = sad_alien) + labs(title = "Cloudy phase - separated by av. rewards") + facet_grid( ~ av_reward)
+cloudy_curves2 = training_curves + aes(color = av_reward, group = av_reward) + stat_summary(fun.data = mean_se, geom = "line") + labs(color = "Value")
+cloudy_curves$data = cloudy_curves2$data = cloudy
+
+dat = subset(cloudy, select = c("subjID", "sad_alien", "TS", "av_reward", "alien_trial", "ACC"))
+
+ACC_1back_self = c(NA, dat$ACC[1:length(dat$ACC)-1])
+ACC_1back_self[dat$alien_trial == 1] = NA
+dat$ACC_1back_self = ACC_1back_self
+
+others_dat = data.frame()
+for (alien in unique(dat$sad_alien)) {
+  alien_dat = ddply(subset(dat, sad_alien != alien),
+        .(subjID, TS, alien_trial), summarize,
+        ACC_others = mean(ACC, na.rm = T))
+  alien_dat$sad_alien = alien
+  others_dat = rbind(others_dat, alien_dat)
+}
+ACC_1back_others = c(NA, others_dat$ACC_others[1:length(others_dat$ACC_others)-1])
+ACC_1back_others[others_dat$alien_trial == 1] = NA
+others_dat$ACC_1back_others = ACC_1back_others
+
+dat = merge(others_dat, dat,  # sanity check: dat should have 12000 rows: 50 subj * 20 alien_trials * 3 TS * 4 sad_aliens
+            by = c("subjID", "TS", "sad_alien", "alien_trial"))
+dat$TS = factor(dat$TS)
+dat$sad_alien = factor(dat$sad_alien)
+
+regression_plot = alien_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "% correct", fill = "Alien")
+regression_plot$data = dat
+
+if (run_regression) {
+  
+  glmer_mod_1back_self_others = glmer(ACC ~ ACC_1back_self * ACC_1back_others + (ACC_1back_self * ACC_1back_others | subjID),
+                    family = binomial,
+                    data = dat,
+                    na.action = na.omit,
+                    control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
+  write.csv(as.data.frame(summary(glmer_mod_1back_self_others)$coef), file.path(plot_dir, "glmer_1back_selfothers_summary.csv"))
+  write.csv(as.data.frame(anova(glmer_mod_1back_self_others, type = 3)), file.path(plot_dir, "glmer_1back_selfothers_aov.csv"))
+  
+  glmer_mod_value = glmer(ACC ~ av_reward + (av_reward | subjID),
+                    family = binomial,
+                    data = dat,
+                    na.action = na.omit,
+                    control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
+  write.csv(as.data.frame(summary(glmer_mod_value)$coef), file.path(plot_dir, "glmer_value_summary.csv"))
+  write.csv(as.data.frame(anova(glmer_mod_value, type = 3)), file.path(plot_dir, "glmer_value_aov.csv"))
+
+  glmer_mod_all3 = glmer(ACC ~ ACC_1back_self * ACC_1back_others * av_reward + (ACC_1back_self * ACC_1back_others * av_reward | subjID),
+                    family = binomial,
+                    data = dat,
+                    na.action = na.omit,
+                    control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e7)))
+  summary(glmer_mod_all3)
+  write.csv(as.data.frame(summary(glmer_mod_all3)$coef), file.path(plot_dir, "glmer_all3_summary.csv"))
+  write.csv(as.data.frame(anova(glmer_mod_all3, type = 3)), file.path(plot_dir, "glmer_all3_aov.csv"))
+  }
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "1cloudy_curves.png"), cloudy_curves, width = 15, height = 3)
+  ggsave(file.path(plot_dir, "1cloudy_curves1.png"), cloudy_curves1, width = 15, height = 3)
+  ggsave(file.path(plot_dir, "1cloudy_curves2.png"), cloudy_curves2, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 3, height = 3)
 }
 ```
 ```{r Phase 3: Pick aliens, TSs, items}
@@ -287,7 +390,7 @@ correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot",
                       .(subjID, TS, sad_alien), summarize,
                       av_reward = mean(reward, na.rm = T),
                       item_chosen = item_chosen[1])
-correct_values  # should agree with the TS!
+correct_values  # agrees with the TS!
 
 rainbow_aliens = ddply(subset(rainbow, item_chosen != "NaN"),
                        c("subjID", "sad_alien", "TS", "item_chosen"),
@@ -315,6 +418,47 @@ gg_rainbow_choice_subj = ggplot(subset(comb_dat, TS == "rainbow"), aes(sad_alien
   geom_point() +
   theme(legend.position = "none") +
   facet_wrap(~ paste("Subj", subjID))
+
+# Categorize participants' strategies
+rainbow_aliens$strategy = "TS-strategy"
+for (subj in unique(rainbow_aliens$subjID)) {
+  subj_dat = subset(rainbow_aliens, subjID == subj)
+  if (all(subj_dat$av_reward == subj_dat$av_reward[1])) {  # if all items have been chosen equally often for all items
+    rainbow_aliens$strategy[rainbow_aliens$subjID == subj] = "Variance 0/1"
+  } #else if ()
+}
+# for (item in unique(rainbow_aliens$item_chosen)) {
+#   for (subj in unique(rainbow_aliens$subjID)) {
+#     row = subset(rainbow_aliens, item_chosen == item & subjID == subj)
+#     if (nrow(row)== 4) {  # if participant 
+#       while (all(row$av_reward == row$av_reward[1]) & row$av_reward[1] > 0) {
+#         rainbow_aliens[rainbow_aliens$item_chosen == item & rainbow_aliens$subjID == subj, "av_reward"] = rainbow_aliens[rainbow_aliens$item_chosen == item & rainbow_aliens$subjID == subj, "av_reward"] - 1
+#         row = subset(rainbow_aliens, item_chosen == item & subjID == subj)
+#       }
+#     }
+#   }
+# }
+
+# rainbow_aliens$av_reward[rainbow_aliens$av_reward <= 2] = NA
+# comb_dat2 = merge(correct_values,
+#                  rainbow_aliens,
+#                  by = c("subjID", "sad_alien", "TS", "item_chosen", "av_reward"), all = T)
+# comb_dat_sum2 = ddply(comb_dat2, .(sad_alien, item_chosen, TS), summarize,
+#                       av_reward = sum(av_reward, na.rm = T))
+# comb_dat_sum2$av_reward[comb_dat_sum2$TS == "rainbow"] = 5 * comb_dat_sum2$av_reward[comb_dat_sum2$TS == "rainbow"] - 9
+# 
+# gg_rainbow_choice2 = ggplot(comb_dat_sum2, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+#   geom_point() +
+#   theme(legend.position = "none") +
+#   labs(x = "Alien ID", y = "", color = "") +
+#   facet_grid( ~ paste("TS", TS))
+# gg_rainbow_choice2
+
+gg_rainbow_choice_subj2 = ggplot(subset(rainbow_aliens, strategy != "Variance 0/1"), aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  facet_wrap(~ paste("Subj", subjID))
+gg_rainbow_choice_subj2
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "4gg_rainbow_choice.png"), gg_rainbow_choice, width = 5, height = 3)
