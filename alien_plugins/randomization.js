@@ -14,7 +14,7 @@ TS_rands = [
   [2, 0, 1]
 ]
 
-// IDs of non-practice aliens (["alien1", "alien2", "alien4"])
+// IDs of non-practice aliens (["alien1", "alien2", "alien3", "alien4"])
 alien_ids = shuffle([0, 1, 2, 3])
 
 // DEFINITIONS

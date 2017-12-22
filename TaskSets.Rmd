@@ -7,13 +7,6 @@ output: html_document
 
 ```{r Set parameters, load packages, etc.}
 
-# TDs:
-# discriminate rainbow strategies: 0 variance (all the same choice); variance 1 (pick a different one each time); closest to TS0 / TS1 / TS2
-# plot reward distributions for each TS (question: do they overlap more for the slower-learned, harder, lower-value TS?)
-# problems with current paradigm:
-  # 1) competition phase: according to what do they make selections?! -> check if it's memory (TS-alien performance during learning block beforehand); cuteness (are some aliens / TS / items preferred over others?)
-  # 2) learning speed: TS0 is learned faster than TS1, than TS2 -> this confounds inference in the cloudy season; and everything else too -> make incorrect-feedback totally informative, i.e., 0?
-
 library("ggplot2"); library("plyr"); library("lme4")
 theme_set(theme_bw())
 
@@ -52,14 +45,11 @@ for (filename in filenames) {
     subj_file$trial[row] = trial
   }
   
-  # Add alien-trial column and repetition column (TD: count repetitions over TS, rather than seasons (keep counting through cloudy season); add repetition (how often has subject seen this TS?))
   subj_file$alien_trial = NA
   alien_season_counter = data.frame(training = rep(0, n_aliens),
                                     hot = rep(0, n_aliens), cold = rep(0, n_aliens), rainy = rep(0, n_aliens),
                                     hot_cloudy = rep(0, n_aliens), cold_cloudy = rep(0, n_aliens), rainy_cloudy = rep(0, n_aliens),
                                     rainbow = rep(0, n_aliens))
-  # subj_file$repetition = NA
-  # reps = data.frame(TS = c(0:2, "training"), rep = 0)
   
   for (row in 1:nrow(subj_file)) {
     sad_alien = subj_file$sad_alien[row] + 1
@@ -68,11 +58,6 @@ for (filename in filenames) {
       alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
       count = alien_season_counter[sad_alien, season]
       subj_file$alien_trial[row] = count
-      # if (count == 1) {
-      #   current_TS = subj_file$TS[row]
-      #   TS_count = subset(reps, TS == current_TS)$rep
-      #   subj_file$repetition[row] = TS_count
-      # }
     }
   }
   
@@ -109,11 +94,6 @@ all_files
 summary(all_files)
 ```
 ```{r Clean data and create summary dataframe}
-
-# all_files = subset(all_files, rt < 5000 & rt > 150)
-# sum_data = ddply(all_files, .(subjID, trial_type, sad_alien, season), summarize,
-#                  ACC = mean(correct, na.rm = T))
-# summary(sum_data)
 
 # Exclude subjects who don't reach criterion in training block
 criterion_dat = subset(all_files, season == "training" & alien_trial %in% 8:10)
@@ -206,6 +186,7 @@ for (row in 1:nrow(pick_aliens)) {
   chosen_item_name = ifelse(is.na(chosen_item), NA, strsplit(strsplit(chosen_item, "#")[[1]][2], "-button")[[1]])
   pick_aliens$item_chosen[row] = chosen_item_name
 }
+pick_aliens$item_chosen[pick_aliens$item_chosen == "xyz"] = NA
 ### Replace "hot", "cold", "rainy" with participants' corresponding TS 
 for (subj in levels(factor(all_files$subjID))) {
   for (seas in c("hot", "cold", "rainy")) {
@@ -220,8 +201,8 @@ pick_aliens$assess = gsub("season", "TS", pick_aliens$assess)
 pick_aliens$item_unchosen = ifelse(pick_aliens$item_chosen == pick_aliens$item_right, pick_aliens$item_left, pick_aliens$item_right)
 pick_aliens$item_left = pick_aliens$item_right = NULL
 ### Rename "0", "1", "2" to "TS0", "TS1", "TS2"
-pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
-pick_aliens$item_chosen[pick_aliens$assess == "TS"] = paste("TS", pick_aliens$item_chosen[pick_aliens$assess == "TS"], sep = "")
+# pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
+pick_aliens$item_chosen[pick_aliens$assess == "TS" & !is.na(pick_aliens$item_chosen)] = paste("TS", pick_aliens$item_chosen[pick_aliens$assess == "TS" & !is.na(pick_aliens$item_chosen)], sep = "")
 pick_aliens$item_unchosen = as.character(pick_aliens$item_unchosen)
 pick_aliens$item_unchosen[pick_aliens$assess == "TS"] = paste("TS", pick_aliens$item_unchosen[pick_aliens$assess == "TS"], sep = "")
 ### Add columns for the values of each trial's chosen and unchosen items
@@ -258,11 +239,33 @@ gg_pick_aliens_ACC_subj = gg_pick_aliens_value_subj +
   aes(trial_index, ACC_chosen - ACC_unchosen, color = assess) +
   labs(x = "Trial", y = "ACC chosen minus unchosen")
 
+cute_dat_chosen = ddply(subset(pick_aliens, !item_chosen %in% c("xyz", "TSxyz")), .(assess, item_chosen), summarize,
+                 count_chosen = length(item_chosen))
+cute_dat_unchosen = ddply(subset(pick_aliens, !item_chosen %in% c("xyz", "TSxyz")), .(assess, item_unchosen), summarize,
+                 count_unchosen = length(item_unchosen))
+cute_dat = merge(cute_dat_chosen, cute_dat_unchosen,
+                 by.x = c("assess", "item_chosen"),
+                 by.y = c("assess", "item_unchosen"))
+
+gg_pick_aliens_raw_ch = ggplot(cute_dat, aes(assess, count_chosen / length(unique(pick_aliens$subjID)), color = item_chosen)) +
+  geom_point(position = position_dodge(width = 0.9)) +
+  labs(x = "", y = "Chosen count", color = "")
+gg_pick_aliens_raw_unch = gg_pick_aliens_raw_ch +
+  aes(y = count_unchosen / length(unique(pick_aliens$subjID))) +
+  labs(y = "Unchosen count")
+gg_pick_aliens_raw_diff = gg_pick_aliens_raw_ch +
+  aes(y = (count_chosen - count_unchosen) / length(unique(pick_aliens$subjID))) +
+  geom_hline(yintercept = 0) +
+  labs(y = "Chosen - unchosen")
+
 if (gg_save) {
   ggsave(file.path(plot_dir, "4gg_pick_aliens_value.png"), gg_pick_aliens_value, width = 5, height = 3)
   ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC.png"), gg_pick_aliens_ACC, width = 5, height = 3)
   ggsave(file.path(plot_dir, "4gg_pick_aliens_value_subj.png"), gg_pick_aliens_value_subj, width = 15, height = 15)
   ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC_subj.png"), gg_pick_aliens_ACC_subj, width = 15, height = 15)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_ch.png"), gg_pick_aliens_raw_ch, width = 6, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_unch.png"), gg_pick_aliens_raw_unch, width = 6, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_diff.png"), gg_pick_aliens_raw_diff, width = 6, height = 3)
 }
 ```
 ```{r Plot learned values and true objective values}
@@ -476,21 +479,48 @@ if (run_regression) {
 }
 ```
 ```{r Rainbow season}
-
+# Get data that shows choices that correspond to the 3 TS
 correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
                       .(subjID, TS, sad_alien), summarize,
                       av_reward = mean(reward, na.rm = T),
                       item_chosen = item_chosen[1])
-correct_values$strategy = "TSX"
 correct_values  # agrees with the TS!
 
+# Get subjects' choices in the rainbow season
 rainbow_aliens = ddply(subset(feed_aliens, phase == "5RainbowSeason", item_chosen != "NaN"),
                        .(subjID, sad_alien, TS, item_chosen),
                        summarize,
                        av_reward = sum(!is.na(item_chosen)))  # add column that indicates in how many trials subject chose each item for each alien
 rainbow_aliens = subset(rainbow_aliens, item_chosen != "NaN")
+rainbow_aliens
 
-# Categorize participants' strategies
+# Create data of randomly acting subjects' choices (as a baselien to see if actual participants are closer to the TS, and to which ones)
+# TD
+
+# Categorize participants' strategies: count of choices "within" each TS divided by total number of choices
+rainbow_aliens$TS0 = rainbow_aliens$TS1 = rainbow_aliens$TS2 = F
+rainbow_aliens$TS0[rainbow_aliens$TS == 0 & item_chosen %in% c(...)] = T
+rainbow_aliens$TS0[rainbow_aliens$TS == 1 & item_chosen %in% c(...)] = T
+rainbow_aliens$TS0[rainbow_aliens$TS == 2 & item_chosen %in% c(...)] = T
+
+ddply(rainbow_aliens, .(subjID), summarize,
+      TS0sim = sum(TS0),
+      TS1sim = sum(TS1),
+      tS2sim = sum(TS2))
+```
+
+```{r}
+
+for (subj in unique(rainbow_aliens$subjID)) {
+  
+  subj_dat = ddply(subset(rainbow_aliens, subjID == subj), 
+                   .(), summarize)
+  
+  
+}
+# for each individual subject's choices
+# for the choices of the whole group
+
 rainbow_aliens$strategy = "TSX"
 for (subj in unique(rainbow_aliens$subjID)) {
   
