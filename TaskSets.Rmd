@@ -7,7 +7,7 @@ output: html_document
 
 ```{r Set parameters, load packages, etc.}
 
-library("ggplot2"); library("plyr"); library("lme4")
+library("ggplot2"); library("plyr"); library("lme4"); library("reshape2")
 theme_set(theme_bw())
 
 n_aliens = 4
@@ -487,26 +487,56 @@ correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot",
 correct_values  # agrees with the TS!
 
 # Get subjects' choices in the rainbow season
-rainbow_aliens = ddply(subset(feed_aliens, phase == "5RainbowSeason", item_chosen != "NaN"),
+rainbow_aliens = ddply(subset(feed_aliens, phase == "5RainbowSeason" & !is.na(key) & !is.na(rt)),
                        .(subjID, sad_alien, TS, item_chosen),
                        summarize,
-                       av_reward = sum(!is.na(item_chosen)))  # add column that indicates in how many trials subject chose each item for each alien
-rainbow_aliens = subset(rainbow_aliens, item_chosen != "NaN")
-rainbow_aliens
+                       times_chosen = length(item_chosen))  # in how many trials subject chose each item for each alien
+rainbow_aliens = merge(subset(rainbow_aliens, select = -TS), correct_values,  # what's the TS that the choice corresponds to?
+      by = c("subjID", "sad_alien", "item_chosen"),
+      all.x = T)
+rainbow_aliens$TS = as.character(rainbow_aliens$TS)
+rainbow_aliens$TS[is.na(rainbow_aliens$TS)] = "No TS"
 
 # Create data of randomly acting subjects' choices (as a baselien to see if actual participants are closer to the TS, and to which ones)
 # TD
 
 # Categorize participants' strategies: count of choices "within" each TS divided by total number of choices
-rainbow_aliens$TS0 = rainbow_aliens$TS1 = rainbow_aliens$TS2 = F
-rainbow_aliens$TS0[rainbow_aliens$TS == 0 & item_chosen %in% c(...)] = T
-rainbow_aliens$TS0[rainbow_aliens$TS == 1 & item_chosen %in% c(...)] = T
-rainbow_aliens$TS0[rainbow_aliens$TS == 2 & item_chosen %in% c(...)] = T
+rainbow_sum = data.frame()
+for (TSi in unique(rainbow_aliens$TS)) {
+  rainbow_TS = ddply(rainbow_aliens, .(subjID, TS == TSi), summarize,
+                      times_chosen_others = sum(times_chosen))
+  rainbow_TS_w = reshape(rainbow_TS, direction = "wide", timevar = "TS == TSi", idvar = "subjID")
+  rainbow_TS_w = merge(rainbow_TS_w,
+                       ddply(rainbow_aliens, .(subjID), summarize,
+                             n_valid_trials = sum(times_chosen)))
+  rainbow_TS_w[TSi] = with(rainbow_TS_w, times_chosen_others.TRUE / n_valid_trials)
+  rainbow_TS_w$times_chosen_others.FALSE = rainbow_TS_w$times_chosen_others.TRUE = rainbow_TS_w$n_valid_trials = NULL
+  if (nrow(rainbow_sum) > 0) {
+    rainbow_sum = merge(rainbow_sum, rainbow_TS_w, all = T)
+  } else {
+    rainbow_sum = rainbow_TS_w
+  }
+}
 
-ddply(rainbow_aliens, .(subjID), summarize,
-      TS0sim = sum(TS0),
-      TS1sim = sum(TS1),
-      tS2sim = sum(TS2))
+rainbow_sum_l = melt(rainbow_sum, id.vars = "subjID", variable.name = "TS", value.name = "Ratio")
+rainbow_sum_l$TS = factor(rainbow_sum_l$TS, levels = c("No TS", "2", "1", "0"))
+
+gg_rainbow_strategy = ggplot(rainbow_sum_l, aes(TS, Ratio, fill = TS)) + 
+  stat_summary(fun.data = mean_cl_boot, geom = "bar") +
+  stat_summary(fun.data = mean_cl_boot, geom = "pointrange", color = "black") +
+  geom_point(position = "jitter", alpha = 0.3) +
+  labs(x = "", y = "TS choices / all choices", fill = "") +
+  theme(legend.position = "none")
+
+gg_rainbow_values = ggplot(subset(rainbow_aliens, round(av_reward) > 2),  # TD: TAKE OUT FOR NEW DATA!!!
+       aes(round(av_reward), times_chosen, color = TS)) +
+  stat_summary(fun.data = mean_se, geom = "pointrange") +
+  labs(x = "Value", y = "Times chosen", color = "TS")
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "5gg_rainbow_strategy.png"), gg_rainbow_strategy, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "5gg_rainbow_values.png"), gg_rainbow_values, width = 5, height = 3)
+}
 ```
 
 ```{r}
