@@ -2,3 +2,8 @@
 /img/old
 /img/Quibbles*
 Data
+*.png
+.Rhistory
+.idea*
+*.html
+*.pdf

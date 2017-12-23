@@ -89,6 +89,7 @@ all_files$time_elapsed = all_files$points0 = all_files$points1 = all_files$point
 all_files$TS = as.character(all_files$TS)
 all_files$TS[is.na(all_files$TS)] = as.character(all_files$season[is.na(all_files$TS)])  # if column TS is NA, replace it with season column
 all_files$TS = factor(all_files$TS)
+all_files$reward[is.na(all_files$key)] = 0
 
 all_files
 summary(all_files)
@@ -358,7 +359,7 @@ regr_dat = merge(others_regr_dat, regr_dat,  # sanity check: cloudy regr_dat sho
 regr_dat$TS = factor(regr_dat$TS)
 regr_dat$sad_alien = factor(regr_dat$sad_alien)
 ```
-```{r Plot first cloudy trials: How well do participants infer TS}
+```{r Plot first trials: How well do participants infer TS}
 for (phas in c("1InitialLearning", "2CloudySeason")) {
   
   dat = subset(regr_dat, phase == phas & alien_trial_sum == 1)
@@ -374,14 +375,9 @@ for (phas in c("1InitialLearning", "2CloudySeason")) {
   dat[,paste("back", 1:n_aliens, sep = "")] = NULL
   
   dat = subset(dat, !is.na(cum_ACC_1back))
-  
-  # dat = subset(feed_aliens, phase == phas & alien_trial_sum < n_aliens+1)
-  # dat = subset(feed_aliens, phase == phas & trial %in% seq(2, 4), select = c("subjID", "sad_alien", "TS", "trial_index", "ACC", "alien_trial_sum", "trial", "av_reward"))
-  # dat$n_evidence = dat$trial - 1
   dat$value = round(dat$av_reward / 3) * 3
   dat$evidence = dat$cum_ACC_1back
   dat$evidence[dat$evidence >= 1] = "1+"
-  # dat[order(dat$subjID, dat$trial_index),]
   
   gg_value_guess = ggplot(dat, aes(evidence, 100 * ACC)) +  # , color = cum_ACC_1back, group = cum_ACC_1back
     stat_summary(fun.data = mean_se, geom = "bar") +
@@ -409,6 +405,84 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "1overall_learning_curves.png"), overall_learning_curves, width = 25, height = 3)
   ggsave(file.path(plot_dir, "1overall_learning_curves_subj.png"), overall_learning_curves_subj, width = 25, height = 25)
   ggsave(file.path(plot_dir, "1overall_RTs.png"), overall_RTs, width = 25, height = 3)
+}
+```
+```{r Plot perseverance mistakes}
+# Get data that shows choices that correspond to the 3 TS
+correct_TS = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
+                      .(TS, sad_alien), summarize,
+                      item_chosen = item_chosen[1])
+correct_TS$ACC = 1
+
+# Add accuracy for each TS to each trial
+for (TSi in unique(correct_TS$TS)) {
+  feed_aliens = merge(feed_aliens, subset(correct_TS, TS == TSi, select = -TS),
+        by.y = c("sad_alien", "item_chosen"),
+        by.x = c("sad_alien", "item_chosen"),
+        all.x = T,
+        suffixes = c("", TSi))
+  col = paste("ACC", TSi, sep = "")
+  feed_aliens[col][is.na(feed_aliens[col])] = 0
+}
+feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$trial_index),]
+
+# Add prev_TS
+feed_aliens$prev_TS = NA
+feed_aliens$prev_prev_TS = NA
+prev_TS = "training"
+prev_prev_TS = "training"
+prev_row = "training"
+for (row in 1:nrow(feed_aliens)) {
+  TS_row = as.character(feed_aliens$TS[row])
+  if (is.na(TS_row)) {
+    print("skip!")
+  } else if (TS_row != prev_row) {
+    prev_prev_TS = prev_TS
+    prev_TS = prev_row
+  }
+  feed_aliens$prev_TS[row] = prev_TS
+  feed_aliens$prev_prev_TS[row] = prev_prev_TS
+  prev_row = TS_row
+}
+feed_aliens$prev_TS[feed_aliens$prev_TS %in% c("training", "rainbow")] = NA
+feed_aliens$prev_prev_TS[feed_aliens$prev_prev_TS %in% c("training", "rainbow")] = NA
+
+# Add ACC_prev_TS
+feed_aliens$ACC_prev_TS = NA
+feed_aliens$ACC_prev_prev_TS = NA
+for (TSi in 0:2) {
+  rows_prev = !is.na(feed_aliens$prev_TS) & feed_aliens$prev_TS == TSi
+  rows_prev_prev = !is.na(feed_aliens$prev_prev_TS) & feed_aliens$prev_prev_TS == TSi
+  col = paste("ACC", TSi, sep = "")
+  feed_aliens[rows_prev, "ACC_prev_TS"] = feed_aliens[rows_prev, col]
+  feed_aliens[rows_prev_prev, "ACC_prev_prev_TS"] = feed_aliens[rows_prev_prev, col]
+}
+```
+```{r}
+for (phas in c("1InitialLearning", "2CloudySeason")) {
+  
+  dat = subset(feed_aliens, phase == phas)
+  
+  dat_l = melt(subset(dat, select = -ACC), measure.vars = c("ACC0", "ACC1", "ACC2"), variable.name = "ACC_TS", value.name = "ACC")
+  gg_otherTS_ACC = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = ACC_TS)) +
+    stat_summary(fun.data = mean_se, geom = "pointrange") +
+    geom_hline(yintercept = 100/3, linetype = "dotted") +
+    coord_cartesian(y = c(0, 100)) +
+    labs(x = "Trial", y = "% correct", color = "") +
+    facet_grid( ~ TS)
+  
+  gg_otherTS_ACC_alien = gg_otherTS_ACC +
+    facet_grid(sad_alien ~ TS)
+  
+  dat_l2 = melt(dat, measure.vars = c("ACC", "ACC_prev_TS"), variable.name = "ACC_TS", value.name = "ACC")  # , "ACC_prev_prev_TS"
+  gg_prevTS_ACC = gg_otherTS_ACC
+  gg_prevTS_ACC$data = dat_l2
+  
+  if (gg_save) {
+    ggsave(paste(plot_dir, "/2gg_otherTS_ACC_", phas, ".png", sep = ""), gg_otherTS_ACC, width = 9, height = 3)
+    ggsave(paste(plot_dir, "/2gg_otherTS_ACC_alien_", phas, ".png", sep = ""), gg_otherTS_ACC_alien, width = 9, height = 7)
+    ggsave(paste(plot_dir, "/2gg_prevTS_ACC_", phas, ".png", sep = ""), gg_prevTS_ACC, width = 9, height = 3)
+  }
 }
 ```
 ```{r Plot learning phase & cloudy season: Learning depends on reward size / value}
@@ -478,7 +552,47 @@ if (run_regression) {
   }
 }
 ```
-```{r Rainbow season}
+```{r Rainbow season - choice descriptives}
+# Combine OPTIMAL CHOICES with subject's choices in the rainbow season
+rainbow_aliens$TS = "rainbow"
+comb_dat = merge(correct_values,
+                 rainbow_aliens,
+                 by = c("subjID", "sad_alien", "TS", "item_chosen", "av_reward"), all = T)
+comb_dat
+
+# Plot OPTIMAL CHOICES in every season together with subject's choices in the rainbow season
+comb_dat_sum = ddply(comb_dat,
+                     .(sad_alien, item_chosen, TS), summarize,
+                     av_reward = mean(av_reward, na.rm = T))
+
+# Standardize TS values and rainbow choices to bring them into the same scale for plotting
+x = comb_dat_sum$av_reward[comb_dat_sum$TS != "rainbow"]
+mu = mean(x, na.rm = T)
+sd = sd(x, na.rm = T)
+comb_dat_sum$av_reward[comb_dat_sum$TS != "rainbow"] = (x - mu) / sd
+
+x = comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"]
+mu = mean(x, na.rm = T)
+sd = sd(x, na.rm = T)
+comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] = (x - mu) / sd
+
+gg_rainbow_choice = ggplot(comb_dat_sum, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  labs(x = "Alien", y = "", color = "") +
+  facet_grid( ~ paste("TS", TS))
+
+gg_rainbow_choice_subj = gg_rainbow_choice
+gg_rainbow_choice_subj$data = subset(comb_dat, TS == "rainbow")
+gg_rainbow_choice_subj = gg_rainbow_choice_subj +
+  facet_wrap(~ paste("Subj", subjID))
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "5gg_rainbow_choice.png"), gg_rainbow_choice, width = 7, height = 2)
+  ggsave(file.path(plot_dir, "5gg_rainbow_choice_subj.png"), gg_rainbow_choice_subj, width = 15, height = 15)
+}
+```
+```{r Rainbow season - TS}
 # Get data that shows choices that correspond to the 3 TS
 correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
                       .(subjID, TS, sad_alien), summarize,
@@ -506,11 +620,8 @@ for (TSi in unique(rainbow_aliens$TS)) {
   rainbow_TS = ddply(rainbow_aliens, .(subjID, TS == TSi), summarize,
                       times_chosen_others = sum(times_chosen))
   rainbow_TS_w = reshape(rainbow_TS, direction = "wide", timevar = "TS == TSi", idvar = "subjID")
-  rainbow_TS_w = merge(rainbow_TS_w,
-                       ddply(rainbow_aliens, .(subjID), summarize,
-                             n_valid_trials = sum(times_chosen)))
-  rainbow_TS_w[TSi] = with(rainbow_TS_w, times_chosen_others.TRUE / n_valid_trials)
-  rainbow_TS_w$times_chosen_others.FALSE = rainbow_TS_w$times_chosen_others.TRUE = rainbow_TS_w$n_valid_trials = NULL
+  rainbow_TS_w[TSi] = with(rainbow_TS_w, times_chosen_others.TRUE / 12)  # add column with fraction chosen / possible
+  rainbow_TS_w$times_chosen_others.FALSE = rainbow_TS_w$times_chosen_others.TRUE = NULL
   if (nrow(rainbow_sum) > 0) {
     rainbow_sum = merge(rainbow_sum, rainbow_TS_w, all = T)
   } else {
@@ -519,19 +630,20 @@ for (TSi in unique(rainbow_aliens$TS)) {
 }
 
 rainbow_sum_l = melt(rainbow_sum, id.vars = "subjID", variable.name = "TS", value.name = "Ratio")
-rainbow_sum_l$TS = factor(rainbow_sum_l$TS, levels = c("No TS", "2", "1", "0"))
+rainbow_sum_l$Ratio[is.na(rainbow_sum_l$Ratio)] = 0
+rainbow_sum_l$TS = factor(rainbow_sum_l$TS, levels = c("No TS", "2", "1", "0"), labels = c("No TS", "TS2", "TS1", "TS0"))
 
 gg_rainbow_strategy = ggplot(rainbow_sum_l, aes(TS, Ratio, fill = TS)) + 
   stat_summary(fun.data = mean_cl_boot, geom = "bar") +
   stat_summary(fun.data = mean_cl_boot, geom = "pointrange", color = "black") +
   geom_point(position = "jitter", alpha = 0.3) +
-  labs(x = "", y = "TS choices / all choices", fill = "") +
+  labs(x = "", y = "Fraction TS choices", fill = "") +
   theme(legend.position = "none")
 
 gg_rainbow_values = ggplot(subset(rainbow_aliens, round(av_reward) > 2),  # TD: TAKE OUT FOR NEW DATA!!!
-       aes(round(av_reward), times_chosen, color = TS)) +
+       aes(round(av_reward), times_chosen / 3, color = TS)) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
-  labs(x = "Value", y = "Times chosen", color = "TS")
+  labs(x = "Value", y = "Fraction chosen", color = "TS")
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "5gg_rainbow_strategy.png"), gg_rainbow_strategy, width = 5, height = 3)
@@ -539,85 +651,5 @@ if (gg_save) {
 }
 ```
 
-```{r}
-
-for (subj in unique(rainbow_aliens$subjID)) {
-  
-  subj_dat = ddply(subset(rainbow_aliens, subjID == subj), 
-                   .(), summarize)
-  
-  
-}
-# for each individual subject's choices
-# for the choices of the whole group
-
-rainbow_aliens$strategy = "TSX"
-for (subj in unique(rainbow_aliens$subjID)) {
-  
-  subj_dat = subset(rainbow_aliens, subjID == subj)
-  
-  var1_criterion = sum(subj_dat$av_reward >= 2) >= 8  # if participant chooses at least 8 different alien-item combinations (out of 16)
-  if (var1_criterion) {
-    rainbow_aliens$strategy[rainbow_aliens$subjID == subj] = "Variance 1"
-  }
-  
-  for (item in unique(subj_dat$item_chosen)) {
-    n_item_chosen = sum(subset(subj_dat, item_chosen == item)$av_reward)
-    if (n_item_chosen >= 16) {  # if participant chooses the same item at least 8 times, irrespective of alien (out of 16)
-      rainbow_aliens$strategy[rainbow_aliens$subjID == subj] = "Variance 0"
-    }
-  }
-}
-
-# Combine OPTIMAL CHOICES (not necessarily subject's choices) with subject's choices in the rainbow season
-comb_dat = merge(correct_values,
-                 rainbow_aliens,
-                 by = c("subjID", "sad_alien", "strategy", "TS", "item_chosen", "av_reward"), all = T)
-comb_dat
-
-# Plot OPTIMAL CHOICES in every season together with subject's choices in the rainbow season
-comb_dat_sum = ddply(subset(comb_dat, strategy == "TSX"),
-                     .(sad_alien, item_chosen, TS), summarize,
-                     av_reward = sum(av_reward, na.rm = T))
-comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] = 7 * comb_dat_sum$av_reward[comb_dat_sum$TS == "rainbow"] - 15  # to make differences in size more evident
-
-comb_dat$TSx = comb_dat$TS == "rainbow"
-comb_dat_sum2 = ddply(subset(comb_dat, strategy == "TSX"),
-                     .(sad_alien, item_chosen, TSx), summarize,
-                     av_reward = mean(av_reward, na.rm = T))
-
-comb_dat_sum2_wide = reshape(comb_dat_sum2, timevar = "TSx", idvar = c("sad_alien", "item_chosen"), direction = "wide")
-comb_dat_sum2_wide$av_reward.TRUE = (comb_dat_sum2_wide$av_reward.TRUE - mean(comb_dat_sum2_wide$av_reward.TRUE)) / sd(comb_dat_sum2_wide$av_reward.TRUE)
-comb_dat_sum2_wide$av_reward.FALSE = (comb_dat_sum2_wide$av_reward.FALSE - mean(comb_dat_sum2_wide$av_reward.FALSE, na.rm = T)) / sd(comb_dat_sum2_wide$av_reward.FALSE, na.rm = T)
-comb_dat_sum2_wide$diff = comb_dat_sum2_wide$av_reward.TRUE - comb_dat_sum2_wide$av_reward.FALSE
-
-diff_between_TS_and_comp = ggplot(comb_dat_sum2_wide, aes(sad_alien, item_chosen, size = diff)) +
-  geom_point() +
-  theme(legend.position = "none") +
-  labs(x = "Alien ID", y = "", color = "")
-
-comb_dat_sum2$av_reward[comb_dat_sum2$TSx == T] = 15 * comb_dat_sum2$av_reward[comb_dat_sum2$TSx == T] - 20  # to make differences in size more evident - SHOULD NORMALIZE BOTH INSTEAD
-gg_rainbow_choice = ggplot(comb_dat_sum, aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
-  geom_point() +
-  theme(legend.position = "none") +
-  labs(x = "Alien ID", y = "", color = "") +
-  facet_grid( ~ paste("TS", TS))
-
-gg_rainbow_choice2 = gg_rainbow_choice + aes(color = TSx) + facet_grid( ~ TSx)
-gg_rainbow_choice2$data = comb_dat_sum2
-
-gg_rainbow_choice_subj = ggplot(subset(comb_dat, TS == "rainbow"), aes(sad_alien, item_chosen, color = TS, size = av_reward)) +
-  geom_point() +
-  theme(legend.position = "none") +
-  facet_wrap(~ paste("Subj", subjID))
-
-
-if (gg_save) {
-  ggsave(file.path(plot_dir, "5gg_rainbow_choice.png"), gg_rainbow_choice, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "5gg_rainbow_choice2.png"), gg_rainbow_choice2, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "5diff_between_TS_and_comp.png"), diff_between_TS_and_comp, width = 3, height = 3)
-  ggsave(file.path(plot_dir, "5gg_rainbow_choice_subj.png"), gg_rainbow_choice_subj, width = 15, height = 15)
-}
-```
 ```{r Start button}
 ```
