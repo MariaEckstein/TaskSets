@@ -19,7 +19,7 @@ if (!dir.exists(plot_dir)) {
   dir.create(plot_dir)
 }
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
-gg_save = T
+gg_save = F
 run_regression = F
 ```
 ```{r Read in data}
@@ -91,7 +91,6 @@ all_files$TS[is.na(all_files$TS)] = as.character(all_files$season[is.na(all_file
 all_files$TS = factor(all_files$TS)
 all_files$reward[is.na(all_files$key)] = 0
 
-all_files
 summary(all_files)
 ```
 ```{r Clean data and create summary dataframe}
@@ -407,7 +406,7 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "1overall_RTs.png"), overall_RTs, width = 25, height = 3)
 }
 ```
-```{r Plot perseverance mistakes}
+```{r Create perseverance data}
 # Get data that shows choices that correspond to the 3 TS
 correct_TS = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
                       .(TS, sad_alien), summarize,
@@ -458,30 +457,67 @@ for (TSi in 0:2) {
   feed_aliens[rows_prev_prev, "ACC_prev_prev_TS"] = feed_aliens[rows_prev_prev, col]
 }
 ```
-```{r}
+```{r Plot perseverance mistakes}
 for (phas in c("1InitialLearning", "2CloudySeason")) {
   
   dat = subset(feed_aliens, phase == phas)
   
   dat_l = melt(subset(dat, select = -ACC), measure.vars = c("ACC0", "ACC1", "ACC2"), variable.name = "ACC_TS", value.name = "ACC")
-  gg_otherTS_ACC = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = ACC_TS)) +
+  dat_l$facet = ""
+  gg_otherTS_ACC = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(ACC_TS))) +
     stat_summary(fun.data = mean_se, geom = "pointrange") +
     geom_hline(yintercept = 100/3, linetype = "dotted") +
     coord_cartesian(y = c(0, 100)) +
     labs(x = "Trial", y = "% correct", color = "") +
-    facet_grid( ~ TS)
+    facet_grid(~ TS)
   
-  gg_otherTS_ACC_alien = gg_otherTS_ACC +
-    facet_grid(sad_alien ~ TS)
+  gg_otherTS_ACC_value = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(av_reward), group = sad_alien)) +
+    stat_summary(fun.data = mean_se, geom = "pointrange") +
+    geom_hline(yintercept = 100/3, linetype = "dotted") +
+    coord_cartesian(y = c(0, 100)) +
+    labs(x = "Trial", y = "% correct", color = "Value") +
+    facet_grid(factor(dat_l$TS, labels = c("TS0", "TS1", "TS2")) ~ ACC_TS)
+  
+  gg_otherTS_ACC_alien = gg_otherTS_ACC_value +
+    aes(color = factor(sad_alien)) +
+    labs(color = "Alien")
   
   dat_l2 = melt(dat, measure.vars = c("ACC", "ACC_prev_TS"), variable.name = "ACC_TS", value.name = "ACC")  # , "ACC_prev_prev_TS"
-  gg_prevTS_ACC = gg_otherTS_ACC
+  dat_l2$facet = ""
+  gg_prevTS_ACC = gg_otherTS_ACC_value +
+    aes(color = factor(av_reward)) +
+    facet_grid(TS ~ ACC_TS)
   gg_prevTS_ACC$data = dat_l2
+  
+  dat_l$ACC[dat_l$sad_alien == 3 & dat_l$TS == 0 & dat_l$ACC_TS == "ACC2"] = NA
+  dat_l$ACC[dat_l$sad_alien == 3 & dat_l$TS == 2 & dat_l$ACC_TS == "ACC0"] = NA
+  dat_l$ACC[dat_l$sad_alien == 0 & dat_l$TS == 2 & dat_l$ACC_TS == "ACC1"] = NA
+  dat_l$ACC[dat_l$sad_alien == 0 & dat_l$TS == 1 & dat_l$ACC_TS == "ACC2"] = NA
+  
+  dat_l2$ACC[dat_l2$sad_alien == 3 & dat_l2$TS == 0 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
+  dat_l2$ACC[dat_l2$sad_alien == 3 & dat_l2$TS == 2 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
+  dat_l2$ACC[dat_l2$sad_alien == 0 & dat_l2$TS == 2 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
+  dat_l2$ACC[dat_l2$sad_alien == 0 & dat_l2$TS == 1 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
+  
+  gg_otherTS_ACC2 = gg_otherTS_ACC
+  gg_otherTS_ACC2$data = dat_l
+  gg_otherTS_ACC_value2 = gg_otherTS_ACC_value
+  gg_otherTS_ACC_value2$data = dat_l
+  gg_otherTS_ACC_alien2 = gg_otherTS_ACC_alien
+  gg_otherTS_ACC_alien2$data = dat_l
+  gg_prevTS_ACC2 = gg_prevTS_ACC + aes(color = ACC_TS, group = ACC_TS) + facet_grid(~ facet) + labs(color = "")
+  gg_prevTS_ACC2$data = dat_l2
   
   if (gg_save) {
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC_", phas, ".png", sep = ""), gg_otherTS_ACC, width = 9, height = 3)
+    ggsave(paste(plot_dir, "/2gg_otherTS_ACC_value_", phas, ".png", sep = ""), gg_otherTS_ACC_value, width = 9, height = 7)
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC_alien_", phas, ".png", sep = ""), gg_otherTS_ACC_alien, width = 9, height = 7)
-    ggsave(paste(plot_dir, "/2gg_prevTS_ACC_", phas, ".png", sep = ""), gg_prevTS_ACC, width = 9, height = 3)
+    ggsave(paste(plot_dir, "/2gg_prevTS_ACC_", phas, ".png", sep = ""), gg_prevTS_ACC, width = 9, height = 7)
+    
+    ggsave(paste(plot_dir, "/2gg_otherTS_ACC2_", phas, ".png", sep = ""), gg_otherTS_ACC2, width = 9, height = 3)
+    ggsave(paste(plot_dir, "/2gg_otherTS_ACC_value2_", phas, ".png", sep = ""), gg_otherTS_ACC_value2, width = 9, height = 7)
+    ggsave(paste(plot_dir, "/2gg_otherTS_ACC_alien2_", phas, ".png", sep = ""), gg_otherTS_ACC_alien2, width = 9, height = 7)
+    ggsave(paste(plot_dir, "/2gg_prevTS_ACC2_", phas, ".png", sep = ""), gg_prevTS_ACC2, width = 4, height = 2)
   }
 }
 ```
