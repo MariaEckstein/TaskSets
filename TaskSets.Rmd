@@ -619,114 +619,150 @@ if (run_regression) {
   }
 }
 ```
-```{r Create Rainbow season data}
-# Get data that shows choices that correspond to the 3 TS
-correct_values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
-                      .(subjID, TS, sad_alien), summarize,
-                      av_reward = mean(reward, na.rm = T),
-                      item_chosen = item_chosen[1])
-correct_values  # agrees with the TS!
-
-# Get subjects' choices in the rainbow season
-subset(feed_aliens, phase == "5RainbowSeason")
-rainbow_aliens = ddply(subset(feed_aliens, phase == "5RainbowSeason" & !is.na(key)),
-                       .(subjID, sad_alien, TS, item_chosen),
-                       summarize,
-                       times_chosen = length(item_chosen))  # in how many trials subject chose each item for each alien
-missed_trials = ddply(subset(feed_aliens, phase == "5RainbowSeason" & is.na(key)),
-                       .(subjID, sad_alien, item_chosen),
-                       summarize,
-                       times_chosen = sum(is.na(key)))  # number of missed trials
-missed_trials$TS = "Missed"
-rainbow_aliens = rbind(rainbow_aliens, missed_trials)  # , overlapping_plant, overlapping_bed
-rainbow_aliens$TS = as.character(rainbow_aliens$TS)
-rainbow_aliens = merge(subset(rainbow_aliens), correct_values,  # what's the TS that the choice corresponds to?
-      by = c("subjID", "sad_alien", "item_chosen"),
-      all.x = T)
-
-rainbow_aliens$TS = rainbow_aliens$TS.y
-rainbow_aliens$TS = as.character(rainbow_aliens$TS)
-rainbow_aliens$TS[rainbow_aliens$TS.x != "rainbow"] = rainbow_aliens$TS.x[rainbow_aliens$TS.x != "rainbow"]
-rainbow_aliens$TS.x = rainbow_aliens$TS.y = NULL
-rainbow_aliens$TS[is.na(rainbow_aliens$TS)] = "No TS"
-
-# Create data of randomly acting subjects' choices (as a baselien to see if actual participants are closer to the TS, and to which ones)
-# TD
-
-# Categorize participants' strategies: count of choices "within" each TS divided by total number of choices
-rainbow_sum = data.frame()
-for (TSi in unique(rainbow_aliens$TS)) {
-  rainbow_TS = ddply(rainbow_aliens, .(subjID, TS == TSi), summarize,
-                      times_chosen_others = sum(times_chosen))
-  rainbow_TS_w = reshape(rainbow_TS, direction = "wide", timevar = "TS == TSi", idvar = "subjID")
-  rainbow_TS_w[TSi] = with(rainbow_TS_w, times_chosen_others.TRUE / 12)  # add column with fraction chosen / possible
-  rainbow_TS_w$times_chosen_others.FALSE = rainbow_TS_w$times_chosen_others.TRUE = NULL
-  if (nrow(rainbow_sum) > 0) {
-    rainbow_sum = merge(rainbow_sum, rainbow_TS_w, all = T)
-  } else {
-    rainbow_sum = rainbow_TS_w
-  }
-}
-
-rainbow_sum = rainbow_sum[order(apply(rainbow_sum["0"], 1, max, na.rm = T)),]
-rainbow_sum$orderedSubj = nrow(rainbow_sum):1
-rainbow_sum = rainbow_sum[order(apply(rainbow_sum[c("Missed", "No TS", "0", "1", "2")], 1, sum, na.rm = T)),]  # "Plant", "Bed", 
-rainbow_sum$orderedSubj2 = nrow(rainbow_sum):1
-
-rainbow_sum_l = melt(rainbow_sum, id.vars = c("subjID", "orderedSubj", "orderedSubj2"), variable.name = "TS", value.name = "Ratio")
-rainbow_sum_l$Ratio[is.na(rainbow_sum_l$Ratio)] = 0
-rainbow_sum_l$TS = factor(rainbow_sum_l$TS, levels = c("Missed", "No TS", "2", "1", "0"), labels = c("Missed", "No TS", "TS2", "TS1", "TS0"))
-
-overlapping_choices = ddply(subset(feed_aliens, phase == "5RainbowSeason" &
-                                     ((sad_alien == 0 & item_chosen == "plant") |
-                                      (sad_alien == 3 & item_chosen == "bed"))),
-                       .(subjID, sad_alien, item_chosen),
-                       summarize,
-                       times_chosen = length(item_chosen))
-add = rbind(expand.grid(subjID = unique(overlapping_choices$subjID), sad_alien = 0, item_chosen = "plant"),
-            expand.grid(subjID = unique(overlapping_choices$subjID), sad_alien = 3, item_chosen = "bed"))
-overlapping_choices = merge(overlapping_choices, add, all = T)  # add 0 choices
-overlapping_choices$times_chosen[is.na(overlapping_choices$times_chosen)] = 0
+```{r}
+# # Get subjects' choices in the rainbow season
+# rainbow_aliens = ddply(subset(feed_aliens, phase == "5RainbowSeason" & !is.na(key)),
+#                        .(subjID, sad_alien, TS, item_chosen),
+#                        summarize,
+#                        times_chosen = length(item_chosen))  # in how many trials subject chose each item for each alien
+# missed_trials = ddply(subset(feed_aliens, phase == "5RainbowSeason" & is.na(key)),
+#                        .(subjID, sad_alien, item_chosen),
+#                        summarize,
+#                        times_chosen = length(item_chosen))  # number of missed trials
+# missed_trials$TS = "Missed"
+# rainbow_aliens = rbind(rainbow_aliens, missed_trials)  # , overlapping_plant, overlapping_bed
+# rainbow_aliens$TS = as.character(rainbow_aliens$TS)
+# rainbow_aliens = merge(subset(rainbow_aliens), correct_values,  # what's the TS that the choice corresponds to?
+#       by = c("subjID", "sad_alien", "item_chosen"),
+#       all.x = T)
+# 
+# rainbow_aliens$TS = rainbow_aliens$TS.y
+# rainbow_aliens$TS = as.character(rainbow_aliens$TS)
+# rainbow_aliens$TS[rainbow_aliens$TS.x != "rainbow"] = rainbow_aliens$TS.x[rainbow_aliens$TS.x != "rainbow"]
+# rainbow_aliens$TS.x = rainbow_aliens$TS.y = NULL
+# rainbow_aliens$TS[is.na(rainbow_aliens$TS)] = "No TS"
+# 
+# # Create data of randomly acting subjects' choices (as a baselien to see if actual participants are closer to the TS, and to which ones)
+# # TD
+# 
+# # Categorize participants' strategies: count of choices "within" each TS divided by total number of choices
+# rainbow_sum = data.frame()
+# for (TSi in unique(rainbow_aliens$TS)) {
+#   rainbow_TS = ddply(rainbow_aliens, .(subjID, TS == TSi), summarize,
+#                       times_chosen_others = sum(times_chosen))
+#   rainbow_TS_w = reshape(rainbow_TS, direction = "wide", timevar = "TS == TSi", idvar = "subjID")
+#   rainbow_TS_w[TSi] = with(rainbow_TS_w, times_chosen_others.TRUE / 12)  # add column with fraction chosen / possible
+#   rainbow_TS_w$times_chosen_others.FALSE = rainbow_TS_w$times_chosen_others.TRUE = NULL
+#   if (nrow(rainbow_sum) > 0) {
+#     rainbow_sum = merge(rainbow_sum, rainbow_TS_w, all = T)
+#   } else {
+#     rainbow_sum = rainbow_TS_w
+#   }
+# }
+# 
+# rainbow_sum = rainbow_sum[order(apply(rainbow_sum["0"], 1, max, na.rm = T)),]
+# rainbow_sum$orderedSubj = nrow(rainbow_sum):1
+# rainbow_sum = rainbow_sum[order(apply(rainbow_sum[c("Missed", "No TS", "0", "1", "2")], 1, sum, na.rm = T)),]  # "Plant", "Bed", 
+# rainbow_sum$orderedSubj2 = nrow(rainbow_sum):1
+# 
+# rainbow_sum_l = melt(rainbow_sum, id.vars = c("subjID", "orderedSubj", "orderedSubj2"), variable.name = "TS", value.name = "Ratio")
+# rainbow_sum_l$Ratio[is.na(rainbow_sum_l$Ratio)] = 0
+# rainbow_sum_l$TS = factor(rainbow_sum_l$TS, levels = c("Missed", "No TS", "2", "1", "0"), labels = c("Missed", "No TS", "TS2", "TS1", "TS0"))
+# 
+# overlapping_choices = ddply(subset(feed_aliens, phase == "5RainbowSeason" &
+#                                      ((sad_alien == 0 & item_chosen == "plant") |
+#                                       (sad_alien == 3 & item_chosen == "bed"))),
+#                        .(subjID, sad_alien, item_chosen),
+#                        summarize,
+#                        times_chosen = length(item_chosen))
+# add = rbind(expand.grid(subjID = unique(overlapping_choices$subjID), sad_alien = 0, item_chosen = "plant"),
+#             expand.grid(subjID = unique(overlapping_choices$subjID), sad_alien = 3, item_chosen = "bed"))
+# overlapping_choices = merge(overlapping_choices, add, all = T)  # add 0 choices
+# overlapping_choices$times_chosen[is.na(overlapping_choices$times_chosen)] = 0
 ```
+```{r Create Rainbow season data}
+# Create data.frame that shows accuracy according to each of the 3 TS, none, and missed trials
+all_ACCs = expand.grid(sad_alien = unique(feed_aliens$sad_alien), item_chosen = unique(feed_aliens$item_chosen))
+correct_ones = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
+                    .(TS, sad_alien), summarize,
+                    item_chosen = item_chosen[1])
+correct_ones$ACC = 1
+correct_ones = reshape(correct_ones, direction = "wide", timevar = "TS", idvar = c("sad_alien", "item_chosen")) #, "value"
+
+all_ACCs = merge(all_ACCs, correct_ones, all.x = T)
+all_ACCs$ACC.Missed = ifelse(all_ACCs$item_chosen == "NaN", 1, 0)
+all_ACCs$ACC.None = with(all_ACCs, (is.na(ACC.0)) * (is.na(ACC.1)) * (is.na(ACC.2)) * (1 - ACC.Missed))
+all_ACCs$ACC.02 = with(all_ACCs, ACC.0 * ACC.2)
+all_ACCs$ACC.12 = with(all_ACCs, ACC.1 * ACC.2)
+all_ACCs$ACC.only0 = with(all_ACCs, ACC.0 * (is.na(ACC.02)))
+all_ACCs$ACC.only1 = with(all_ACCs, ACC.1 * (is.na(ACC.12)))
+all_ACCs$ACC.only2 = with(all_ACCs, ACC.2 * (is.na(ACC.12)) * (is.na(ACC.02)))
+
+rainbow_aliens = merge(subset(feed_aliens, phase == "5RainbowSeason", select = c("subjID", "sad_alien", "item_chosen")), all_ACCs)
+
+rainbow_aliens[order(rainbow_aliens$subjID, rainbow_aliens$sad_alien),]
+
+rainbow_sum = ddply(rainbow_aliens, .(subjID), summarize,
+      TS0 = sum(ACC.only0, na.rm = T),
+      TS1 = sum(ACC.only1, na.rm = T),
+      TS2 = sum(ACC.only2, na.rm = T),
+      TS0and2 = sum(ACC.02, na.rm = T),
+      TS1and2 = sum(ACC.12, na.rm = T),
+      Missed = sum(ACC.Missed, na.rm = T),
+      None = sum(ACC.None, na.rm = T))
+# rainbow_sum$sum = apply(subset(rainbow_sum, select = -subjID), 1, sum)  # checking that they sum up to 12
+rainbow_sum = rainbow_sum[order(rainbow_sum$TS0 + rainbow_sum$TS0and2),]
+rainbow_sum$orderedSubj = nrow(rainbow_sum):1
+rainbow_sum
+
+rainbow_sum_l = melt(rainbow_sum, id.vars = c("subjID", "orderedSubj"), variable.name = "TS", value.name = "times_chosen")
+rainbow_sum_l$times_chosen[is.na(rainbow_sum_l$times_chosen)] = 0
+rainbow_sum_l$TS = gsub("times", "", rainbow_sum_l$TS)
+rainbow_sum_l$TS = factor(rainbow_sum_l$TS, levels = c("TS0", "TS0and2", "TS1", "TS1and2", "TS2", "None", "Missed"))
+rainbow_sum_l
+
+# Create value dat
+# values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
+#                     .(TS, sad_alien), summarize,
+#                     value = round(mean(reward, na.rm = T)),
+#                     item_chosen = item_chosen[1])
+# values = merge(values, rainbow_aliens)
+# values_sum = ddply(values, .(subjID, value), summarize,
+#       TS0 = sum(ACC.0, na.rm = T),
+#       TS1 = sum(ACC.1, na.rm = T),
+#       TS2 = sum(ACC.2, na.rm = T))
+# 
+# values_sum_l = melt(values_sum, id.vars = c("subjID", "value"), variable.name = "TS", value.name = "times_chosen")
+```
+
 ```{r Plot rainbow season}
-gg_rainbow_strategy = ggplot(rainbow_sum_l, aes(TS, Ratio, fill = TS)) + 
+gg_rainbow_strategy = ggplot(rainbow_sum_l, aes(TS, times_chosen / 12, fill = TS)) + 
   stat_summary(fun.data = mean_cl_boot, geom = "bar") +
   stat_summary(fun.data = mean_cl_boot, geom = "pointrange", color = "black") +
   geom_point(position = "jitter", alpha = 0.3) +
   labs(x = "", y = "Fraction TS choices", fill = "") +
   theme(legend.position = "none")
 
-gg_subj_strategy = ggplot(rainbow_sum_l, aes(orderedSubj, Ratio, fill = TS)) +
+gg_subj_strategy = ggplot(rainbow_sum_l, aes(orderedSubj, times_chosen / 12, fill = TS)) +
   geom_bar(stat = "identity") +
-  labs(x = "", fill = "") +
-  geom_hline(yintercept = 18/16, linetype = "dotted") +
+  labs(x = "", y = "Fraction", fill = "") +
   theme(axis.text.x = element_blank())
 
-gg_subj_strategy2 = gg_subj_strategy + aes(x = orderedSubj2) + labs(x = "")
-
-gg_strategy_hist = ggplot(rainbow_sum_l, aes(Ratio, fill = TS)) +
+gg_strategy_hist = ggplot(subset(rainbow_sum_l, TS %in% c("TS0", "TS1", "TS2", "None")), aes(times_chosen / 12, fill = TS)) +
   geom_histogram(stat = "density", position = "identity", alpha = 0.5) +
-  geom_vline(xintercept = 3/16, linetype = "dotted") +
-  geom_vline(xintercept = 2/16, linetype = "dotted", color = "red") +
-  labs(fill = "")
+  labs(x = "Fraction", fill = "")
 
-gg_rainbow_values = ggplot(subset(rainbow_aliens, round(av_reward) > 2),  # TD: TAKE OUT FOR NEW DATA!!!
-       aes(round(av_reward), times_chosen / 3, color = TS)) +
-  stat_summary(fun.data = mean_se, geom = "pointrange") +
-  labs(x = "Value", y = "Fraction chosen", color = "TS")
-
-gg_overlap = ggplot(overlapping_choices, aes(times_chosen, fill = item_chosen)) +
-  geom_histogram(binwidth = 1) +
-  geom_vline(xintercept = 1, linetype = "dotted") +
-  labs(x = "Times chosen", y = "Count", fill = "Item")
+# gg_rainbow_values = ggplot(subset(values_sum_l),  #, round(value) > 2 TD: TAKE OUT FOR NEW DATA!!!
+#        aes(value, times_chosen, color = TS)) +
+#   stat_summary(fun.data = mean_se, geom = "pointrange") +
+#   labs(x = "Value", y = "Fraction chosen", color = "TS")
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "5gg_rainbow_strategy.png"), gg_rainbow_strategy, width = 3, height = 3)
-  ggsave(file.path(plot_dir, "5gg_rainbow_values.png"), gg_rainbow_values, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "5gg_rainbow_strategy.png"), gg_rainbow_strategy, width = 5, height = 3)
+  # ggsave(file.path(plot_dir, "5gg_rainbow_values.png"), gg_rainbow_values, width = 4, height = 3)
   ggsave(file.path(plot_dir, "5gg_subj_strategy.png"), gg_subj_strategy, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "5gg_subj_strategy2.png"), gg_subj_strategy2, width = 5, height = 3)
+  # ggsave(file.path(plot_dir, "5gg_subj_strategy2.png"), gg_subj_strategy2, width = 5, height = 3)
   ggsave(file.path(plot_dir, "5gg_strategy_hist.png"), gg_strategy_hist, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "5gg_overlap.png"), gg_overlap, width = 4, height = 3)
 }
 ```
 
