@@ -488,15 +488,16 @@ for (phas in c("1InitialLearning", "2CloudySeason")) {
   gg_otherTS_ACC = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(ACC_TS))) +
     stat_summary(fun.data = mean_se, geom = "pointrange") +
     geom_hline(yintercept = 100/3, linetype = "dotted") +
+    geom_hline(yintercept = 200/12, linetype = "dotted", color = "purple") +
     coord_cartesian(y = c(0, 100)) +
-    labs(x = "Trial", y = "% correct", color = "") +
+    labs(x = "Trial", y = "% chosen", color = "") +
     facet_grid(~ TS)
   
   gg_otherTS_ACC_value = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(av_reward), group = sad_alien)) +
     stat_summary(fun.data = mean_se, geom = "pointrange") +
     geom_hline(yintercept = 100/3, linetype = "dotted") +
     coord_cartesian(y = c(0, 100)) +
-    labs(x = "Trial", y = "% correct", color = "Value") +
+    labs(x = "Trial", y = "% chosen", color = "Value") +
     facet_grid(factor(dat_l$TS, labels = c("TS0", "TS1", "TS2")) ~ ACC_TS)
   
   gg_otherTS_ACC_alien = gg_otherTS_ACC_value +
@@ -736,21 +737,25 @@ rainbow_sum_l
 ```
 
 ```{r Plot rainbow season}
-gg_rainbow_strategy = ggplot(rainbow_sum_l, aes(TS, times_chosen / 12, fill = TS)) + 
+lines = c(1, 2, 3)
+gg_rainbow_strategy = ggplot(rainbow_sum_l, aes(TS, times_chosen, fill = TS)) + 
+  geom_hline(yintercept = lines, linetype = "dotted") +
   stat_summary(fun.data = mean_cl_boot, geom = "bar") +
   stat_summary(fun.data = mean_cl_boot, geom = "pointrange", color = "black") +
   geom_point(position = "jitter", alpha = 0.3) +
-  labs(x = "", y = "Fraction TS choices", fill = "") +
+  labs(x = "", y = "# TS choices", fill = "") +
+  annotate("text", x = rep(7.2, 3), y = lines, label = lines) +
   theme(legend.position = "none")
 
 gg_subj_strategy = ggplot(rainbow_sum_l, aes(orderedSubj, times_chosen / 12, fill = TS)) +
   geom_bar(stat = "identity") +
-  labs(x = "", y = "Fraction", fill = "") +
+  labs(x = "", y = "Fraction TS choices", fill = "") +
+  geom_hline(yintercept = c(2/12, 4/12, 5/12, 8/12, 9/12), colors = c("purple", "blue", "turkois", "green", "orange", "red"), linetype = "dotted") +
   theme(axis.text.x = element_blank())
 
-gg_strategy_hist = ggplot(subset(rainbow_sum_l, TS %in% c("TS0", "TS1", "TS2", "None")), aes(times_chosen / 12, fill = TS)) +
+gg_strategy_hist = ggplot(subset(rainbow_sum_l, TS %in% c("TS0", "TS1", "TS2", "None")), aes(times_chosen, fill = TS)) +
   geom_histogram(stat = "density", position = "identity", alpha = 0.5) +
-  labs(x = "Fraction", fill = "")
+  labs(x = "# TS choices", fill = "")
 
 # gg_rainbow_values = ggplot(subset(values_sum_l),  #, round(value) > 2 TD: TAKE OUT FOR NEW DATA!!!
 #        aes(value, times_chosen, color = TS)) +
