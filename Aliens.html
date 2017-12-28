@@ -16,14 +16,14 @@
     <script src="alien_plugins/helper_functions.js"></script>
     <script src="alien_plugins/randomization.js"></script>
     <script src="alien_plugins/visual_elements.js"></script>
-    <script src="alien_plugins/Phase1_instructions.js"></script>
-    <script src="alien_plugins/Phase1_trials.js"></script>
-    <script src="alien_plugins/Phase2_instructions.js"></script>
-    <script src="alien_plugins/Phase2_trials.js"></script>
-    <script src="alien_plugins/Phase3_instructions.js"></script>
-    <script src="alien_plugins/Phase3_trials.js"></script>
+    <script src="alien_plugins/1InitialLearn_instructions.js"></script>
+    <script src="alien_plugins/1InitialLearn_trials.js"></script>
+    <script src="alien_plugins/2CloudySeason_instructions.js"></script>
+    <script src="alien_plugins/2CloudySeason_trials.js"></script>
+    <script src="alien_plugins/3Competition_instructions.js"></script>
+    <script src="alien_plugins/3Competition_trials.js"></script>
     <script src="alien_plugins/Refreshers.js"></script>
-    <script src="alien_plugins/Phase5-instructions-trials.js"></script>
+    <script src="alien_plugins/5Rainbow_instructions_trials.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
     <link href="alien_plugins/alien_style.css" rel="stylesheet" type="text/css"></link>
   </head>
@@ -40,19 +40,19 @@
 
     /* create experiment timeline array */
     var timeline = [];
-    timeline.push(get_subj_data);
-    timeline.push(phase1_instructions);
-    timeline.push(  // each training_block has 1 trial per alien
-      training_block, training_block, training_block, training_block, training_block,
-      training_block, training_block, training_block, training_block, training_block,
-    );
-    timeline.push(training_instructions_post);
-    timeline.push(phase1_initial_learn);
-    timeline.push(phase1_instructions_post);
-    timeline.push(phase2_instructions);
-    timeline.push(phase2_cloudy);
-    timeline.push(phase2_instructions_post);
-    timeline.push(refresher_block_2);
+    // timeline.push(get_subj_data);
+    // timeline.push(phase1_instructions);
+    // timeline.push(  // each training_block has 1 trial per alien
+    //   training_block, training_block, training_block, training_block, training_block,
+    //   training_block, training_block, training_block, training_block, training_block,
+    // );
+    // timeline.push(training_instructions_post);
+    // timeline.push(phase1_initial_learn);
+    // timeline.push(phase1_instructions_post);
+    // timeline.push(phase2_instructions);
+    // timeline.push(phase2_cloudy);
+    // timeline.push(phase2_instructions_post);
+    // timeline.push(refresher_block_2);
     timeline.push(phase3_instructions);
     timeline.push(phase3_pick_aliens);
     timeline.push(phase3_post);
@@ -65,7 +65,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      fullscreen: true,
+      // fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }

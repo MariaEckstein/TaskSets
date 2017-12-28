@@ -108,17 +108,17 @@ jsPsych.plugins["feed-aliens"] = (function() {
       }
 
       // get feedback amount
-      amount = 1  // incorrect response or no answer
-      if (correct) {  // correct response
+      if (!correct) {  // incorrect response or no answer
+        feedback_amount = 0
+      } else {  // correct response
         for (i = 0; i < button_names.length; i++) {
           if (item_chosen == button_names[i]) {
-            amount = trial.reward
+            noised_amount = trial.reward + 0.5 * randn_bm()
+            rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
+            feedback_amount = Math.max(0, rounded_amount)
           }
         }
       }
-      noised_amount = amount + 0.5 * randn_bm()
-      rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
-      feedback_amount = Math.max(0, rounded_amount)
 
       // update points
       points[trial.sad_alien] += feedback_amount
@@ -185,7 +185,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
       } else {
 
       // add reward bubble
-      ruler_length = 40 + 50 * feedback_amount;
+      ruler_length = 20 + 50 * feedback_amount;
       ruler =
         "<div>" +
           "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, "+ ruler_length +"px , 200px,0px);'>" +
