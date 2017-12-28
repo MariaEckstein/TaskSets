@@ -47,3 +47,12 @@ var refresher_block_3 = {
   timeout_message: timeout_message,
   timeline: seasons_in_order_refresher3
 }
+
+// Goodbye block
+var goodbye = {
+  type: 'instructions',
+  pages: ["<center><p>The game is now over, you did a great job!</p>" +
+    "<p>Thank you for participating in the experiment!</p>" +
+    "<p>Please click 'Next' and let the experimenter know you are done!</p></center>"],
+  show_clickable_nav: true
+}

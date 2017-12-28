@@ -5,7 +5,6 @@
     <script>
       // IMPORTANT PARAMETERS
       var short_version = false;  // false or true
-      // var input_device = "keyboard";  // "mouse" OR "keyboard"
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="jspsych-5.0.3/jspsych.js"></script>
@@ -24,9 +23,7 @@
     <script src="alien_plugins/Phase3_instructions.js"></script>
     <script src="alien_plugins/Phase3_trials.js"></script>
     <script src="alien_plugins/Refreshers.js"></script>
-    <script src="alien_plugins/Phase4-instructions-trials.js"></script>
     <script src="alien_plugins/Phase5-instructions-trials.js"></script>
-    <script src="alien_plugins/StrategyQuestionnaire.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
     <link href="alien_plugins/alien_style.css" rel="stylesheet" type="text/css"></link>
   </head>
@@ -35,55 +32,10 @@
 
   <script>
 
-  /*
-  from the grant proposal:
-  "We will investigate whether
-  agents operate reinforcement learning at multiple hierarchical levels in parallel, with executive functions
-  providing abstract contexts and rules as options whose values should be learned."
-  "We%will%use%behavioral%
-experiments,% computational% modeling,% EEG,% and% fMRI% to% investigate% whether% abstract% contexts% and% abstract%
-rules% that% are% maintained% by% EF% provide% a% hierarchical% state% and% action% space% for% RL% value=based% learning."
-  - it's about finding out whether and how RL (BG, striatum) interacts with EF (FC):
-    RL is about slow incremental value learning;
-    EF is about WM, goals, creating and representing contexts, abstract rules
-
-    TDs
-    - CHECK Tell people explicitly that colors and shapes do not determine aliens' preferences
-    - CHECK Make button pictures black-and-white?
-    - Train until criterion rather than fixed number of trials
-    - Things to check when looking at data:
-      - Do people learn or do they get everything right on the first try (in the second season)?
-        -> do they learn or do they do inference? -> reduce mutual information? Add more aliens?
-      - Do they remember TS?
-        -> do they get it faster in subsequent repetitions? do they answer phase 2 right?
-      - Do they learn values, i.e., do they pay attention to the numbers?
-        -> can they tell me which alien-season-combos are better?
-      - Interference between seasons?
-        -> Do values spill over into new seasons?
-      - Make sure the "best" seasons and aliens are actually best!
-        -> Do participants make the most points in the right seasons / aliens? Equal for actions?
-      - Enough trials?
-        -> Do learning curves plateau at the end? In phase 3?
-      - Phase 1: Do we have nice learning curves?
-      - Phase 2: Do participants' responses agree with actual values?
-      - Phase 4: Do participants select the most-valuable action? Or the not-yet used action?
-        Or the most popular action? Or do they select each action once to make sure they got it right at least once?
-        Does this make sense at all if one action can be applied to more than one alien, with different values?
-      - Phase 5: Do participants select the most valuable TS in the new context?
-        Or do they select the single best action for each alien?
-        (This would mean that participants prefer marginalizing out seasons to marginalizing out aliens;
-        that they prefer to keep the info about aliens, rather than about seasons
-        ["which action was best for this alien (ignoring seasons)?" rather than
-         "which season was best and which action went with which seasons there?"])
-        Or do they do something random?
-        In this case, it could be that (a) participants learn each season-alien-action association separately)
-    - monetary bonus: we will pick one alien randomly and your payment will be based on that
-    - make distributions wider -> right now, people just remember closest number anyway
-    - add new TS to google slides!
-    - make sure distributions don't shift over time
+    /*
+    Notes & TSs:
     - in phase 2, put everything side-by-side or everything on top of each other
     - add pics in instructions
-    - respond "as fast and accurately as possible"
     */
 
     /* create experiment timeline array */
@@ -95,23 +47,19 @@ rules% that% are% maintained% by% EF% provide% a% hierarchical% state% and% acti
       training_block, training_block, training_block, training_block, training_block,
     );
     timeline.push(training_instructions_post);
-    timeline.push(phase1_initial_learn);  // blocks of 10; 10; 10 per alien
+    timeline.push(phase1_initial_learn);
     timeline.push(phase1_instructions_post);
     timeline.push(phase2_instructions);
-    timeline.push(phase2_cloudy);  // blocks of 10 and 10s
+    timeline.push(phase2_cloudy);
     timeline.push(phase2_instructions_post);
     timeline.push(refresher_block_2);
     timeline.push(phase3_instructions);
     timeline.push(phase3_pick_aliens);
     timeline.push(phase3_post);
     timeline.push(refresher_block_3);
-    // timeline.push(phase4_instructions);  // phase 4 makes no sense
-    // timeline.push(all_seasons_phase4);
-    // timeline.push(phase4_after);
     timeline.push(phase5_instructions);
     timeline.push(rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5);
     timeline.push(phase5_after);  // Necessary to get rid of rainbow background
-    // timeline.push(strategy_questionnaire);
     timeline.push(goodbye);
 
     /* start the experiment */
