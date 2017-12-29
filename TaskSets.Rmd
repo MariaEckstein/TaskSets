@@ -405,10 +405,12 @@ for (phas in c("1InitialLearning", "2CloudySeason")) {
 ```
 ```{r Plot overall learning}
 # Plot learning curves (and RTs) overall
-overall_learning_curves = ggplot(feed_aliens, aes(trial_index, 100 * ACC, color = phase)) +
+overall_learning_curves = ggplot(subset(feed_aliens),
+                                 aes(trial_index, 100 * ACC, color = phase, group = phase)) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
   geom_hline(yintercept = 100/3, linetype = "dotted") +
   labs(x = "Trial", y = "% correct")
+
 overall_learning_curves_subj = overall_learning_curves + facet_wrap(~ subjID)
 overall_RTs = overall_learning_curves + aes(trial_index, rt, color = phase) + labs(x = "Trial", y = "Response time (msec)")
 

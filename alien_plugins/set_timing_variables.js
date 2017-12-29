@@ -1,8 +1,8 @@
 // Timing variables
 // Main experiment
 var max_RT = 1500
-var feedback_duration = 500
-var ITI_duration = 250
+var feedback_duration = 400  //500
+var ITI_duration = 200  //250
 // Training block
 max_RT_phase2 = max_RT
 var max_RT_train = 2 * max_RT
