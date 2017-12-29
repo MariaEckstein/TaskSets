@@ -128,7 +128,7 @@ item_values$item_chosen = NULL
 
 alien_TS_values = ddply(learnt_values, .(subjID, phase, TS, sad_alien), summarize,
                         av_reward = mean(reward, na.rm = T))
-alien_TS_values$selected = with(alien_TS_values, paste("alien", as.numeric(as.character(sad_alien))+1, TS, sep = ""))
+alien_TS_values$selected = with(alien_TS_values, paste("alien", as.numeric(as.character(sad_alien))+1, "TS", TS, sep = ""))
 alien_TS_values$assess = "AlienSameTS"
 
 all_values = rbind(alien_values, TS_values, item_values, subset(alien_TS_values, select = -c(TS, sad_alien)))
@@ -156,11 +156,12 @@ item_perf$item_chosen = NULL
 
 alien_TS_perf = ddply(dat, .(subjID, TS, sad_alien), summarize,
                       av_ACC = mean(ACC, na.rm = T))
-alien_TS_perf$selected = with(alien_TS_perf, paste("alien", as.numeric(as.character(sad_alien))+1, TS, sep = ""))
+alien_TS_perf$selected = with(alien_TS_perf, paste("alien", as.numeric(as.character(sad_alien))+1, "TS", TS, sep = ""))
 alien_TS_perf$assess = "AlienSameTS"
 
 all_perf = rbind(alien_perf, TS_perf, item_perf, subset(alien_TS_perf, select = -c(TS, sad_alien)))
 all_perf$phase = "Refresher2"
+unique(all_perf$selected)
 
 all_values_perf = merge(all_values, all_perf, all = T)
 all_values_perf
@@ -182,6 +183,7 @@ season_TS = ddply(subset(all_files, trial_type == "feed-aliens" & season %in% c(
 
 # pick_aliens: Which choices did subjects make in phase 3?
 pick_aliens = subset(all_files, trial_type == "pick-aliens", select = c("subjID", "trial_index", "item_left", "item_right", "item_chosen", "assess"))
+
 ### Remove "-button"
 pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
 for (row in 1:nrow(pick_aliens)) {
@@ -190,24 +192,23 @@ for (row in 1:nrow(pick_aliens)) {
   pick_aliens$item_chosen[row] = chosen_item_name
 }
 pick_aliens$item_chosen[pick_aliens$item_chosen == "xyz"] = NA
-### Replace "hot", "cold", "rainy" with participants' corresponding TS 
+
+### Add TS (in addition to season)
 for (subj in levels(factor(all_files$subjID))) {
+  add = subset(pick_aliens, subjID == subj & assess %in% c("season", "alien-same-season"))
   for (seas in c("hot", "cold", "rainy")) {
-    sub = subset(season_TS, subjID == subj & season == seas)$TS
-    pick_aliens$item_right = gsub(seas, sub, pick_aliens$item_right)
-    pick_aliens$item_left = gsub(seas, sub, pick_aliens$item_left)
-    pick_aliens$item_chosen = gsub(seas, sub, pick_aliens$item_chosen)
+    sub = paste("TS", subset(season_TS, subjID == subj & season == seas)$TS, sep = "")
+    add$item_right = gsub(seas, sub, add$item_right)
+    add$item_left = gsub(seas, sub, add$item_left)
+    add$item_chosen = gsub(seas, sub, add$item_chosen)
+    add$assess = as.character(add$assess)
+    add$assess = gsub("season", "TS", add$assess)
   }
+  pick_aliens = rbind(pick_aliens, add)
 }
-pick_aliens$assess = as.character(pick_aliens$assess)
-pick_aliens$assess = gsub("season", "TS", pick_aliens$assess)
 pick_aliens$item_unchosen = ifelse(pick_aliens$item_chosen == pick_aliens$item_right, pick_aliens$item_left, pick_aliens$item_right)
 pick_aliens$item_left = pick_aliens$item_right = NULL
-### Rename "0", "1", "2" to "TS0", "TS1", "TS2"
-# pick_aliens$item_chosen = as.character(pick_aliens$item_chosen)
-pick_aliens$item_chosen[pick_aliens$assess == "TS" & !is.na(pick_aliens$item_chosen)] = paste("TS", pick_aliens$item_chosen[pick_aliens$assess == "TS" & !is.na(pick_aliens$item_chosen)], sep = "")
-pick_aliens$item_unchosen = as.character(pick_aliens$item_unchosen)
-pick_aliens$item_unchosen[pick_aliens$assess == "TS"] = paste("TS", pick_aliens$item_unchosen[pick_aliens$assess == "TS"], sep = "")
+
 ### Add columns for the values of each trial's chosen and unchosen items
 for (col in c("unchosen", "chosen")) {
   pick_aliens = merge(pick_aliens, all.x = T,
@@ -224,7 +225,7 @@ pick_aliens_sum = ddply(subset(pick_aliens, !is.na(assess)),
                         ACC_diff = mean(ACC_chosen - ACC_unchosen, na.rm = T))
 ```
 ```{r Plot competition phase: Participants have no idea what they are doing}
-gg_pick_aliens_value = ggplot(pick_aliens_sum, aes(assess, value_diff, color = subjID)) +
+gg_pick_aliens_value = ggplot(subset(pick_aliens_sum, assess %in% c("alien", "alien-same-TS", "item", "TS")), aes(assess, value_diff, color = subjID)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
   labs(x = "", y = "Value chosen minus unchosen", color = "Participant") +
@@ -242,33 +243,38 @@ gg_pick_aliens_ACC_subj = gg_pick_aliens_value_subj +
   aes(trial_index, ACC_chosen - ACC_unchosen, color = assess) +
   labs(x = "Trial", y = "ACC chosen minus unchosen")
 
-cute_dat_chosen = ddply(subset(pick_aliens, !item_chosen %in% c("xyz", "TSxyz")), .(assess, item_chosen), summarize,
-                 count_chosen = length(item_chosen))
-cute_dat_unchosen = ddply(subset(pick_aliens, !item_chosen %in% c("xyz", "TSxyz")), .(assess, item_unchosen), summarize,
-                 count_unchosen = length(item_unchosen))
-cute_dat = merge(cute_dat_chosen, cute_dat_unchosen,
-                 by.x = c("assess", "item_chosen"),
-                 by.y = c("assess", "item_unchosen"))
+cute_dat_chosen = ddply(subset(pick_aliens, !is.na(item_chosen) & !item_chosen %in% c("xyz", "TSxyz")),
+                        .(subjID, assess, item_chosen), summarize,
+                        count_chosen = length(item_chosen))
+cute_dat_unchosen = ddply(subset(pick_aliens, !is.na(item_chosen) & !item_chosen %in% c("xyz", "TSxyz")),
+                          .(subjID, assess, item_unchosen), summarize,
+                          count_unchosen = length(item_unchosen))
+cute_dat = merge(cute_dat_chosen, cute_dat_unchosen, all = T,
+                 by.x = c("subjID", "assess", "item_chosen"),
+                 by.y = c("subjID", "assess", "item_unchosen"))
+cute_dat$count_chosen[is.na(cute_dat$count_chosen)] = 0
+cute_dat$count_unchosen[is.na(cute_dat$count_unchosen)] = 0
 
-gg_pick_aliens_raw_ch = ggplot(cute_dat, aes(assess, count_chosen / length(unique(pick_aliens$subjID)), color = item_chosen)) +
-  geom_point(position = position_dodge(width = 0.9)) +
-  labs(x = "", y = "Chosen count", color = "")
+gg_pick_aliens_raw_ch = ggplot(cute_dat, aes(assess, count_chosen, color = item_chosen, group = item_chosen)) +
+  # geom_point(position = position_dodge(width = 0.9), alpha = 0.05, color = "black") +
+  stat_summary(fun.data = mean_se, geom = "pointrange", position = position_dodge(width = 0.9)) +
+  labs(x = "", y = "# Chosen", color = "")
 gg_pick_aliens_raw_unch = gg_pick_aliens_raw_ch +
-  aes(y = count_unchosen / length(unique(pick_aliens$subjID))) +
-  labs(y = "Unchosen count")
+  aes(y = count_unchosen) +
+  labs(y = "# Unchosen")
 gg_pick_aliens_raw_diff = gg_pick_aliens_raw_ch +
-  aes(y = (count_chosen - count_unchosen) / length(unique(pick_aliens$subjID))) +
-  geom_hline(yintercept = 0) +
-  labs(y = "Chosen - unchosen")
+  aes(y = (count_chosen - count_unchosen)) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(y = "# Chosen - # Unchosen")
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_value.png"), gg_pick_aliens_value, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC.png"), gg_pick_aliens_ACC, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_value.png"), gg_pick_aliens_value, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC.png"), gg_pick_aliens_ACC, width = 4, height = 3)
   ggsave(file.path(plot_dir, "4gg_pick_aliens_value_subj.png"), gg_pick_aliens_value_subj, width = 15, height = 15)
   ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC_subj.png"), gg_pick_aliens_ACC_subj, width = 15, height = 15)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_ch.png"), gg_pick_aliens_raw_ch, width = 6, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_unch.png"), gg_pick_aliens_raw_unch, width = 6, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_diff.png"), gg_pick_aliens_raw_diff, width = 6, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_ch.png"), gg_pick_aliens_raw_ch, width = 8, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_unch.png"), gg_pick_aliens_raw_unch, width = 8, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_diff.png"), gg_pick_aliens_raw_diff, width = 8, height = 3)
 }
 ```
 ```{r Plot learned values and true objective values}
@@ -538,9 +544,10 @@ for (phas in c("1InitialLearning", "2CloudySeason")) {
     dat_l$current_TS[dat_l$TS == TSi & dat_l$ACC_TS == paste("ACC", TSi, sep = "")] = T
   }
   gg_otherTS_ACC3 = gg_otherTS_ACC2 + aes(x = alien_trial_sum, color = ACC_TS, shape = factor(current_TS, labels = c("Other TS", "Current TS"))) +
-    labs(x = "Trial", color = "", shape = "") +
+    labs(x = "", color = "", shape = "") +
     facet_grid(~ facet)
   gg_otherTS_ACC3$data = dat_l
+  gg_otherTS_ACC4 = gg_otherTS_ACC3 + aes(x = "") + theme(legend.position = "none")
   
   if (gg_save) {
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC_", phas, ".png", sep = ""), gg_otherTS_ACC, width = 9, height = 3)
@@ -550,6 +557,7 @@ for (phas in c("1InitialLearning", "2CloudySeason")) {
     
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC2_", phas, ".png", sep = ""), gg_otherTS_ACC2, width = 9, height = 3)
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC3_", phas, ".png", sep = ""), gg_otherTS_ACC3, width = 4, height = 3)
+    ggsave(paste(plot_dir, "/2gg_otherTS_ACC4_", phas, ".png", sep = ""), gg_otherTS_ACC4, width = 1, height = 3)
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC_value2_", phas, ".png", sep = ""), gg_otherTS_ACC_value2, width = 9, height = 6)
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC_alien2_", phas, ".png", sep = ""), gg_otherTS_ACC_alien2, width = 9, height = 6)
     ggsave(paste(plot_dir, "/2gg_prevTS_ACC2_", phas, ".png", sep = ""), gg_prevTS_ACC2, width = 4, height = 4)
@@ -723,8 +731,10 @@ rainbow_sum_l = melt(rainbow_sum, id.vars = c("subjID", "orderedSubj"), variable
 rainbow_sum_l$times_chosen[is.na(rainbow_sum_l$times_chosen)] = 0
 rainbow_sum_l$TS = gsub("times", "", rainbow_sum_l$TS)
 rainbow_sum_l$TS = factor(rainbow_sum_l$TS, levels = c("TS0", "TS0and2", "TS1", "TS1and2", "TS2", "None", "Missed"))
-rainbow_sum_l
-
+rainbow_sum_l$frac_chosen = rainbow_sum_l$times_chosen
+rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("TS0", "TS1", "TS2")] = rainbow_sum_l$times_chosen[rainbow_sum_l$TS %in% c("TS0", "TS1", "TS2")] / 3
+rainbow_sum_l$frac_chosen[rainbow_sum_l$TS == "None"] = rainbow_sum_l$times_chosen[rainbow_sum_l$TS == "None"] / 2
+rainbow_sum_l$frac_chosen[rainbow_sum_l$TS == "Missed"] = NA
 # Create value dat
 # values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
 #                     .(TS, sad_alien), summarize,
@@ -741,13 +751,20 @@ rainbow_sum_l
 
 ```{r Plot rainbow season}
 lines = c(1, 2, 3)
+gg_rainbow_strategy_frac = ggplot(rainbow_sum_l, aes(TS, frac_chosen, color = TS)) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  stat_summary(fun.data = mean_cl_boot, geom = "pointrange") +
+  labs(x = "", y = "Fraction of chance-expected TS choices", fill = "") +
+  theme(legend.position = "none")
+
 gg_rainbow_strategy = ggplot(rainbow_sum_l, aes(TS, times_chosen, fill = TS)) + 
   geom_hline(yintercept = lines, linetype = "dotted") +
+  geom_point(position = "jitter", alpha = 0.3) +
   stat_summary(fun.data = mean_cl_boot, geom = "bar") +
   stat_summary(fun.data = mean_cl_boot, geom = "pointrange", color = "black") +
   geom_point(position = "jitter", alpha = 0.3) +
   labs(x = "", y = "# TS choices", fill = "") +
-  annotate("text", x = rep(7.2, 3), y = lines, label = lines) +
+  annotate("text", x = rep(7.7, 3), y = lines, label = lines) +
   theme(legend.position = "none")
 
 gg_subj_strategy = ggplot(rainbow_sum_l, aes(orderedSubj, times_chosen / 12, fill = TS)) +
@@ -767,6 +784,7 @@ gg_strategy_hist = ggplot(subset(rainbow_sum_l, TS %in% c("TS0", "TS1", "TS2", "
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "5gg_rainbow_strategy.png"), gg_rainbow_strategy, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "5gg_rainbow_strategy_frac.png"), gg_rainbow_strategy_frac, width = 5, height = 3)
   # ggsave(file.path(plot_dir, "5gg_rainbow_values.png"), gg_rainbow_values, width = 4, height = 3)
   ggsave(file.path(plot_dir, "5gg_subj_strategy.png"), gg_subj_strategy, width = 5, height = 3)
   # ggsave(file.path(plot_dir, "5gg_subj_strategy2.png"), gg_subj_strategy2, width = 5, height = 3)
