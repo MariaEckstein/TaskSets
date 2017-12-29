@@ -26,11 +26,11 @@ right_key = 76;
 var timeout_message = "<p class='start_new_season'>Use <i>j, k</i>, or <i>l</i> to respond.</p>"
 
 // numbers of trials
-n_blocks_phase1 = 1;  //3 how often will each season be repeated?
-n_trials_phase1 = 2;  //13 how many trials per season per alien?
+n_blocks_phase1 = 3;  //3 how often will each season be repeated?
+n_trials_phase1 = 13;  //13 how many trials per season per alien?
 
-n_blocks_cloudy = 1;  //3 how often will each season be repeated?
-n_trials_cloudy = 2;  //13 how many trials per season per alien?
+n_blocks_cloudy = 3;  //2 how often will each season be repeated?
+n_trials_cloudy = 10;  //10 how many trials per season per alien?
 
-n_blocks_refreshers = 1;  //3 how often will each season be repeated?
-n_trials_refreshers = 2;  //13 how many trials per season per alien?
+n_blocks_refreshers = 1;  //2 how often will each season be repeated?
+n_trials_refreshers = 7;  //7 how many trials per season per alien?
