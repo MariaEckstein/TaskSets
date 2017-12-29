@@ -61,7 +61,7 @@ var rainbow_season_phase5 = {
   type: "feed-aliens",
   phase: "5RainbowSeason",
   season: "rainbow",
-  aliens: ph1_alien_names,
+  aliens: alien_names_rand,
   choices: [left_key, middle_key, right_key],
   randomize_order: true,
   show_stim_with_feedback: false,

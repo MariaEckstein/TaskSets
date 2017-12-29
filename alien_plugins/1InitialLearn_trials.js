@@ -1,87 +1,37 @@
-// Assign reward schedule and TS to each season
-var hot_season = {
-  season: "hot",
-  randomize_order: true,
-  timeline: TSs[TS_rand[0]]
-}
-var cold_season = {
-  season: "cold",
-  randomize_order: true,
-  timeline: TSs[TS_rand[1]]
-}
-var rainy_season = {
-  season: "rainy",
-  randomize_order: true,
-  timeline: TSs[TS_rand[2]]
+
+// Get the order of the seasons
+seasons_in_order = []
+for (block = 0; block < season_names.length * n_blocks_phase1; block ++) {  // iterate through season_order, which indicates in which block each season should be presented
+
+  season_index = season_order[block]  // 0, 1, or 2
+  season_name = season_names[season_index]  // "hot", "cold", or "rainy"
+
+  trials = [{
+    type: "start_new_season",
+    show_clickable_nav: true,
+    pages: [
+      "<img class='background' src='img/" + season_name + ".png'>" +
+      "<p class='start_new_season'><i>This is the " + season_name + " season!</i></p>"
+    ]
+  }]
+
+  for (trial = 0; trial < n_trials_phase1; trial ++) {
+    trials.push({
+      season: season_name,
+      randomize_order: true,
+      timeline: TSs[TS_rand[season_index]]
+    })
+  }
+
+  seasons_in_order = seasons_in_order.concat(trials)
 }
 
-// Create the transition page (point resetter) for each season
-var start_hot_season = {
-  type: "start_new_season",
-  show_clickable_nav: true,
-  pages: [
-    "<img class='background' src='img/hot.png'>" +
-    "<p class='start_new_season'><i>This is the hot season!</i></p>"
-  ]
-}
-var start_rainy_season = {
-  type: "start_new_season",
-  show_clickable_nav: true,
-  pages: [
-    "<img class='background' src='img/rainy.png'>" +
-    "<p class='start_new_season'><i>This is the rainy season!</i></p>"
-  ]
-}
-var start_cold_season = {
-  type: "start_new_season",
-  show_clickable_nav: true,
-  pages: [
-    "<img class='background' src='img/cold.png'>" +
-    "<p class='start_new_season'><i>This is the cold season!</i></p>"
-  ]
-}
-
-// Define a chunk of 10 trials per season
-ten_trial_chunk = [
-  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season,
-                     hot_season, hot_season, hot_season, hot_season, hot_season],
-  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season,
-                      cold_season, cold_season, cold_season, cold_season, cold_season],
-  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
-                       rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
-]
-thirteen_trial_chunk = [
-  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season,
-                     hot_season, hot_season, hot_season, hot_season, hot_season, hot_season],
-  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season,
-                      cold_season, cold_season, cold_season, cold_season, cold_season, cold_season],
-  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
-                       rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
-]
-seven_trial_chunk = [
-  [start_hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season, hot_season],
-  [start_cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season, cold_season],
-  [start_rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
-]
-one_trial_chunk = [
-  [start_hot_season, hot_season],
-  [start_cold_season, cold_season],
-  [start_rainy_season, rainy_season]
-]
-
-// Get the seasons in the pre-randomized order
-seasons_in_order = [].concat(
-  thirteen_trial_chunk[season_order[0][0]], thirteen_trial_chunk[season_order[0][1]], thirteen_trial_chunk[season_order[0][2]],
-  thirteen_trial_chunk[season_order[1][0]], thirteen_trial_chunk[season_order[1][1]], thirteen_trial_chunk[season_order[1][2]],
-  thirteen_trial_chunk[season_order[2][0]], thirteen_trial_chunk[season_order[2][1]], thirteen_trial_chunk[season_order[2][2]],
-)
-
-// Define a jsPsych object for all the trials; pick aliens; max RT; timing
+// Define jsPsych object
 var phase1_initial_learn = {
   type: "feed-aliens",
   phase: "1InitialLearning",
   choices: [left_key, middle_key, right_key],
-  aliens: ph1_alien_names,
+  aliens: alien_names_rand,
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
   timing_post_trial: ITI_duration,

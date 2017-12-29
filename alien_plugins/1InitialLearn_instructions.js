@@ -182,14 +182,14 @@ var training_instructions_post = {
 happy_aliens =
   "<center><div class='alien_box'>" +
     "<div>" +
-      "<img class='alien' src='img/" + ph1_alien_names[0] + ".png'>" +
+      "<img class='alien' src='img/" + alien_names[0] + ".png'>" +
       "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
-      "<img class='alien' src='img/" + ph1_alien_names[1] + ".png'>" +
+      "<img class='alien' src='img/" + alien_names[1] + ".png'>" +
       "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
     "</div><div>" +
-      "<img class='alien' src='img/" + ph1_alien_names[2] + ".png'>" +
+      "<img class='alien' src='img/" + alien_names[2] + ".png'>" +
       "<img class='lovebubble' src='img/happy2.png' style='left: 15%'>" +
-      "<img class='alien' src='img/" + ph1_alien_names[3] + ".png'>" +
+      "<img class='alien' src='img/" + alien_names[3] + ".png'>" +
       "<img class='lovebubble' src='img/happy2.png' style='left: 50%'>" +
     "</div>" +
   "</div></center>"

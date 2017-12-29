@@ -1,10 +1,3 @@
-/**
- * jspsych plugin for categorization trials with feedback
- * Josh de Leeuw
- *
- * documentation: docs.jspsych.org
- **/
-
 
 jsPsych.plugins["feed-aliens"] = (function() {
 
@@ -37,46 +30,27 @@ jsPsych.plugins["feed-aliens"] = (function() {
     // get background, alien, point counters, and response buttons
     background = "<img class='background' src=img/" + trial.season + ".png>"
     sad_alien = "<img class='alien' id='sad_alien' src='img/" + trial.aliens[trial.sad_alien] + ".png'>"
+    l_item_name = item_names[item_order[0]]
+    m_item_name = item_names[item_order[1]]
+    r_item_name = item_names[item_order[2]]
+    l_item_html = item_buttons[item_order[0]]
+    m_item_html = item_buttons[item_order[1]]
+    r_item_html = item_buttons[item_order[2]]
 
-    point_counters = "<div class='counter_box' id='counter_box'>"
-    for (i = 0; i < trial.aliens.length; i ++) {
-      point_counters = point_counters.concat(
-        "<img class='counter_alien' style='top: ", c_alien_tops[i], "px' src='img/", trial.aliens[i], ".png'>",
-        "<p class='counter_number' style='top: ", point_tops[i], "px;'>", points[i], "</p>"
-      )
-    }
-    point_counters = point_counters.concat("</div>")
-    if (!trial.show_stim_with_feedback || trial.hide_alien_counter) {
-      point_counters = " ";
-    }
-
-    if (trial.shuffle_buttons) {
-      button_order = shuffle([0, 1, 2])
-    } else {
-      button_order = [0, 1, 2]
-    }
-    shuffled_buttons = [
-      item_buttons[button_order[0]],
-      item_buttons[button_order[1]],
-      item_buttons[button_order[2]]
-    ]
     response_buttons =
       "<center><div class='response_buttons' id='response_buttons'>" +
-        shuffled_buttons[0] +
-        shuffled_buttons[1] +
-        shuffled_buttons[2] +
+        l_item_html + m_item_html + r_item_html +
       "</div></center>"
 
-    alien_counters_buttons =
+    alien_buttons =
       "<center><div class='alien_box' id='everything'>" +
         sad_alien +
-        point_counters +
         response_buttons +
       "</div></center>"
 
     // display everyting
     display_element.html("");
-    display_element.append(background, alien_counters_buttons);
+    display_element.append(background, alien_buttons);
 
     var trial_data = {};
 
@@ -93,17 +67,23 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       var key = info.key;
       if (key == left_key) {
-        item_chosen = button_names[button_order[0]]
+        chosen_item_name = l_item_name
+        unchosen_item1 = m_item_name
+        unchosen_item2 = r_item_name
       } else if (key == middle_key) {
-        item_chosen = button_names[button_order[1]]
+        chosen_item_name = m_item_name
+        unchosen_item1 = l_item_name
+        unchosen_item2 = r_item_name
       } else if (key == right_key) {
-        item_chosen = button_names[button_order[2]]
+        chosen_item_name = r_item_name
+        unchosen_item1 = l_item_name
+        unchosen_item2 = m_item_name
       } else {
-        item_chosen = NaN
+        chosen_item_name = NaN
       }
 
       var correct = false;
-      if (trial.key_answer == item_chosen) {
+      if (trial.key_answer == chosen_item_name) {
         correct = true;
       }
 
@@ -111,8 +91,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
       if (!correct) {  // incorrect response or no answer
         feedback_amount = 0
       } else {  // correct response
-        for (i = 0; i < button_names.length; i++) {
-          if (item_chosen == button_names[i]) {
+        for (i = 0; i < item_names.length; i++) {
+          if (chosen_item_name == item_names[i]) {
             noised_amount = trial.reward + 0.5 * randn_bm()
             rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
             feedback_amount = Math.max(0, rounded_amount)
@@ -120,39 +100,22 @@ jsPsych.plugins["feed-aliens"] = (function() {
         }
       }
 
-      // update points
-      points[trial.sad_alien] += feedback_amount
-      for (i = 0; i < points.length; i++) {
-          points[i] = Math.round(10 * points[i]) / 10
-      }
-
-      season2number = {
-        "hot": 0,
-        "hot_cloudy": 0,
-        "cold": 1,
-        "cold_cloudy": 1,
-        "rainy": 2,
-        "rainy_cloudy": 2
-      }
-
       // save data
       trial_data = {
         "rt": info.rt,
+        "key": info.key,
         "correct": correct,
+        "item_left": l_item_name,
+        "item_center": m_item_name,
+        "item_right": r_item_name,
+        "item_chosen": chosen_item_name,
         "reward": feedback_amount,
-        "sad_alien": trial.sad_alien,
+        "sad_alien": trial.aliens[trial.sad_alien],  //trial.aliens: alien_names_rand ((fixed! used to be just trial.sad_alien))
         "season": trial.season,
         "TS": TS_rand[season2number[trial.season]],
-        "item_left": shuffled_buttons[0],
-        "item_center": shuffled_buttons[1],
-        "item_right": shuffled_buttons[2],
-        "item_chosen": item_chosen,
-        "key": info.key,
-        "points0": points[0],
-        "points1": points[1],
-        "points2": points[2],
         "phase": trial.phase,
       };
+      console.log(chosen_item_name);
 
       display_element.html('');  // clears display before feedback screen
 
@@ -184,59 +147,29 @@ jsPsych.plugins["feed-aliens"] = (function() {
         display_element.append(trial.timeout_message);
       } else {
 
-      // add reward bubble
+      // add reward measuringtape
       ruler_length = 20 + 50 * feedback_amount;
       ruler =
         "<div>" +
-          "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, "+ ruler_length +"px , 200px,0px);'>" +
+          "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, " + ruler_length + "px, 200px, 0px);'>" +
         "</div>"
 
-      // update point counters
-      point_counters = "<div class='counter_box' id='counter_box'>"
-      for (i = 0; i < trial.aliens.length; i ++) {
-        point_counters = point_counters.concat(
-          "<img class='counter_alien' style='top: ", c_alien_tops[i], "px' src='img/", trial.aliens[i], ".png'>",
-          "<p class='counter_number' style='top: ", point_tops[i], "px'>", points[i], "</p>"
-        )
-      }
-      point_counters = point_counters.concat("</div>")
-      if (!trial.show_stim_with_feedback) {
-        point_counters = " ";
-        ruler = " ";
-      }
-      if (trial.hide_alien_counter) {
-        point_counters = " ";
+      if (trial.season == "rainbow") {  // no feedback in rainbow season!
+        ruler = ""
       }
 
-      alien_counters_buttons =
+      alien_buttons =
         "<center><div class='alien_box'>" +
           sad_alien +
           ruler +
-          point_counters +
           response_buttons +
         "</div></center>"
 
-      display_element.append(background, alien_counters_buttons);
+      display_element.append(background, alien_buttons);
 
       // remove non-clicked buttons
-      if (key == 74) {
-        disappear_button_id = "#".concat(shuffled_buttons[1].split("id='")[1].split("'>")[0])
-        $(disappear_button_id).css('visibility', 'hidden');
-        disappear_button_id = "#".concat(shuffled_buttons[2].split("id='")[1].split("'>")[0])
-        $(disappear_button_id).css('visibility', 'hidden');
-      } else if (key == 75) {
-        disappear_button_id = "#".concat(shuffled_buttons[0].split("id='")[1].split("'>")[0])
-        $(disappear_button_id).css('visibility', 'hidden');
-        disappear_button_id = "#".concat(shuffled_buttons[2].split("id='")[1].split("'>")[0])
-        $(disappear_button_id).css('visibility', 'hidden');
-      } else if (key == 76) {
-        disappear_button_id = "#".concat(shuffled_buttons[1].split("id='")[1].split("'>")[0])
-        $(disappear_button_id).css('visibility', 'hidden');
-        disappear_button_id = "#".concat(shuffled_buttons[0].split("id='")[1].split("'>")[0])
-        $(disappear_button_id).css('visibility', 'hidden');
-      } else {
-        disappear_button_id = "xyzid='xyz"  // ugly solution ;( don't know how to get element ids...
-      }
+      $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
+      $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
       }
       setTimeout(function() {
@@ -246,14 +179,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
     function endTrial() {
       display_element.html("");
-      point_counters =
-        "<center><div class='alien_box'>" +
-          point_counters +
-        "</div></center>"
-      if (!trial.show_stim_with_feedback) {
-        point_counters = " ";
-      }
-      display_element.append(background, point_counters);
+      display_element.append(background);
       jsPsych.finishTrial(trial_data);
     }
 

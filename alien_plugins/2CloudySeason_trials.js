@@ -1,53 +1,37 @@
-// Assign reward schedule and TS to each season
-var hot_season = {
-  season: "hot_cloudy",
-  randomize_order: true,
-  timeline: TSs[TS_rand[0]]
-}
-var cold_season = {
-  season: "cold_cloudy",
-  randomize_order: true,
-  timeline: TSs[TS_rand[1]]
-}
-var rainy_season = {
-  season: "rainy_cloudy",
-  randomize_order: true,
-  timeline: TSs[TS_rand[2]]
-}
 
-// Create the transition page (point resetter) for each season
-var start_cloudy_season = {
-  type: "start_new_season",
-  show_clickable_nav: true,
-  pages: [
-    "<img class='background' src='img/hot_cloudy.png'>" +
-    "<p class='start_new_season'><i>A new season started!</i></p>"
-  ]
+// Get the order of the seasons
+cloudy_seasons_in_order = []
+for (block = 0; block < season_names.length * n_blocks_cloudy; block ++) {  // iterate through season_order, which indicates in which block each season should be presented
+
+  season_index = season_order_cloudy[block]  // 0, 1, or 2
+  season_name = season_names_cloudy[season_index]  // "hot", "cold", or "rainy"
+
+  trials = [{
+    type: "start_new_season",
+    show_clickable_nav: true,
+    pages: [
+      "<img class='background' src='img/" + season_name + ".png'>" +
+      "<p class='start_new_season'><i>A new season started!</i></p>"
+    ]
+  }]
+
+  for (trial = 0; trial < n_trials_cloudy; trial ++) {
+    trials.push({
+      season: season_name,
+      randomize_order: true,
+      timeline: TSs[TS_rand[season_index]]
+    })
+  }
+
+  cloudy_seasons_in_order = cloudy_seasons_in_order.concat(trials)
 }
-
-// Define the numbers of trials for each repetition of each season
-ten_trial_cloudy = [
-  [start_cloudy_season, hot_season, hot_season, hot_season, hot_season, hot_season,
-                     hot_season, hot_season, hot_season, hot_season, hot_season],
-  [start_cloudy_season, cold_season, cold_season, cold_season, cold_season, cold_season,
-                      cold_season, cold_season, cold_season, cold_season, cold_season],
-  [start_cloudy_season, rainy_season, rainy_season, rainy_season, rainy_season, rainy_season,
-                       rainy_season, rainy_season, rainy_season, rainy_season, rainy_season]
-]
-
-// Get the seasons in the pre-randomized order
-cloudy_seasons_in_order = [].concat(
-  ten_trial_cloudy[season_order_phase1b[1][0]], ten_trial_cloudy[season_order_phase1b[1][1]], ten_trial_cloudy[season_order_phase1b[1][2]],
-  ten_trial_cloudy[season_order_phase1b[2][0]], ten_trial_cloudy[season_order_phase1b[2][1]], ten_trial_cloudy[season_order_phase1b[2][2]],
-  ten_trial_cloudy[season_order_phase1b[3][0]], ten_trial_cloudy[season_order_phase1b[3][1]], ten_trial_cloudy[season_order_phase1b[3][2]],
-)
 
 // Define a jsPsych object for all the trials; pick aliens; max RT; timing
 var phase2_cloudy = {
   type: "feed-aliens",
   phase: "2CloudySeason",
   choices: [left_key, middle_key, right_key],
-  aliens: ph1_alien_names,
+  aliens: alien_names_rand,
   timing_response: max_RT,
   timing_feedback_duration: feedback_duration,
   timeout_message: timeout_message,

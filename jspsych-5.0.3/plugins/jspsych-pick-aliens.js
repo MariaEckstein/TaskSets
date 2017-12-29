@@ -1,10 +1,3 @@
-/**
- * jspsych plugin for categorization trials with feedback
- * Josh de Leeuw
- *
- * documentation: docs.jspsych.org
- **/
-
 
 jsPsych.plugins["pick-aliens"] = (function() {
 
@@ -33,11 +26,16 @@ jsPsych.plugins["pick-aliens"] = (function() {
     var setTimeoutHandlers = [];
 
     // prepare the two buttons that will be shown
-    shuffled_buttons = shuffle(trial.buttons)
+    button_order = shuffle([0, 1])
+    l_button_html = trial.buttons[button_order[0]]
+    r_button_html = trial.buttons[button_order[1]]
+    l_button_name = trial.button_names[button_order[0]]
+    r_button_name = trial.button_names[button_order[1]]
+
+    // shuffled_buttons = shuffle(trial.buttons)
     response_buttons =
       "<center><div class='response_buttons'>" +
-        shuffled_buttons[0] +
-        shuffled_buttons[1] +
+        l_button_html + r_button_html +
       "</div></center>"
 
     // display buttons
@@ -58,29 +56,24 @@ jsPsych.plugins["pick-aliens"] = (function() {
 
       // get id of selected and non-selected stimuli
       if (info.key == left_key) {
-        pressed_button = shuffled_buttons[0];
-        disappear_button = shuffled_buttons[1];
+        chosen_button_name = l_button_name;
+        unchosen_button_name = r_button_name;
       } else if (info.key == right_key) {
-        pressed_button = shuffled_buttons[1];
-        disappear_button = shuffled_buttons[0];
-      } else {
-        pressed_button = "xyzid='xyz"  // ugly solution ;( don't know how to get element ids...
-        disappear_button = "xyzid='xyz"  // ugly solution ;( don't know how to get element ids...
+        chosen_button_name = r_button_name;
+        unchosen_button_name = l_button_name;
       }
-      console.log(pressed_button)
-      pressed_button_id = "#".concat(pressed_button.split("id='")[1].split("'>")[0])
-      disappear_button_id = "#".concat(disappear_button.split("id='")[1].split("'>")[0])
 
       // save data
       trial_data = {
         "rt": info.rt,
         "key": info.key,
         "assess": trial.assess,
-        "item_left": shuffled_buttons[0],
-        "item_right": shuffled_buttons[1],
-        "item_chosen": pressed_button_id,
+        "item_left": l_button_name,
+        "item_right": r_button_name,
+        "item_chosen": chosen_button_name,
         "phase": 2,
       };
+      console.log(chosen_button_name);
 
       var timeout = info.rt == -1;
       correct = -1;
@@ -113,7 +106,7 @@ jsPsych.plugins["pick-aliens"] = (function() {
         display_element.append(trial.timeout_message);
       } else {
         // hide non-selected stimulus
-        $(disappear_button_id).css('visibility', 'hidden');
+        $("#" + unchosen_button_name + "-button").css('visibility', 'hidden');
       }
       setTimeout(function() {
         endTrial();

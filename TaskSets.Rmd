@@ -92,6 +92,9 @@ all_files$TS = factor(all_files$TS)
 all_files$reward[is.na(all_files$key)] = 0
 
 summary(all_files)
+
+ddply(subset(all_files, season = "rainy"), .(subjID, TS, sad_alien, item_chosen), summarize,
+      rew = mean(reward, na.rm = T))
 ```
 ```{r Clean data and create summary dataframe}
 

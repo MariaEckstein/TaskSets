@@ -25,3 +25,13 @@ function shuffle(array) {
 
   return array;
 }
+
+// Convert name of the season into the corresponding number
+var season2number = {
+  "hot": 0,
+  "hot_cloudy": 0,
+  "cold": 1,
+  "cold_cloudy": 1,
+  "rainy": 2,
+  "rainy_cloudy": 2
+}

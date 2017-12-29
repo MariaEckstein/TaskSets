@@ -4,7 +4,7 @@
     <title>Aliens</title>
     <script>
       // IMPORTANT PARAMETERS
-      var short_version = false;  // false or true
+      var short_version = true;  // false or true
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="jspsych-5.0.3/jspsych.js"></script>
@@ -15,7 +15,9 @@
     <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
     <script src="alien_plugins/helper_functions.js"></script>
     <script src="alien_plugins/randomization.js"></script>
-    <script src="alien_plugins/visual_elements.js"></script>
+    <script src="alien_plugins/make_competition_images.js"></script>
+    <script src="alien_plugins/define_TS.js"></script>
+    <script src="alien_plugins/set_timing_variables.js"></script>
     <script src="alien_plugins/1InitialLearn_instructions.js"></script>
     <script src="alien_plugins/1InitialLearn_trials.js"></script>
     <script src="alien_plugins/2CloudySeason_instructions.js"></script>
@@ -39,28 +41,27 @@
     */
 
     /* create experiment timeline array */
-    var timeline = [];
-    // timeline.push(get_subj_data);
-    // timeline.push(phase1_instructions);
-    // timeline.push(  // each training_block has 1 trial per alien
-    //   training_block, training_block, training_block, training_block, training_block,
-    //   training_block, training_block, training_block, training_block, training_block,
-    // );
-    // timeline.push(training_instructions_post);
-    // timeline.push(phase1_initial_learn);
-    // timeline.push(phase1_instructions_post);
-    // timeline.push(phase2_instructions);
-    // timeline.push(phase2_cloudy);
-    // timeline.push(phase2_instructions_post);
-    // timeline.push(refresher_block_2);
-    timeline.push(phase3_instructions);
-    timeline.push(phase3_pick_aliens);
-    timeline.push(phase3_post);
-    timeline.push(refresher_block_3);
-    timeline.push(phase5_instructions);
-    timeline.push(rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5);
-    timeline.push(phase5_after);  // Necessary to get rid of rainbow background
-    timeline.push(goodbye);
+    var timeline = [
+      get_subj_data,
+      phase1_instructions,
+      training_block, training_block, training_block, training_block, training_block,
+      training_block, training_block, training_block, training_block, training_block,
+      training_instructions_post,
+      phase1_initial_learn,
+      phase1_instructions_post,
+      phase2_instructions,
+      phase2_cloudy,
+      phase2_instructions_post,
+      refresher_block_2,
+      phase3_instructions,
+      phase3_pick_aliens,
+      phase3_post,
+      refresher_block_3,
+      phase5_instructions,
+      rainbow_season_phase5, rainbow_season_phase5, rainbow_season_phase5,
+      phase5_after,  // to get rid of rainbow background
+      goodbye
+    ]
 
     /* start the experiment */
     jsPsych.init({
