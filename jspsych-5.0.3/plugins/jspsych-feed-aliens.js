@@ -30,12 +30,12 @@ jsPsych.plugins["feed-aliens"] = (function() {
     // get background, alien, point counters, and response buttons
     background = "<img class='background' src=img/" + trial.season + ".png>"
     sad_alien = "<img class='alien' id='sad_alien' src='img/" + trial.aliens[trial.sad_alien] + ".png'>"
-    l_item_name = item_names[item_order[0]]
-    m_item_name = item_names[item_order[1]]
-    r_item_name = item_names[item_order[2]]
-    l_item_html = item_buttons[item_order[0]]
-    m_item_html = item_buttons[item_order[1]]
-    r_item_html = item_buttons[item_order[2]]
+    l_item_name = item_names[0]
+    m_item_name = item_names[1]
+    r_item_name = item_names[2]
+    l_item_html = item_buttons[0]
+    m_item_html = item_buttons[1]
+    r_item_html = item_buttons[2]
 
     response_buttons =
       "<center><div class='response_buttons' id='response_buttons'>" +
@@ -66,16 +66,21 @@ jsPsych.plugins["feed-aliens"] = (function() {
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
       var key = info.key;
+      chosen_item_name = NaN
+      chosen_item_id = NaN
       if (key == left_key) {
         chosen_item_name = l_item_name
+        chosen_item_id = 0
         unchosen_item1 = m_item_name
         unchosen_item2 = r_item_name
       } else if (key == middle_key) {
         chosen_item_name = m_item_name
+        chosen_item_id = 1
         unchosen_item1 = l_item_name
         unchosen_item2 = r_item_name
       } else if (key == right_key) {
         chosen_item_name = r_item_name
+        chosen_item_id = 2
         unchosen_item1 = l_item_name
         unchosen_item2 = m_item_name
       } else {
@@ -105,14 +110,15 @@ jsPsych.plugins["feed-aliens"] = (function() {
         "rt": info.rt,
         "key": info.key,
         "correct": correct,
-        "item_left": l_item_name,
-        "item_center": m_item_name,
-        "item_right": r_item_name,
-        "item_chosen": chosen_item_name,
         "reward": feedback_amount,
-        "sad_alien": trial.aliens[trial.sad_alien],  //trial.aliens: alien_names_rand ((fixed! used to be just trial.sad_alien))
+        "item_chosen": chosen_item_id,
+        "item_chosen_name": chosen_item_name,
+        "sad_alien": trial.sad_alien,
+        "sad_alien_name": trial.aliens[trial.sad_alien],
+        "TS": trial.TS,
         "season": trial.season,
-        "TS": TS_rand[season2number[trial.season]],
+        // "TS": TS_rand[season2number[trial.season]],
+        // "season": trial.season,
         "phase": trial.phase,
       };
       console.log(chosen_item_name);
@@ -154,7 +160,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
           "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, " + ruler_length + "px, 200px, 0px);'>" +
         "</div>"
 
-      if (trial.season == "rainbow") {  // no feedback in rainbow season!
+      if (trial.TS == "rainbow") {  // no feedback in rainbow season!
         ruler = ""
       }
 

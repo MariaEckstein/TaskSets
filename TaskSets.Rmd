@@ -7,6 +7,12 @@ output: html_document
 
 ```{r Set parameters, load packages, etc.}
 
+# TDs
+# check if participants reactivte TS in rainbow phase, or just individual associations
+  # order of choices -> does one TS0 action predict another?
+  # "values" of choices -> do participants select the highest-valued items or the TS0 items?
+  # It will be easier to do all of that when I have the new dataset because alien and item IDs will be better 
+
 library("ggplot2"); library("plyr"); library("lme4"); library("reshape2")
 theme_set(theme_bw())
 
@@ -254,6 +260,7 @@ cute_dat = merge(cute_dat_chosen, cute_dat_unchosen, all = T,
                  by.y = c("subjID", "assess", "item_unchosen"))
 cute_dat$count_chosen[is.na(cute_dat$count_chosen)] = 0
 cute_dat$count_unchosen[is.na(cute_dat$count_unchosen)] = 0
+cute_dat$chosen_minus_unchosen = with(cute_dat, count_chosen - count_unchosen)
 
 gg_pick_aliens_raw_ch = ggplot(cute_dat, aes(assess, count_chosen, color = item_chosen, group = item_chosen)) +
   # geom_point(position = position_dodge(width = 0.9), alpha = 0.05, color = "black") +
@@ -263,9 +270,16 @@ gg_pick_aliens_raw_unch = gg_pick_aliens_raw_ch +
   aes(y = count_unchosen) +
   labs(y = "# Unchosen")
 gg_pick_aliens_raw_diff = gg_pick_aliens_raw_ch +
-  aes(y = (count_chosen - count_unchosen)) +
+  aes(y = chosen_minus_unchosen) +
   geom_hline(yintercept = 0, linetype = "dotted") +
   labs(y = "# Chosen - # Unchosen")
+
+alien_TS = subset(cute_dat, assess == "alien-same-season")
+alien_TS$alien = substring(alien_TS$item_chosen, 1, 6)
+alien_TS$season = substring(alien_TS$item_chosen, 7)
+
+ggplot(alien_TS, aes(season, chosen_minus_unchosen, color = alien)) +
+  stat_summary(fun.data = mean_se, geom = "pointrange")
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "4gg_pick_aliens_value.png"), gg_pick_aliens_value, width = 4, height = 3)
@@ -298,6 +312,7 @@ alien_TS_obj = expand.grid(sad_alien = aliens,
 alien_TS_obj$av_reward = c(6, 4, 5, 10,
                            2, 8, 7, 3,
                            7, 3, 3, 2)
+alien_TS_obj$item = c()
 alien_TS_obj$selected = factor(alien_TS_obj$sad_alien)
 alien_TS_obj$assess = factor(alien_TS_obj$TS)
 
@@ -712,7 +727,10 @@ all_ACCs$ACC.only0 = with(all_ACCs, ACC.0 * (is.na(ACC.02)))
 all_ACCs$ACC.only1 = with(all_ACCs, ACC.1 * (is.na(ACC.12)))
 all_ACCs$ACC.only2 = with(all_ACCs, ACC.2 * (is.na(ACC.12)) * (is.na(ACC.02)))
 
-rainbow_aliens = merge(subset(feed_aliens, phase == "5RainbowSeason", select = c("subjID", "sad_alien", "item_chosen")), all_ACCs)
+rainbow_aliens = merge(subset(feed_aliens, phase == "5RainbowSeason", select = c("subjID", "sad_alien", "item_chosen")),
+                       all_ACCs)
+
+alien_TS_obj
 
 rainbow_aliens[order(rainbow_aliens$subjID, rainbow_aliens$sad_alien),]
 
@@ -737,6 +755,8 @@ rainbow_sum_l$frac_chosen = rainbow_sum_l$times_chosen
 rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("TS0", "TS1", "TS2")] = rainbow_sum_l$times_chosen[rainbow_sum_l$TS %in% c("TS0", "TS1", "TS2")] / 3
 rainbow_sum_l$frac_chosen[rainbow_sum_l$TS == "None"] = rainbow_sum_l$times_chosen[rainbow_sum_l$TS == "None"] / 2
 rainbow_sum_l$frac_chosen[rainbow_sum_l$TS == "Missed"] = NA
+```
+```{r}
 # Create value dat
 # values = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
 #                     .(TS, sad_alien), summarize,
@@ -776,6 +796,10 @@ gg_subj_strategy = ggplot(rainbow_sum_l, aes(orderedSubj, times_chosen / 12, fil
   theme(axis.text.x = element_blank())
 
 gg_strategy_hist = ggplot(subset(rainbow_sum_l, TS %in% c("TS0", "TS1", "TS2", "None")), aes(times_chosen, fill = TS)) +
+  geom_histogram(stat = "density", position = "identity", alpha = 0.5) +
+  labs(x = "# TS choices", fill = "")
+
+gg_strategy_hist_sub = ggplot(subset(rainbow_sum_l, TS %in% c("TS0", "TS1", "TS2", "None")), aes(times_chosen, fill = TS)) +
   geom_histogram(stat = "density", position = "identity", alpha = 0.5) +
   labs(x = "# TS choices", fill = "")
 

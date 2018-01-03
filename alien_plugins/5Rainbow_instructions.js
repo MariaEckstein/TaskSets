@@ -49,24 +49,3 @@ var phase5_after = {
   show_clickable_nav: true,
   timing_post_trial: 200
 }
-
-// Get the seasons in the pre-randomized order
-rainbow_timeline = [
-  {sad_alien: 0},
-  {sad_alien: 1},
-  {sad_alien: 2},
-  {sad_alien: 3},
-]
-var rainbow_season_phase5 = {
-  type: "feed-aliens",
-  phase: "5RainbowSeason",
-  season: "rainbow",
-  aliens: alien_names_rand,
-  choices: [left_key, middle_key, right_key],
-  randomize_order: true,
-  show_stim_with_feedback: false,
-  timing_response: max_RT,
-  timing_feedback_duration: feedback_duration,
-  timeout_message: timeout_message,
-  timeline: rainbow_timeline,
-}

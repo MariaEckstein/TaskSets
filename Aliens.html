@@ -4,7 +4,7 @@
     <title>Aliens</title>
     <script>
       // IMPORTANT PARAMETERS
-      var short_version = false;  // false or true
+      var short_version = true;  // false or true
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="jspsych-5.0.3/jspsych.js"></script>
@@ -14,18 +14,16 @@
     <script src="jspsych-5.0.3/plugins/jspsych-pick-aliens.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
     <script src="alien_plugins/helper_functions.js"></script>
-    <script src="alien_plugins/randomization.js"></script>
-    <script src="alien_plugins/make_competition_images.js"></script>
+    <script src="alien_plugins/set_timing_and_numbers.js"></script>
+    <script src="alien_plugins/names_and_competition_images.js"></script>
     <script src="alien_plugins/define_TS.js"></script>
-    <script src="alien_plugins/set_timing_variables.js"></script>
+    <script src="alien_plugins/FeedAliensTimelines.js"></script>
     <script src="alien_plugins/1InitialLearn_instructions.js"></script>
-    <script src="alien_plugins/1InitialLearn_trials.js"></script>
     <script src="alien_plugins/2CloudySeason_instructions.js"></script>
-    <script src="alien_plugins/2CloudySeason_trials.js"></script>
     <script src="alien_plugins/3Competition_instructions.js"></script>
     <script src="alien_plugins/3Competition_trials.js"></script>
-    <script src="alien_plugins/Refreshers.js"></script>
-    <script src="alien_plugins/5Rainbow_instructions_trials.js"></script>
+    <script src="alien_plugins/RefresherInstructions.js"></script>
+    <script src="alien_plugins/5Rainbow_instructions.js"></script>
     <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
     <link href="alien_plugins/alien_style.css" rel="stylesheet" type="text/css"></link>
   </head>
@@ -33,12 +31,6 @@
   </body>
 
   <script>
-
-    /*
-    Notes & TSs:
-    - in phase 2, put everything side-by-side or everything on top of each other
-    - add pics in instructions
-    */
 
     /* create experiment timeline array */
     var timeline = [
@@ -66,7 +58,7 @@
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
-      fullscreen: true,
+      // fullscreen: true,
       on_finish: function() {
         jsPsych.data.localSave('test.csv', 'csv')
       }
