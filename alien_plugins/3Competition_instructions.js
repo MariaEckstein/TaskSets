@@ -50,11 +50,11 @@ intro_slide_alien =
   "Press the right arrow to begin.</p>" +
   exmpl_alien_buttons
 
-// exmpl_item_buttons =
-//   "<center><div class='response_buttons'>" +
-//     item_buttons[0] +
-//     item_buttons[1] +
-//   "</div></center>"
+exmpl_item_buttons =
+  "<center><div class='response_buttons'>" +
+    item_buttons[0] +
+    item_buttons[1] +
+  "</div></center>"
 //
 // exmpl_alien_season_buttons_rest =
 //   "<center><div class='response_buttons'>" +
@@ -62,13 +62,13 @@ intro_slide_alien =
 //     alien_season_buttons[5] +
 //   "</div></center>"
 
-// intro_slide_item =
-//   "<center><p>Thank you for selecting your aliens!<p>" +
-//   "<p>Next in the selection process, you will select which <i>items</i> you would prefer for the competition. " +
-//   "For example, you might see the two items below. Which one would you pick?</p>" +
-//   "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
-//   exmpl_item_buttons +
-//   "<p>Your opponent will automatically get the other alien! "
+intro_slide_item =
+  "<center><p>Thank you for selecting your aliens!<p>" +
+  "<p>Next in the selection process, you will select which <i>items</i> you would prefer for the competition. " +
+  "For example, you might see the two items below. Which one would you pick?</p>" +
+  "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
+  exmpl_item_buttons +
+  "<p>Your opponent will automatically get the other alien! "
 
 // intro_slide_alien_rest_season =
 //   "<center><p>Last in the selection process, " +
@@ -95,16 +95,16 @@ type: "instructions",
 pages: [intro_slide_alien],
 show_clickable_nav: true,
 }
-// intro_item = {
-// type: "instructions",
-// pages: [intro_slide_item],
-// show_clickable_nav: true,
-// }
-// intro_alien_rest_season = {
-// type: "instructions",
-// pages: [intro_slide_alien_rest_season],
-// show_clickable_nav: true,
-// }
+intro_item = {
+type: "instructions",
+pages: [intro_slide_item],
+show_clickable_nav: true,
+}
+intro_alien_rest_season = {
+type: "instructions",
+pages: [intro_slide_alien_rest_season],
+show_clickable_nav: true,
+}
 
 var phase3_instructions = {
   type: 'instructions',
