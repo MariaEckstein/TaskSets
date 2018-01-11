@@ -21,11 +21,11 @@ alien_timeline = [
   {buttons: [alien_buttons[2], alien_buttons[3]],
   button_names: [alien_names[2], alien_names[3]]},
 ]
-// item_timeline = [
-//   {buttons: [item_buttons[0], item_buttons[1]]},  // pick between bed and umbrella
-//   {buttons: [item_buttons[0], item_buttons[2]]},  // pick between bed and plant
-//   {buttons: [item_buttons[1], item_buttons[2]]},  // pick between umbrella and plant
-// ]
+item_timeline = [
+  {buttons: [item_buttons[0], item_buttons[1]]},
+  {buttons: [item_buttons[0], item_buttons[2]]},
+  {buttons: [item_buttons[1], item_buttons[2]]},
+]
 same_season_timeline = []
 // rest_timeline = []
 for (a1 = 0; a1 < alien_season_buttons.length; a1 ++) {
@@ -75,11 +75,11 @@ alien = {
   randomize_order: true,
   timeline: alien_timeline
 }
-// item = {
-//   assess: "item",
-//   randomize_order: true,
-//   timeline: item_timeline
-// }
+item = {
+  assess: "item",
+  randomize_order: true,
+  timeline: item_timeline
+}
 // alien_rest_season = {
 //   assess: "alien-rest-season",
 //   randomize_order: true,
@@ -98,5 +98,6 @@ phase3_pick_aliens = {
     intro_season, season, season,  // comes first because that's what I'm interested in - shouldn't be influenced by the other things
     intro_alien_same_seasonn, alien_same_season, alien_same_season,
     intro_alien, alien, alien,
+    intro_item, item, item,
   )
 }
