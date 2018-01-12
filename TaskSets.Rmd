@@ -599,6 +599,11 @@ for (phas in c("1InitialLearning", "2CloudySeason")) {
   
   learning_curves_TS = learning_curves_value + aes(color = TS, group = TS)
   learning_curves_TS_aliens = learning_curves_value + facet_grid(sad_alien ~ TS)
+  learning_curves_rep = learning_curves_value +
+    aes(x = alien_trial_sum, group = floor((alien_trial-1) / length(unique(dat$alien_trial_sum))), color = floor((alien_trial-1) / length(unique(dat$alien_trial_sum)))) +
+    labs(x = "Trial", color = "Repetition") +
+    # theme(legend.position = "none") +
+    facet_grid(~ TS)
   
   learning_value_RTs = learning_curves_TS_aliens + aes(trial_index, rt) + coord_cartesian(ylim = c(0, 2000))
   
@@ -612,6 +617,7 @@ for (phas in c("1InitialLearning", "2CloudySeason")) {
   if (gg_save) {
     ggsave(paste(plot_dir, "/2learning_curves_value_", phas, ".png", sep = ""), learning_curves_valuep, width = 3, height = 3)
     ggsave(paste(plot_dir, "/2learning_curves_TS_", phas, ".png", sep = ""), learning_curves_TS, width = 4, height = 3)
+    ggsave(paste(plot_dir, "/2learning_curves_rep_", phas, ".png", sep = ""), learning_curves_rep, width = 6, height = 3)
     ggsave(paste(plot_dir, "/2learning_curves_TS_aliens_", phas, ".png", sep = ""), learning_curves_TS_aliens, width = 10, height = 10)
     ggsave(paste(plot_dir, "/2learning_value_RTs_", phas, ".png", sep = ""), learning_value_RTs, width = 10, height = 10)
     ggsave(paste(plot_dir, "/2learning_curves_wide_", phas, ".png", sep = ""), learning_curves_wide, width = 15, height = 3)
