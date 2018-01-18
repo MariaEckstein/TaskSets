@@ -374,19 +374,22 @@ feed_aliens = merge(feed_aliens, all.x = T,
                     by = c("subjID", "sad_alien", "TS"),
                     suffixes = c("", "_subj"))
 
-feed_aliens$alien_trial_sum = feed_aliens$alien_trial
+feed_aliens$alien_trial_sum = NA
+feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$phase, feed_aliens$trial_index, feed_aliens$sad_alien, feed_aliens$TS),]
+
 for (phas in feed_aliens_phases) {
   # Let each phase start at alien_trial == 1
   subs = feed_aliens$phase == phas & !is.na(feed_aliens$alien_trial)
   feed_aliens[subs, "alien_trial"] = feed_aliens[subs, "alien_trial"] - feed_aliens[subs, "alien_trial"][1] + 1
-  feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$phase, feed_aliens$trial_index, feed_aliens$sad_alien, feed_aliens$TS),]
   feed_aliens[subs,]
   
   # Add alien_trial_sum: starts at 1 every time a TS is repeated
+  feed_aliens[subs, "alien_trial_sum"] = feed_aliens[subs, "alien_trial"]
   n_tr = as.numeric(n_trials[paste("X", phas, sep = "")])
   subs2 = feed_aliens$phase == phas & feed_aliens$alien_trial_sum > n_tr
   while (any(feed_aliens[subs2, "alien_trial_sum"] > n_tr)) {
     feed_aliens[subs2, "alien_trial_sum"] = feed_aliens[subs2, "alien_trial_sum"] - n_tr
+    subs2 = feed_aliens$phase == phas & feed_aliens$alien_trial_sum > n_tr
   }
 }
 ```
@@ -442,13 +445,13 @@ for (phas in feed_aliens_phases) {
   dat$evidence = dat$cum_ACC
   dat$evidence[dat$evidence >= 1] = "1+"
   
-  if (phas == "1InitialLearning") {
+  if (phas == "1InitialLearning") {  # remove the very first encounter of a TS because participants don't know anything yet
     dat = subset(dat, alien_trial > 1)
   }
   
   sum_dat = ddply(dat, .(subjID, evidence), summarize,
                   ACC = mean(ACC, na.rm = T))
-  ggplot(sum_dat, aes(ACC, fill = TS)) +
+  ggplot(sum_dat, aes(ACC)) +
     geom_histogram(stat = "density", position = "identity", alpha = 0.5) +
     facet_grid(~ evidence)
   mean(subset(sum_dat, evidence == "0")$ACC)  # mean of evidence 0
@@ -456,11 +459,9 @@ for (phas in feed_aliens_phases) {
   t.test(subset(sum_dat, evidence == "0")$ACC - 1/3)  # participants perform above chance even in the first trial...??
   t.test(subset(sum_dat, evidence == "0")$ACC - subset(sum_dat, evidence == "1+")$ACC)  # sig. diff. betwe. evid. 0 & 1+
   
-  gg_value_guess_paper = ggplot(sum_dat, aes(evidence, 100 * ACC)) +  # , color = cum_ACC_1back, group = cum_ACC_1back
+  gg_value_guess_paper = ggplot(sum_dat, aes(evidence, 100 * ACC)) +
     stat_summary(fun.data = mean_cl_normal, geom = "bar") +
     stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
-    # geom_hline(yintercept = 100/3, linetype = "dotted") +
-    # coord_cartesian(ylim = c(0, 100)) +
     labs(x = "Prev. correct", y = "% correct", color = "Value")
   
   gg_value_guess = ggplot(dat, aes(cum_ACC, 100 * ACC)) +  # , color = cum_ACC_1back, group = cum_ACC_1back
@@ -624,6 +625,32 @@ for (phas in feed_aliens_phases) {
     facet_grid(~ facet)
   gg_otherTS_ACC3$data = dat_l
   gg_otherTS_ACC4 = gg_otherTS_ACC3 + aes(x = "") + theme(legend.position = "none")
+
+  # Run models
+  if (run_regression) {
+    others = subset(dat_l, current_TS == F & ACC_TS != "None")
+    others$ACC_TS = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = 0:2)
+    others = merge(others, by.x = c("sad_alien", "ACC_TS"), all.x = T,
+              subset(alien_TS_obj, select = c("sad_alien", "TS", "av_reward")), by.y = c("sad_alien", "TS"),
+              suff = c("", "_ACC_TS"))
+    # subset(others, select = c("sad_alien", "item_chosen", "av_reward", "av_reward_ACC_TS", "ACC_TS", "TS"), sad_alien == 0 & item_chosen == "umbrella")
+    # 
+    # ggplot(others, aes(alien_trial_sum, ACC, color = av_reward_ACC_TS, group = av_reward_ACC_TS)) +
+    # stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
+    # facet_grid(~ ACC_TS)
+    
+    # others$ACC_TS = factor(others$ACC_TS, levels = c("None", "ACC0", "ACC1", "ACC2"), labels = c(0, 6.25, 5, 3.75))
+    others$ACC_TS = as.numeric(as.character(others$ACC_TS))
+    intrusions_form = "ACC ~ alien_trial_sum + ACC_TS + av_reward_ACC_TS + (1 | subjID)"
+    
+    glmer_mod_intrusions = glmer(as.formula(intrusions_form),
+                      family = binomial,
+                      data = others,
+                      na.action = na.omit,
+                      control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
+    write.csv(as.data.frame(summary(glmer_mod_intrusions)$coef), paste(plot_dir, "/glmer_mod_intrusions_summary_", phas, ".csv", sep = ""))
+    write.csv(as.data.frame(anova(glmer_mod_intrusions, type = 3)), paste(plot_dir, "/glmer_mod_intrusions_aov_", phas, ".csv", sep = ""))
+  }
   
   if (gg_save) {
     ggsave(paste(plot_dir, "/2gg_otherTS_ACC_", phas, ".png", sep = ""), gg_otherTS_ACC, width = 9, height = 3)
@@ -688,22 +715,30 @@ regression_plot = alien_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "
 regression_plot$data = subset(regr_dat, phase == "2CloudySeason")
 ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 3, height = 3)
 
+sub_dat = subset(regr_dat, phase %in% feed_aliens_phases)
+sub_dat[order(sub_dat$subjID, sub_dat$trial),]
+ggplot(sub_dat, aes(alien_trial_sum, ACC, color = av_reward, group = av_reward)) +
+  stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
+  stat_summary(fun.data = mean_cl_normal, geom = "line") +
+  facet_grid(TS ~ phase)
+  
+
 if (run_regression) {
   for (phas in feed_aliens_phases) {
     
     oneback_self_others_form = "ACC ~ ACC_1back_self * ACC_1back_others + (ACC_1back_self * ACC_1back_others | subjID)"
     rew_1back_form = "ACC ~ rew_1back_self + (rew_1back_self | subjID)"
     all3_form = "ACC ~ ACC_1back_self * ACC_1back_others * rew_1back_self + (ACC_1back_self * ACC_1back_others * rew_1back_self | subjID)"
-    trial_value_form = "ACC ~ alien_trial_sum + av_reward * TS_value + (1 | subjID)"
+    trial_value_form = "ACC ~ TS_value + av_reward + alien_trial_sum + (1 | subjID)"  # I can't add TS_value:av_reward because that will make the models for refresher2 and refresher3 crash
     
     glmer_mod_trial_value = glmer(as.formula(trial_value_form),
                       family = binomial,
-                      data = subset(regr_dat, phase == phas),
+                      data = subset(regr_dat, phase == phas & TS != 2),
                       na.action = na.omit,
                       control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
     write.csv(as.data.frame(summary(glmer_mod_trial_value)$coef), paste(plot_dir, "/glmer_trial_value_summary_", phas, ".csv", sep = ""))
     write.csv(as.data.frame(anova(glmer_mod_trial_value, type = 3)), paste(plot_dir, "/glmer_trial_value_aov_", phas, ".csv", sep = ""))
-  
+    
     # glmer_mod_1back_self_others = glmer(as.formula(oneback_self_others_form),
     #                   family = binomial,
     #                   data = subset(regr_dat, phase == phase),
