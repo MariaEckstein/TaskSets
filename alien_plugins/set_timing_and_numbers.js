@@ -32,7 +32,7 @@ n_trials_phase1 = 13;  //13 how many trials per season per alien?
 n_blocks_cloudy = 3;  //2 how often will each season be repeated?
 n_trials_cloudy = 10;  //10 how many trials per season per alien?
 
-n_blocks_refreshers = 1;  //2 how often will each season be repeated?
+n_blocks_refreshers = 2;  //2 how often will each season be repeated?
 n_trials_refreshers = 7;  //7 how many trials per season per alien?
 
 n_blocks_rainbow = 3;

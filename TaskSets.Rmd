@@ -28,8 +28,8 @@ if (!dir.exists(plot_dir)) {
   dir.create(plot_dir)
 }
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
-gg_save = T
-run_regression = T
+gg_save = F
+run_regression = F
 ```
 ```{r Read in data}
 filenames = list.files(data_dir, pattern = "*.csv")
@@ -564,7 +564,7 @@ for (TSi in unique(feed_aliens$TS)) {
   feed_aliens[rows_prev_prev, "ACC_prev_prev_TS"] = feed_aliens[rows_prev_prev, col]
 }
 ```
-```{r Plot perseverance mistakes}
+```{r Plot perseverance mistakes and run regression models}
 for (phas in feed_aliens_phases) {
   
   dat = subset(feed_aliens, phase == phas)
@@ -629,6 +629,8 @@ for (phas in feed_aliens_phases) {
   # Run models
   if (run_regression) {
     others = subset(dat_l, current_TS == F & ACC_TS != "None")
+    others$TS_values = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = c(6.25, 5, 3.75))
+    others$TS_values = as.numeric(as.character(others$TS_values))
     others$ACC_TS = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = 0:2)
     others = merge(others, by.x = c("sad_alien", "ACC_TS"), all.x = T,
               subset(alien_TS_obj, select = c("sad_alien", "TS", "av_reward")), by.y = c("sad_alien", "TS"),
@@ -640,8 +642,7 @@ for (phas in feed_aliens_phases) {
     # facet_grid(~ ACC_TS)
     
     # others$ACC_TS = factor(others$ACC_TS, levels = c("None", "ACC0", "ACC1", "ACC2"), labels = c(0, 6.25, 5, 3.75))
-    others$ACC_TS = as.numeric(as.character(others$ACC_TS))
-    intrusions_form = "ACC ~ alien_trial_sum + ACC_TS + av_reward_ACC_TS + (1 | subjID)"
+    intrusions_form = "ACC ~ TS_values + av_reward_ACC_TS + alien_trial_sum + (TS_values + av_reward_ACC_TS + alien_trial_sum | subjID)"
     
     glmer_mod_intrusions = glmer(as.formula(intrusions_form),
                       family = binomial,
@@ -649,7 +650,6 @@ for (phas in feed_aliens_phases) {
                       na.action = na.omit,
                       control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
     write.csv(as.data.frame(summary(glmer_mod_intrusions)$coef), paste(plot_dir, "/glmer_mod_intrusions_summary_", phas, ".csv", sep = ""))
-    write.csv(as.data.frame(anova(glmer_mod_intrusions, type = 3)), paste(plot_dir, "/glmer_mod_intrusions_aov_", phas, ".csv", sep = ""))
   }
   
   if (gg_save) {
@@ -726,38 +726,22 @@ ggplot(sub_dat, aes(alien_trial_sum, ACC, color = av_reward, group = av_reward))
 if (run_regression) {
   for (phas in feed_aliens_phases) {
     
+    trial_value_form = "ACC ~ TS_value + av_reward + alien_trial_sum + (TS_value + av_reward + alien_trial_sum | subjID)"
     oneback_self_others_form = "ACC ~ ACC_1back_self * ACC_1back_others + (ACC_1back_self * ACC_1back_others | subjID)"
     rew_1back_form = "ACC ~ rew_1back_self + (rew_1back_self | subjID)"
-    all3_form = "ACC ~ ACC_1back_self * ACC_1back_others * rew_1back_self + (ACC_1back_self * ACC_1back_others * rew_1back_self | subjID)"
-    trial_value_form = "ACC ~ TS_value + av_reward + alien_trial_sum + (1 | subjID)"  # I can't add TS_value:av_reward because that will make the models for refresher2 and refresher3 crash
     
     glmer_mod_trial_value = glmer(as.formula(trial_value_form),
                       family = binomial,
-                      data = subset(regr_dat, phase == phas & TS != 2),
+                      data = subset(regr_dat, phase == phas),
                       na.action = na.omit,
                       control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
     write.csv(as.data.frame(summary(glmer_mod_trial_value)$coef), paste(plot_dir, "/glmer_trial_value_summary_", phas, ".csv", sep = ""))
-    write.csv(as.data.frame(anova(glmer_mod_trial_value, type = 3)), paste(plot_dir, "/glmer_trial_value_aov_", phas, ".csv", sep = ""))
     
-    # glmer_mod_1back_self_others = glmer(as.formula(oneback_self_others_form),
-    #                   family = binomial,
-    #                   data = subset(regr_dat, phase == phase),
-    #                   na.action = na.omit,
-    #                   control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
-    # write.csv(as.data.frame(summary(glmer_mod_1back_self_others)$coef), paste(plot_dir, "/glmer_oneback_self_others_summary_", phase, ".csv", sep = ""))
-    # write.csv(as.data.frame(anova(glmer_mod_1back_self_others, type = 3)), paste(plot_dir, "/glmer_oneback_self_others_aov_", phase, ".csv", sep = ""))
+    glmer_mod_1back_self_others = update(glmer_mod_trial_value, formula = as.formula(oneback_self_others_form))
+    write.csv(as.data.frame(summary(glmer_mod_1back_self_others)$coef), paste(plot_dir, "/glmer_oneback_self_others_summary_", phas, ".csv", sep = ""))
     
-    # glmer_mod_rew_1back = update(glmer_mod_1back_self_others, formula = as.formula(rew_1back_form))
-    # write.csv(as.data.frame(summary(glmer_mod_rew_1back)$coef), paste(plot_dir, "/glmer_rew_1back_summary_", phase, ".csv", sep = ""))
-    # write.csv(as.data.frame(anova(glmer_mod_rew_1back, type = 3)), paste(plot_dir, "/glmer_rew_1back_aov_", phase, ".csv", sep = ""))
-  
-    # glmer_mod_rew_1back_value = update(glmer_mod_1back_self_others, formula = as.formula(rew_1back_value_form))
-    # write.csv(as.data.frame(summary(glmer_mod_rew_1back_value)$coef), paste(plot_dir, "/glmer_rew_1back_value_summary_", phase, ".csv", sep = ""))
-    # write.csv(as.data.frame(anova(glmer_mod_rew_1back_value, type = 3)), paste(plot_dir, "/glmer_rew_1back_value_aov_", phase, ".csv", sep = ""))
-  
-    # glmer_mod_all3 = update(glmer_mod_1back_self_others, formula = as.formula(all3_form))
-    # write.csv(as.data.frame(summary(glmer_mod_all3)$coef), paste(plot_dir, "/glmer_all3_summary_", phase, ".csv", sep = ""))
-    # write.csv(as.data.frame(anova(glmer_mod_all3, type = 3)), paste(plot_dir, "/glmer_all3_aov_", phase, ".csv", sep = ""))
+    glmer_mod_rew_1back = update(glmer_mod_trial_value, formula = as.formula(rew_1back_form))
+    write.csv(as.data.frame(summary(glmer_mod_rew_1back)$coef), paste(plot_dir, "/glmer_rew_1back_summary_", phas, ".csv", sep = ""))
   }
 }
 ```
