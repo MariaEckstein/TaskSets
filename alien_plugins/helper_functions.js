@@ -58,7 +58,8 @@ function create_feed_aliens_timeline(TS_order, n_blocks, n_trials, special) {
         "<p class='start_new_season'><i>The season has changed!</i></p>"
       ]
     }
-    trials = [start_new_season];
+    // trials = [start_new_season];
+    trials = [];
 
     for (tr = 0; tr < n_trials; tr ++) {
       trial = {
