@@ -56,13 +56,22 @@
     ]
 
     /* start the experiment */
-    jsPsych.init({
-      timeline: timeline,
-      // fullscreen: true,
-      on_finish: function() {
-        jsPsych.data.localSave('test.csv', 'csv')
-      }
-    });
+    var images = ['img/alien1.png', 'img/alien2.png', 'img/alien3.png', 'img/alien4.png', 'img/alien5.png',
+        'img/alien6.png', 'img/alien7.png', 'img/alien8.png', 'img/alien9.png', 'img/alien10.png', 'img/alien_blank.png',
+        'img/aliens.png', 'img/bed.png', 'img/cold.png', 'img/cold_cloudy.png', 'img/happy.png', 'img/happy2.png',
+        'img/hot.png', 'img/hot_cloudy.png', 'measuringtape.png', 'img/measuringtape_5cm.png', 'img/plant.png',
+        'img/rainbow.png', 'img/rainy.png', 'img/rainy_cloudy.png', 'img/rock.png', 'img/sad.png', 'img/speech.png',
+        'img/training.png', 'img/umbrella.png'];
 
+    jsPsych.pluginAPI.preloadImages(images, function(){ startExperiment(); });
+    function startExperiment() {
+        jsPsych.init({
+            timeline: timeline,
+            // fullscreen: true,
+            on_finish: function () {
+                jsPsych.data.localSave('test.csv', 'csv')
+            }
+        });
+    }
   </script>
 </html>
