@@ -238,7 +238,7 @@ pick_aliens_sum = ddply(subset(pick_aliens, !is.na(assess)),
                         selected_better = mean(selected_better, na.rm = T),
                         selected_better_obj = mean(selected_better_obj, na.rm = T))
 ```
-```{r Plot competition phase: Participants have no idea what they are doing}
+```{r Plot competition phase}
 gg_pick_aliens_value = ggplot(subset(pick_aliens_sum, assess %in% c("alien", "alien-same-TS", "item", "TS")), aes(assess, value_diff, color = subjID)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_cl_normal", geom = "pointrange") +
@@ -570,7 +570,12 @@ for (phas in feed_aliens_phases) {
   dat = subset(feed_aliens, phase == phas)
   
   dat_l = melt(subset(dat, select = -ACC), measure.vars = c("ACC0", "ACC1", "ACC2", "ACCNone"), variable.name = "ACC_TS", value.name = "ACC")
+  dat_l$current_TS = F
+  for (TSi in 0:2) {
+    dat_l$current_TS[dat_l$TS == TSi & dat_l$ACC_TS == paste("ACC", TSi, sep = "")] = T
+  }
   dat_l$facet = ""
+  
   gg_otherTS_ACC = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(ACC_TS))) +
     stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
     geom_hline(yintercept = 100/3, linetype = "dotted") +
@@ -597,6 +602,7 @@ for (phas in feed_aliens_phases) {
     facet_grid(TS ~ ACC_TS)
   gg_prevTS_ACC$data = dat_l2
   
+  # Remove trials that count as "intrusion errors" although they are correct in the current TS
   dat_l$ACC[dat_l$sad_alien == 3 & dat_l$TS == 0 & dat_l$ACC_TS == "ACC2"] = NA
   dat_l$ACC[dat_l$sad_alien == 3 & dat_l$TS == 2 & dat_l$ACC_TS == "ACC0"] = NA
   dat_l$ACC[dat_l$sad_alien == 0 & dat_l$TS == 2 & dat_l$ACC_TS == "ACC1"] = NA
@@ -607,6 +613,16 @@ for (phas in feed_aliens_phases) {
   dat_l2$ACC[dat_l2$sad_alien == 0 & dat_l2$TS == 2 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
   dat_l2$ACC[dat_l2$sad_alien == 0 & dat_l2$TS == 1 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
   
+  # How often do intrusions occur compared to just random mistakes?  (Question: Am I counting errors twice that are correct in more than one TS??)
+  dat_l$none_or_TS = ifelse(dat_l$ACC_TS == "ACCNone", "None", "TS")
+  subj_av = ddply(subset(dat_l, !current_TS), .(subjID, none_or_TS), summarize,
+        ACC = sum(ACC, na.rm = T))
+  subj_av = reshape(subj_av, direction = "wide", timevar = "none_or_TS", idvar = "subjID")
+  subj_av$fraction_TS_errors = with(subj_av, ACC.TS / (ACC.None + ACC.TS))
+  t.test(subj_av$fraction_TS_errors - 6/8)
+  grand_av = ddply(subj_av, .(), summarize,
+        fraction_TS_errors = mean(fraction_TS_errors, na.rm = T))
+  
   gg_otherTS_ACC2 = gg_otherTS_ACC
   gg_otherTS_ACC2$data = dat_l
   gg_otherTS_ACC_value2 = gg_otherTS_ACC_value
@@ -616,10 +632,6 @@ for (phas in feed_aliens_phases) {
   gg_prevTS_ACC2 = gg_prevTS_ACC + aes(x = alien_trial_sum, color = factor(ACC_TS, labels = c("Current TS", "Previous TS", "Other TS")), group = ACC_TS) + facet_grid(~ facet) + labs(x = "Trial", color = "")
   gg_prevTS_ACC2$data = dat_l2
   
-  dat_l$current_TS = F
-  for (TSi in 0:2) {
-    dat_l$current_TS[dat_l$TS == TSi & dat_l$ACC_TS == paste("ACC", TSi, sep = "")] = T
-  }
   gg_otherTS_ACC3 = gg_otherTS_ACC2 + aes(x = alien_trial_sum, color = ACC_TS, shape = factor(current_TS, labels = c("Other TS", "Current TS"))) +
     labs(x = "", color = "", shape = "") +
     facet_grid(~ facet)
@@ -641,7 +653,6 @@ for (phas in feed_aliens_phases) {
     # stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
     # facet_grid(~ ACC_TS)
     
-    # others$ACC_TS = factor(others$ACC_TS, levels = c("None", "ACC0", "ACC1", "ACC2"), labels = c(0, 6.25, 5, 3.75))
     intrusions_form = "ACC ~ TS_values + av_reward_ACC_TS + alien_trial_sum + (TS_values + av_reward_ACC_TS + alien_trial_sum | subjID)"
     
     glmer_mod_intrusions = glmer(as.formula(intrusions_form),
@@ -666,6 +677,11 @@ for (phas in feed_aliens_phases) {
     ggsave(paste(plot_dir, "/2gg_prevTS_ACC2_", phas, ".png", sep = ""), gg_prevTS_ACC2, width = 4, height = 4)
   }
 }
+
+subset(others, select = c("subjID", "trial_index", "sad_alien", "item_chosen", "ACC_TS", "ACC", "current_TS"))
+subset(dat_l, select = c("subjID", "trial_index", "sad_alien", "item_chosen", "ACC_TS", "ACC", "current_TS"))
+unique(dat_l$ACC_TS)
+subset(dat_l, ACC_TS == "ACCNone")
 ```
 ```{r Plot learning phase & cloudy season: Learning depends on reward size / value}
 for (phas in feed_aliens_phases) {
@@ -832,7 +848,7 @@ cloudy_aliens = merge(subset(feed_aliens, phase == "2CloudySeason" & trial == 1,
                        all_ACCs)
 cloudy_aliens[order(cloudy_aliens$subjID, cloudy_aliens$sad_alien),]
 
-cloudy_sum = ddply(cloudy_aliens, .(sad_alien, subjID), summarize,
+cloudy_sum = ddply(cloudy_aliens, .(subjID), summarize,
       TS0 = sum(ACC.only0, na.rm = T),
       TS1 = sum(ACC.only1, na.rm = T),
       TS2 = sum(ACC.only2, na.rm = T),
@@ -841,10 +857,10 @@ cloudy_sum = ddply(cloudy_aliens, .(sad_alien, subjID), summarize,
       Missed = sum(ACC.Missed, na.rm = T),
       None = sum(ACC.None, na.rm = T))
 ```
-```{r}
+```{r Cloudy season}
 
 # Model: frac_chosen ~ TS_value + alien_values + TS_ACC
-cloudy_sum_l = melt(cloudy_sum, id.vars = c("subjID", "sad_alien"), variable.name = "TS", value.name = "times_chosen")
+cloudy_sum_l = melt(cloudy_sum, id.vars = c("subjID"), variable.name = "TS", value.name = "times_chosen")
 cloudy_sum_l$TS = factor(cloudy_sum_l$TS, levels = c("TS0", "TS0and2", "TS1", "TS1and2", "TS2", "None", "Missed"))
 cloudy_sum_l$frac_chosen = cloudy_sum_l$times_chosen
 cloudy_sum_l$frac_chosen[cloudy_sum_l$TS %in% c("TS0", "TS1")] = cloudy_sum_l$times_chosen[cloudy_sum_l$TS %in% c("TS0", "TS1")] / 3
@@ -852,8 +868,7 @@ cloudy_sum_l$frac_chosen[cloudy_sum_l$TS %in% c("None", "TS2")] = cloudy_sum_l$t
 cloudy_sum_l$frac_chosen[cloudy_sum_l$TS == "Missed"] = NA
 
 ggplot(cloudy_sum_l, aes(TS, frac_chosen)) +
-  stat_summary(fun.data="mean_cl_normal", geom="pointrange", position="dodge") +
-  facet_grid(~ sad_alien)
+  stat_summary(fun.data="mean_cl_normal", geom="pointrange", position="dodge")
 
 cloudy_sum_l = subset(cloudy_sum_l, TS %in% c("TS0", "TS1", "TS2"))
 cloudy_sum_l$TS = gsub("TS", "", cloudy_sum_l$TS)
@@ -908,7 +923,7 @@ mean(Double_TS_choices)
 mean(Double_TS_choices / Valid_choices)
 t.test(Double_TS_choices - 2 / 12 * Valid_choices)
 ```
-```{r}
+```{r Rainbow season}
 
 rainbow_sum = ddply(rainbow_aliens, .(subjID), summarize,
       TS0 = sum(ACC.only0, na.rm = T),
@@ -966,7 +981,7 @@ mod = lm(frac_chosen ~ TS_value + TS_ACC + alien_values,
          na.action=na.omit)
 summary(mod)
 
-
+# Were more TS-related items selected than expected based on chance?
 TS_choices = 12 - rainbow_sum$Missed - rainbow_sum$None
 Valid_choices = 12 - rainbow_sum$Missed
 mean(TS_choices)
