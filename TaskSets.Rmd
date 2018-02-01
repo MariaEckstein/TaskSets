@@ -34,11 +34,52 @@ run_regression = F
 ```{r Read in data}
 filenames = list.files(data_dir, pattern = "*.csv")
 all_files = data.frame()
+demographics = data.frame()
+demo_row = 1
+
 for (filename in filenames) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "-1"))
-  subj_file$subjID = strsplit(substr(as.character(subj_file$responses), 8, 10), "[^0-9]")[[1]][[1]]
-  subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
+  demos = gsub('[[:punct:]]', '', as.character(subj_file$responses)[1])
+  subjID = as.numeric(strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1])
+  subj_file$subjID = subjID
   
+  # Get demographics
+  demographics[demo_row, "subjID"] = subjID
+  dob = gsub("[a-zA-Z]", "", strsplit(strsplit(demos, "Q1")[[1]][2], "Q2")[[1]][1])
+  month = substr(dob, 1, 2)
+  day = substr(dob, 3, 4)
+  year = substr(dob, 5, nchar(dob))
+  if (year > 2010 | year < 1980) {
+    year = 1995
+  }
+  if (nchar(year) == 2) {
+    year = paste("19", year, sep = "")
+  }
+  demographics[demo_row, "dob"] = paste(year, month, day, sep = "-")
+  
+  today = gsub("[a-zA-Z]", "", strsplit(demos, "Q2")[[1]][2])
+  month = substr(today, 1, 2)
+  if (month == "19") {
+    month = "10"
+  }
+  day = substr(today, 3, 4)
+  year = substr(today, 5, nchar(today))
+  if (nchar(year) == 1) {
+    day = paste("0", substr(today, 3, 3), sep = "")
+    year = substr(today, 4, nchar(today))
+  }
+  if (nchar(year) == 2) {
+    year = paste("20", year, sep = "")
+  }
+  if (year < 2017 | year > 2018) {
+    year = 2017
+  }
+  demographics[demo_row, "testing_date"] = paste(year, month, day, sep = "-")
+  demo_row = demo_row + 1
+
+  # Get all_files
+  subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
+
   # Add trial column: counter within blocks
   subj_file$trial = NA
   for (row in 2:nrow(subj_file)) {
@@ -109,9 +150,19 @@ ddply(subset(all_files, season = "rainy"), .(subjID, TS, sad_alien, item_chosen)
 criterion_dat = subset(all_files, season == "training" & alien_trial %in% 8:10)
 perf_dat = ddply(criterion_dat, .(subjID), summarize,
                  ACC = mean(ACC, na.rm = T))
+plot(perf_dat$ACC)
 perf_dat$below_criterion = perf_dat$ACC < perf_criterion
 (chance_performers = subset(perf_dat, below_criterion == T))
 all_files = subset(all_files, !subjID %in% chance_performers$subjID)
+```
+```{r demographics}
+demographics$age = with(demographics, as.Date(testing_date) - as.Date(dob))
+nrow(demographics)  # number of participants
+demographics = subset(demographics, subjID %in% unique(all_files$subjID))
+nrow(demographics)  # number of participants after removing chance performaners
+as.numeric(mean(demographics$age) / 365.242)  # mean age in years
+as.numeric(sd(demographics$age) / 365.242)  # age sd
+plot(as.numeric(demographics$age) / 365.242)  # plot to check
 ```
 ```{r Calculate learned values for aliens, seasons, items}
 learnt_values = subset(all_files, phase %in% c("1InitialLearning", "Refresher2", "Refresher3") & item_chosen != "NaN")
@@ -677,17 +728,13 @@ for (phas in feed_aliens_phases) {
     ggsave(paste(plot_dir, "/2gg_prevTS_ACC2_", phas, ".png", sep = ""), gg_prevTS_ACC2, width = 4, height = 4)
   }
 }
-
-subset(others, select = c("subjID", "trial_index", "sad_alien", "item_chosen", "ACC_TS", "ACC", "current_TS"))
-subset(dat_l, select = c("subjID", "trial_index", "sad_alien", "item_chosen", "ACC_TS", "ACC", "current_TS"))
-unique(dat_l$ACC_TS)
-subset(dat_l, ACC_TS == "ACCNone")
 ```
 ```{r Plot learning phase & cloudy season: Learning depends on reward size / value}
 for (phas in feed_aliens_phases) {
   
   dat = subset(feed_aliens, phase == phas)
   dat$value = round(dat$av_reward / 2) * 2
+  dat$TS_value = as.numeric(as.character(factor(dat$TS, levels = c("0", "1", "2"), labels = c(6.25, 5, 3.75))))
   
   learning_curves_value = ggplot(dat, aes(alien_trial, 100 * ACC, color = value, group = value)) +
     stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
@@ -699,7 +746,7 @@ for (phas in feed_aliens_phases) {
     stat_summary(fun.data = mean_cl_normal, geom = "line") +
     labs(x = "Trial", y = "% correct", color = "Value")
   
-  learning_curves_TS = learning_curves_value + aes(color = TS, group = TS)
+  learning_curves_TS = learning_curves_valuep + aes(color = TS_value, group = TS_value)
   learning_curves_TS_aliens = learning_curves_value + facet_grid(sad_alien ~ TS)
   learning_curves_rep = learning_curves_value +
     aes(x = alien_trial_sum, group = floor((alien_trial-1) / length(unique(dat$alien_trial_sum))), color = floor((alien_trial-1) / length(unique(dat$alien_trial_sum)))) +
@@ -718,7 +765,7 @@ for (phas in feed_aliens_phases) {
 
   if (gg_save) {
     ggsave(paste(plot_dir, "/2learning_curves_value_", phas, ".png", sep = ""), learning_curves_valuep, width = 3, height = 3)
-    ggsave(paste(plot_dir, "/2learning_curves_TS_", phas, ".png", sep = ""), learning_curves_TS, width = 4, height = 3)
+    ggsave(paste(plot_dir, "/2learning_curves_TS_", phas, ".png", sep = ""), learning_curves_TS, width = 3, height = 3)
     ggsave(paste(plot_dir, "/2learning_curves_rep_", phas, ".png", sep = ""), learning_curves_rep, width = 6, height = 3)
     ggsave(paste(plot_dir, "/2learning_curves_TS_aliens_", phas, ".png", sep = ""), learning_curves_TS_aliens, width = 10, height = 10)
     ggsave(paste(plot_dir, "/2learning_value_RTs_", phas, ".png", sep = ""), learning_value_RTs, width = 10, height = 10)
