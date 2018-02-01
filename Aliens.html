@@ -63,15 +63,15 @@
         'img/rainbow.png', 'img/rainy.png', 'img/rainy_cloudy.png', 'img/rock.png', 'img/sad.png', 'img/speech.png',
         'img/training.png', 'img/umbrella.png'];
 
-    jsPsych.pluginAPI.preloadImages(images, function(){ startExperiment(); });
-    function startExperiment() {
         jsPsych.init({
             timeline: timeline,
+            //show_preload_progress_bar: false, // hide preload progress bar
             // fullscreen: true,
+            preload_images: images,
             on_finish: function () {
                 jsPsych.data.localSave('test.csv', 'csv')
             }
         });
-    }
+
   </script>
 </html>
