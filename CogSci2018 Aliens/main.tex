@@ -89,7 +89,7 @@ In our novel task, participants encountered four aliens and were asked to "help 
 
 Participants learned a different TS in each of three contexts (hot, cold, and rainy "seasons"; Fig.~\ref{figure:task sets and values}A), such that there was a one-to-one mapping between contexts and TS. The reward value associated with each correct context-alien-item mapping was normally distributed around a fixed mean, with standard deviation 0.5. The mean reward values were predetermined such that TS differed in average reward ("TS value"), while aliens and items did not (Fig.~\ref{figure:task sets and values}B). This manipulation allowed us to test participants' sensitivity to TS values, while ruling out confounds based on stimulus and action values. 
 
-The different phases of the alien task are described in table \ref{table:task phases}. To minimize confounds, the mappings between contexts and TS were randomized between participants, as were the images of aliens and items.
+The different phases of the alien task are described in table~\ref{table:task phases}. To minimize confounds, the mappings between contexts and TS were randomized between participants, as were the images of aliens and items.
 
 \begin{figure}[ht]
     \begin{center}
@@ -152,7 +152,7 @@ A TS is a coherent, interdependent assembly of stimulus-response mappings that a
 
 In order to test whether participants had formed TS, we therefore first focused on trials in which participants saw an alien for the first time after a context change. In this situation, participants had not yet received any information about the correct item for this alien, i.e., they had no direct evidence about the stimulus-response mapping. We compared two different conditions within these trials, (1) when participants had not yet selected the correct item for any other alien, and (2) when participants had at least once selected the correct item for another alien. We expected that knowledge about some stimulus-response (alien-item) mappings within a TS would facilitate the recall of the remaining mappings, such that participants would select the correct item more often in condition (2) than (1).
 
-This was indeed the case. In condition (1), participants selected the correct item in 36.9\% of trials, compared to 45.8\% in condition (2) (chance: 33.3\%; Fig.~\ref{figure:learning values}B). The difference was statistically significant (t(49)=2.5, p=0.014), suggesting that participants retrieved stimulus-response mappings for unseen aliens based on knowledge about already-seen alien-item mappings within the same TS. These results were confirmed in a regression model encompassing all trials of the hidden-context phase, rather than just the subset used above. In this model, each trial's accuracy was predicted from two factors, (1) participants' performance in the previous trial of the same stimulus-response mapping ("ACC same"), and (2) participants' performance in the previous trials of the other three stimulus-response mappings combined ("ACC other"). As expected, both factors significantly affected performance (table \ref{table:acc self other}). 
+This was indeed the case. In condition (1), participants selected the correct item in 36.9\% of trials, compared to 45.8\% in condition (2) (chance: 33.3\%; Fig.~\ref{figure:learning values}B). The difference was statistically significant (t(49)=2.5, p=0.014), suggesting that participants retrieved stimulus-response mappings for unseen aliens based on knowledge about already-seen alien-item mappings within the same TS. These results were confirmed in a regression model encompassing all trials of the hidden-context phase, rather than just the subset used above. In this model, each trial's accuracy was predicted from four factors, including (1) participants' performance in the previous trial of the same stimulus-response mapping ("ACC same"), and (2) participants' performance in the previous trials of the other three stimulus-response mappings combined ("ACC other"). As expected, both factors significantly affected performance (table~\ref{table:acc self other}). 
 
 Similar patterns were evident in the initial-learning phase and the two refresher periods. In these phases, the background pictures provided perfect cues for the current TS, as opposed to the hidden-context phase. The fact that certainty about other mappings (ACC other) still affected performance suggests that participants used partial knowledge about TS as a cue for the remaining mappings even when a perfect cue for the TS was given.
 
@@ -169,17 +169,21 @@ Taken together, the interdependence between stimulus-response mappings within co
 Task phase          &   Predictor           &   $\beta$ &   $p$ \\
 \hline
 Initial learning    &   {\bf ACC same}      &   1.09    &   $<0.001$ \\
-                    &   {\bf ACC other}     &   0.49    &   $<0.001$ \\
-                    &   {\bf interaction}   &   0.35    &   $0.008$  \\
-Refresher 1         &   {\bf ACC same}      &   1.73    &   $<0.001$ \\
-                    &   {\bf ACC other}     &   1.40    &   $<0.001$ \\
-                    &   {\bf interaction}   &   -0.28   &   $0.022$  \\
+                    &   {\bf ACC other}     &   0.41    &   $<0.001$ \\
+                    &   {\bf interaction}   &   0.31    &   $0.028$  \\
+                    &   {\bf Repetition}    &   0.18    &   $<$0.001 \\
+Refresher 1         &   {\bf ACC same}      &   1.74    &   $<0.001$ \\
+                    &   {\bf ACC other}     &   1.39    &   $<0.001$ \\
+                    &   {\bf interaction}   &   -0.65   &   $0.020$  \\
+                    &   Repetition          &   0.02    &   $0.74$   \\
 Refresher 2         &   {\bf ACC same}      &   1.91    &   $<0.001$ \\
                     &   {\bf ACC other}     &   1.79    &   $<0.001$ \\
-                    &   {\bf interaction}   &   -1.10   &   $0.005$  \\
-Hidden context      &   {\bf ACC same}      &   1.17    &   $<0.001$ \\
-                    &   {\bf ACC other}     &   0.73    &   $<0.001$ \\
-                    &   {\bf interaction}   &   0.47    &   $0.019$  \\
+                    &   {\bf interaction}   &   -1.11   &   $0.005$  \\
+                    &   Repetition          &   0.03    &   $0.64$   \\
+Hidden context      &   {\bf ACC same}      &   1.18    &   $<0.001$ \\
+                    &   {\bf ACC other}     &   0.72    &   $<0.001$ \\
+                    &   {\bf interaction}   &   0.45    &   $0.027$  \\
+                    &   {\bf Repetition}    &   0.14    &   $0.013$  \\
 \hline
 \end{tabular}
 }
@@ -201,7 +205,7 @@ So far, we have established that participants created TS and flexibly reactivate
 
 \subsection{TS values affect learning}
 
-To this aim, we analyzed the initial-learning phase of the task, in which participants first learned to associate each alien with the correct item, in each context. To test the effects of both stimulus-action values (lower-level RL loop) and context-TS values (higher-level loop), we used a regression model predicting accuracy in each trial from three factors: the value of the current stimulus (lower-level), the value of the current TS (higher-level), and the trial index, in order to account for learning over time (Fig.~\ref{figure:learning values}A). The model revealed a significant effect of stimulus values (table \ref{table:accuracy}), as predicted by traditional RL models. This shows that participants performed better when the rewards for correct responses were larger.
+To this aim, we analyzed the initial-learning phase of the task, in which participants first learned to associate each alien with the correct item, in each context. To test the effects of both stimulus-action values (lower-level RL loop) and context-TS values (higher-level loop), we used a regression model predicting accuracy in each trial from four factors: (1) the value of the current stimulus (lower-level), (2) the value of the current TS (higher-level), (3) the trial index, in order to account for learning within a context block, and (4) the repetition index, which accounts for learning across context blocks (Fig.~\ref{figure:learning values}A). The model revealed a significant effect of stimulus values (table~\ref{table:accuracy}), as predicted by traditional RL models. This shows that participants performed better when the rewards for correct responses were larger.
 
 In addition, the model revealed a significant effect of TS values, which is not predicted by standard RL theories, but by our model. This shows that performance depended on the average rewards of all mappings within a TS, in addition to their individual rewards. In other words, participants did not only perform better in higher-valued alien-item mappings, but also in mappings that were part of higher-valued TS. This effect held in the two refresher periods, supporting the claim that TS values had long-lasting effects on performance. TS values influenced performance even in the hidden-context phase, in which contexts were not shown. This supports the claim that TS values were not only associated with the observable context, but directly integrated with the TS.
 
@@ -226,18 +230,22 @@ In addition, the model revealed a significant effect of TS values, which is not 
 \hline
 Task phase          &   Predictor               &   $\beta$ &   $p$ \\
 \hline
-Initial learning    &   {\bf Stimulus value}    &   0.17    &   $<0.001$ \\
-                    &   {\bf TS value}          &   0.19    &   0.005  \\
+Initial learning    &   {\bf Stimulus value}    &   0.19    &   $<0.001$ \\
+                    &   TS value                &   0.037   &   0.24     \\
                     &   {\bf Trial index}       &   0.14    &   $<0.001$ \\
-Refresher 1         &   {\bf Stimulus value}    &   0.15    &   $<0.001$ \\
-                    &   {\bf TS value}          &   0.35    &   0.006  \\
-                    &   {\bf Trial index}       &   0.39    &   $<0.001$ \\
-Refresher 2         &   {\bf Stimulus value}    &   0.16    &   $<0.001$ \\
-                    &   {\bf TS value}          &   0.35    &   0.012  \\
+                    &   {\bf Repetition}        &   0.30    &   $<0.001$ \\
+Refresher 1         &   {\bf Stimulus value}    &   0.12    &   $<0.001$ \\
+                    &   {\bf TS value}          &   0.18    &   $<0.001$ \\
+                    &   {\bf Trial index}       &   0.31    &   $<0.001$ \\
+                    &   Repetition              &   0.16    &   $0.053$  \\
+Refresher 2         &   {\bf Stimulus value}    &   0.12    &   $<0.001$ \\
+                    &   {\bf TS value}          &   0.18    &   0.0026   \\
                     &   {\bf Trial index}       &   0.27    &   $<0.001$ \\
-Hidden context      &   {\bf Stimulus value}    &   0.22    &   $<0.001$ \\
-                    &   {\bf TS value}          &   0.24    &   0.018  \\
-                    &   {\bf Trial index}       &   0.30    &   $<0.001$ \\
+                    &   {\bf Repetition}        &   0.22    &   $0.019$  \\
+Hidden context      &   {\bf Stimulus value}    &   0.20    &   $<0.001$ \\
+                    &   {\bf TS value}          &   0.09    &   0.048    \\
+                    &   {\bf Trial index}       &   0.27    &   $<0.001$ \\
+                    &   {\bf Repetition}        &   0.22    &   $0.0038$ \\
 \hline
 \end{tabular}
 }
@@ -260,9 +268,9 @@ We also aimed to confirm that participants had acquired traditional stimulus val
 
 Having shown that participants learned values for TS and that TS values affected learning and context selection, we next tested whether TS values also affected TS reactivation and generalization. We tested this in three ways. First, we asked whether higher-valued TS were reactivated more readily than lower-valued TS in the hidden-context phase. Second, we assessed whether TS values predicted error types in the initial-learning phase and the refreshers. Third, we tested whether higher-valued TS had a larger influence on the creation of new TS than lower-valued ones (generalization phase).
 
-With respect to our first question, we have shown above that TS values influenced accuracy in the hidden-context phase (table \ref{table:accuracy}). One potential reason for this is that participants more readily reactivated higher-valued than lower-valued TS, leading to higher accuracy in higher-valued TS as a whole. This is in accordance with our model, which predicts that TS are selected based on TS values.
+With respect to our first question, we have shown above that TS values influenced accuracy in the hidden-context phase (table~\ref{table:accuracy}). One potential reason for this is that participants more readily reactivated higher-valued than lower-valued TS, leading to higher accuracy in higher-valued TS as a whole. This is in accordance with our model, which predicts that TS are selected based on TS values.
 
-Our second assessment concerned errors, specifically intrusions from other TS. We defined intrusion as the selection of an action that is correct in a context other than the current one. In the initial-learning phase, if participants made errors by selecting incorrect items uniformly at random, 75\% of all errors would be intrusions (due to the specific way TS were defined). Participants instead produced 78.4\% intrusion errors, a small but significant increase, t(49)=6.69, $p<0.001$. Within these intrusions, TS values significantly affected item selection, as shown in a logistic mixed-effects regression model (table \ref{table:intrusions}). The effect was not driven by stimulus values. This confirms that TS values influenced TS reactivation, to the point of introducing incorrect mappings from other TS.
+Our second assessment concerned errors, specifically intrusions from other TS. We defined intrusion as the selection of an action that is correct in a context other than the current one. In the initial-learning phase, if participants made errors by selecting incorrect items uniformly at random, 75\% of all errors would be intrusions (due to the specific way TS were defined). Participants instead produced 78.4\% intrusion errors, a small but significant increase, t(49)=6.69, $p<0.001$. Within these intrusions, TS values significantly affected item selection, as shown in a logistic mixed-effects regression model (table~\ref{table:intrusions}). The effect was not driven by stimulus values. This confirms that TS values influenced TS reactivation, to the point of introducing incorrect mappings from other TS.
 
 \begin{table}[!ht]
 \begin{center} 
@@ -274,18 +282,22 @@ Our second assessment concerned errors, specifically intrusions from other TS. W
 \hline
 Task phase          &   Predictor               &   $\beta$ &   $p$ \\
 \hline
-Initial learning    &   Stimulus value          &   0.01    &   0.13 \\
-                    &   {\bf TS value}          &   0.05    &   0.005 \\
+Initial learning    &   Stimulus value          &   0.01    &   0.09 \\
+                    &   {\bf TS value}          &   0.05    &   0.007 \\
                     &   {\bf Trial index}       &   -0.10   &   $<$0.001 \\
-Refresher 1         &   Stimulus value          &   0.01    &   0.45 \\
-                    &   TS value                &   0.01    &   0.76 \\
+                    &   {\bf Repetition}        &   -0.18   &   $<$0.001 \\
+Refresher 1         &   Stimulus value          &   0.02    &   0.32 \\
+                    &   TS value                &   0.01    &   0.68 \\
                     &   {\bf Trial index}       &   -0.30   &   $<$0.001 \\
-Refresher 2         &   Stimulus value          &   0.009   &   0.60 \\
-                    &   {\bf TS value}          &   0.11    &   0.019 \\
+                    &   {\bf Repetition}        &   -0.16   &   0.02 \\
+Refresher 2         &   Stimulus value          &   0.008   &   0.67 \\
+                    &   {\bf TS value}          &   0.13    &   0.003 \\
                     &   {\bf Trial index}       &   -0.25   &   $<$0.001 \\
+                    &   Repetition              &   -0.11   &   0.09 \\
 Hidden context      &   {\bf Stimulus value}    &   0.02    &   0.035 \\
-                    &   TS value                &   0.03    &   0.28 \\
+                    &   TS value                &   0.03    &   0.29 \\
                     &   {\bf Trial index}       &   -0.24   &   $<$0.001 \\
+                    &   Repetition              &   -0.12   &   0.05 \\
 \hline
 \end{tabular}
 }
@@ -294,7 +306,7 @@ Hidden context      &   {\bf Stimulus value}    &   0.02    &   0.035 \\
 
 Lastly, we tested the influence of TS values on the creation of new TS, hypothesizing that higher-valued TS would influence TS creation more than lower-valued TS. This should be evident in the generalization phase of our task, in that participants would apply mappings from higher-valued TS more often than mappings from lower-valued TS. We found that participants chose actions according to TS0 (largest value), TS1 (intermediate value), and TS2 (lowest value) in an average of 30.1\%, 23.9\%, and 14.1\% of trials, respectively, compared to chance levels of 3/12=25\%, 3/12=25\%, and 2/12=16.7\% (Fig.~\ref{figure:TS creation distribution}). Participants chose actions that were correct in more than one TS in 22.4\% of trials (chance 2/12=16.7\%), and actions that were not correct in any TS in 9.4\% of trials (chance 2/12=16.7\%).
 
-To test for differences between TS, we analyzed the effect of TS values on the ratio of participant-selected to chance-expected choices, using linear regression. The effect of TS values was significant, controlling for two potential confounds, the values of individual stimulus-response mappings (lower-level values), and participants' performance on each TS, a proxy for their confidence in the TS (table \ref{table:TS creation}). In summary, these results suggest that action selection in the novel context was driven by previously-acquired TS, especially those of high value. Crucially, participants did not select items based on the values of individual alien-item mappings, or based on elevated confidence with certain TS. 
+To test for differences between TS, we analyzed the effect of TS values on the ratio of participant-selected to chance-expected choices, using linear regression. The effect of TS values was significant, controlling for two potential confounds, the values of individual stimulus-response mappings (lower-level values), and participants' performance on each TS, a proxy for their confidence in the TS (table~\ref{table:TS creation}). In summary, these results suggest that action selection in the novel context was driven by previously-acquired TS, especially those of high value. Crucially, participants did not select items based on the values of individual alien-item mappings, or based on elevated confidence with certain TS. 
 
 \begin{table}[!ht]
 \begin{center} 
