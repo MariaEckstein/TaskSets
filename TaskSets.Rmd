@@ -28,8 +28,8 @@ if (!dir.exists(plot_dir)) {
   dir.create(plot_dir)
 }
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
-gg_save = F
-run_regression = F
+gg_save = T
+run_regression = T
 ```
 ```{r Read in data}
 filenames = list.files(data_dir, pattern = "*.csv")
@@ -39,34 +39,37 @@ demo_row = 1
 
 for (filename in filenames) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "-1"))
-  demos = gsub('[[:punct:]]', '', as.character(subj_file$responses)[1])
-  subjID = as.numeric(strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1])
-  subj_file$subjID = subjID
   
   # Get demographics
+  demos = gsub("[^A-Za-z0-9/]", "", as.character(subj_file$responses)[1])  # get rid of all funny characters
+  Q0split = strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1]
+  Q1split = strsplit(strsplit(demos, "Q1")[[1]][2], "Q2")[[1]][1]
+  Q1split = gsub("[^0-9/]", "", Q1split)  # remove non-numbers
+  Q2split = strsplit(demos, "Q2")[[1]][2]
+  Q2split = gsub("[^0-9/]", "", Q2split)  # remove non-numbers
+  
+  # Subj ID
+  subjID = as.numeric(Q0split)
   demographics[demo_row, "subjID"] = subjID
-  dob = gsub("[a-zA-Z]", "", strsplit(strsplit(demos, "Q1")[[1]][2], "Q2")[[1]][1])
-  month = substr(dob, 1, 2)
-  day = substr(dob, 3, 4)
-  year = substr(dob, 5, nchar(dob))
-  if (year > 2010 | year < 1980) {
-    year = 1995
-  }
+  
+  # Date of birth
+  month = as.numeric(strsplit(Q1split, "/")[[1]][1])
+  day = as.numeric(strsplit(Q1split, "/")[[1]][2])
+  year = as.numeric(strsplit(Q1split, "/")[[1]][3])
   if (nchar(year) == 2) {
     year = paste("19", year, sep = "")
   }
+  if (year > 2010 | year < 1950) {
+    year = 1995
+  }
   demographics[demo_row, "dob"] = paste(year, month, day, sep = "-")
   
-  today = gsub("[a-zA-Z]", "", strsplit(demos, "Q2")[[1]][2])
-  month = substr(today, 1, 2)
+  # Testing date
+  month = as.numeric(strsplit(Q2split, "/")[[1]][1])
+  day = as.numeric(strsplit(Q2split, "/")[[1]][2])
+  year = as.numeric(strsplit(Q2split, "/")[[1]][3])
   if (month == "19") {
     month = "10"
-  }
-  day = substr(today, 3, 4)
-  year = substr(today, 5, nchar(today))
-  if (nchar(year) == 1) {
-    day = paste("0", substr(today, 3, 3), sep = "")
-    year = substr(today, 4, nchar(today))
   }
   if (nchar(year) == 2) {
     year = paste("20", year, sep = "")
@@ -78,10 +81,11 @@ for (filename in filenames) {
   demo_row = demo_row + 1
 
   # Get all_files
+  subj_file$subjID = subjID
   subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
 
   # Add trial column: counter within blocks
-  subj_file$trial = NA
+  subj_file$trial = NA  # trial within block / season
   for (row in 2:nrow(subj_file)) {
     if (is.na(subj_file$season[row])) {
       trial = NA
@@ -95,16 +99,30 @@ for (filename in filenames) {
     subj_file$trial[row] = trial
   }
   
+  # Add alien_trial and repetition columns (alien_trial: how often has this alien been presented in this season?; repetition: How often has this season been presented?)
   subj_file$alien_trial = NA
+  subj_file$repetition = NA
+  # Create counters for seasons and alien-season combinations
+  season_counter = data.frame(training = 0,
+                              hot = 0, cold = 0, rainy = 0,
+                              hot_cloudy = 0, cold_cloudy = 0, rainy_cloudy = 0,
+                              rainbow = 0)
   alien_season_counter = data.frame(training = rep(0, n_aliens),
                                     hot = rep(0, n_aliens), cold = rep(0, n_aliens), rainy = rep(0, n_aliens),
                                     hot_cloudy = rep(0, n_aliens), cold_cloudy = rep(0, n_aliens), rainy_cloudy = rep(0, n_aliens),
                                     rainbow = rep(0, n_aliens))
-  
+
   for (row in 1:nrow(subj_file)) {
-    sad_alien = subj_file$sad_alien[row] + 1
+    sad_alien = subj_file$sad_alien[row] + 1  # Python starts at 0, I start at 1
     if (!is.na(sad_alien)) {
       season = as.character(subj_file$season[row])
+      # Update counters, add new count to subj_file
+      if (row > 1) {
+        if (is.na(subj_file$season[row-1])) {
+          season_counter[season] = season_counter[season] + 1
+        }
+      }
+      subj_file$repetition[row] = season_counter[season][[1]]
       alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
       subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
     }
@@ -116,6 +134,7 @@ all_files$subjID = as.numeric(as.character(all_files$subjID))
 all_files$sad_alien = factor(all_files$sad_alien)
 all_files$ACC = ifelse(all_files$correct == "true", 1, 0)
 
+# Make buttons readable
 all_files$item_left = as.character(all_files$item_left)
 all_files$item_right = as.character(all_files$item_right)
 all_files$item_center = as.character(all_files$item_center)
@@ -133,7 +152,7 @@ for (row in 1:nrow(all_files)) {
   all_files$item_right[row] = right_item_name
 }
 
-all_files$time_elapsed = all_files$points0 = all_files$points1 = all_files$points2 = NULL
+all_files$time_elapsed = all_files$points0 = all_files$points1 = all_files$points2 = NULL  # Remove unnecessary columns
 all_files$TS = as.character(all_files$TS)
 all_files$TS[is.na(all_files$TS)] = as.character(all_files$season[is.na(all_files$TS)])  # if column TS is NA, replace it with season column
 all_files$TS = factor(all_files$TS)
@@ -289,7 +308,7 @@ pick_aliens_sum = ddply(subset(pick_aliens, !is.na(assess)),
                         selected_better = mean(selected_better, na.rm = T),
                         selected_better_obj = mean(selected_better_obj, na.rm = T))
 ```
-```{r Plot competition phase}
+```{r Plot competition phase and t-tests}
 gg_pick_aliens_value = ggplot(subset(pick_aliens_sum, assess %in% c("alien", "alien-same-TS", "item", "TS")), aes(assess, value_diff, color = subjID)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_cl_normal", geom = "pointrange") +
@@ -311,10 +330,11 @@ t.test(subset(pick_aliens_sum, assess == "TS")$selected_better_obj - 0.5)
 mean(subset(pick_aliens_sum, assess == "TS")$value_chosen)
 mean(subset(pick_aliens_sum, assess == "TS")$value_unchosen)
 t.test(subset(pick_aliens_sum, assess == "TS")$value_chosen - subset(pick_aliens_sum, assess == "TS")$value_unchosen)
-mean(subset(pick_aliens_sum, assess == "item")$value_chosen)
+mean(subset(pick_aliens_sum, assess == "item")$selected_better)
 mean(subset(pick_aliens_sum, assess == "item")$value_unchosen)
+mean(subset(pick_aliens_sum, assess == "item")$value_chosen)
 t.test(subset(pick_aliens_sum, assess == "item")$value_chosen - subset(pick_aliens_sum, assess == "item")$value_unchosen)
-t.test(subset(pick_aliens_sum, assess == "item")$selected_better - subset(pick_aliens_sum, assess == "TS")$selected_better)
+t.test(subset(pick_aliens_sum, assess == "item")$selected_better - 0.5)
 
 gg_pick_aliens_value_subj = ggplot(subset(pick_aliens), aes(trial_index, value_chosen - value_unchosen, color = assess)) +
   geom_point() +
@@ -448,7 +468,7 @@ for (phas in feed_aliens_phases) {
 # Regression data: regr_dat
 ## Bring in the right order for regression: each line must be the predictor of the immediate next line!
 feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$phase, feed_aliens$sad_alien, feed_aliens$TS, feed_aliens$alien_trial),]
-regr_dat = subset(feed_aliens, select = c("subjID", "phase", "sad_alien", "TS", "reward", "av_reward", "TS_value", "trial", "alien_trial_sum", "alien_trial", "ACC"))
+regr_dat = subset(feed_aliens, select = c("subjID", "phase", "sad_alien", "TS", "reward", "av_reward", "TS_value", "trial", "alien_trial_sum", "alien_trial", "repetition", "ACC"))
 
 ACC_1back_self = c(NA, regr_dat$ACC[1:length(regr_dat$ACC)-1])
 ACC_1back_self[regr_dat$alien_trial_sum == 1] = NA
@@ -547,7 +567,7 @@ if (gg_save) {
 }
 ```
 ```{r Create perseverance data}
-# Get data that shows whcih choices correspond to one of the 3 TS, and which don't
+# Get data that shows which choices correspond to one of the 3 TS, and which don't
 correct_TS = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
                       .(TS, sad_alien), summarize,
                       item_chosen = item_chosen[1])
@@ -670,6 +690,7 @@ for (phas in feed_aliens_phases) {
         ACC = sum(ACC, na.rm = T))
   subj_av = reshape(subj_av, direction = "wide", timevar = "none_or_TS", idvar = "subjID")
   subj_av$fraction_TS_errors = with(subj_av, ACC.TS / (ACC.None + ACC.TS))
+  plot(subj_av$fraction_TS_errors - 6/8)
   t.test(subj_av$fraction_TS_errors - 6/8)
   grand_av = ddply(subj_av, .(), summarize,
         fraction_TS_errors = mean(fraction_TS_errors, na.rm = T))
@@ -704,7 +725,7 @@ for (phas in feed_aliens_phases) {
     # stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
     # facet_grid(~ ACC_TS)
     
-    intrusions_form = "ACC ~ TS_values + av_reward_ACC_TS + alien_trial_sum + (TS_values + av_reward_ACC_TS + alien_trial_sum | subjID)"
+    intrusions_form = "ACC ~ TS_values + av_reward_ACC_TS + alien_trial_sum + repetition + (TS_values + av_reward_ACC_TS + alien_trial_sum + repetition | subjID)"
     
     glmer_mod_intrusions = glmer(as.formula(intrusions_form),
                       family = binomial,
@@ -744,7 +765,8 @@ for (phas in feed_aliens_phases) {
   learning_curves_valuep = learning_curves_value +
     aes(alien_trial_sum, 100 * ACC) +
     stat_summary(fun.data = mean_cl_normal, geom = "line") +
-    labs(x = "Trial", y = "% correct", color = "Value")
+    labs(x = "Trial", y = "% correct", color = "Value") +
+    theme(legend.position = "none")
   
   learning_curves_TS = learning_curves_valuep + aes(color = TS_value, group = TS_value)
   learning_curves_TS_aliens = learning_curves_value + facet_grid(sad_alien ~ TS)
@@ -764,8 +786,8 @@ for (phas in feed_aliens_phases) {
     facet_grid(~ paste("Value", av_reward))
 
   if (gg_save) {
-    ggsave(paste(plot_dir, "/2learning_curves_value_", phas, ".png", sep = ""), learning_curves_valuep, width = 3, height = 3)
-    ggsave(paste(plot_dir, "/2learning_curves_TS_", phas, ".png", sep = ""), learning_curves_TS, width = 3, height = 3)
+    ggsave(paste(plot_dir, "/2learning_curves_value_", phas, ".png", sep = ""), learning_curves_valuep, width = 2.3, height = 3)
+    ggsave(paste(plot_dir, "/2learning_curves_TS_", phas, ".png", sep = ""), learning_curves_TS, width = 2.3, height = 3)
     ggsave(paste(plot_dir, "/2learning_curves_rep_", phas, ".png", sep = ""), learning_curves_rep, width = 6, height = 3)
     ggsave(paste(plot_dir, "/2learning_curves_TS_aliens_", phas, ".png", sep = ""), learning_curves_TS_aliens, width = 10, height = 10)
     ggsave(paste(plot_dir, "/2learning_value_RTs_", phas, ".png", sep = ""), learning_value_RTs, width = 10, height = 10)
@@ -789,9 +811,9 @@ ggplot(sub_dat, aes(alien_trial_sum, ACC, color = av_reward, group = av_reward))
 if (run_regression) {
   for (phas in feed_aliens_phases) {
     
-    trial_value_form = "ACC ~ TS_value + av_reward + alien_trial_sum + (TS_value + av_reward + alien_trial_sum | subjID)"
-    oneback_self_others_form = "ACC ~ ACC_1back_self * ACC_1back_others + (ACC_1back_self * ACC_1back_others | subjID)"
-    rew_1back_form = "ACC ~ rew_1back_self + (rew_1back_self | subjID)"
+    trial_value_form = "ACC ~ TS_value + av_reward + alien_trial_sum + repetition + (TS_value + av_reward + alien_trial_sum + repetition | subjID)"
+    oneback_self_others_form = "ACC ~ ACC_1back_self * ACC_1back_others + repetition + (ACC_1back_self * ACC_1back_others + repetition | subjID)"
+    rew_1back_form = "ACC ~ rew_1back_self + repetition + (rew_1back_self + repetition | subjID)"
     
     glmer_mod_trial_value = glmer(as.formula(trial_value_form),
                       family = binomial,
