@@ -72,14 +72,14 @@ function create_feed_aliens_timeline(TS_order, n_blocks, n_trials, notify_season
 
     for (tr = 0; tr < n_trials; tr ++) {
         if (notify_season == false){
-            for (alien in alien_order){
+            for (alien_choice in alien_order){
                 //DO. NOT. TOUCH.
-                console.log([TSs[TS][alien]])
+                console.log([TSs[TS][alien_choice]]);
 
                 trial = {
                     TS: TS,
                     season: season_name,
-                    timeline: [TSs[TS][alien]]
+                    timeline: [TSs[TS][alien_choice]]
                 }
             }
         }
