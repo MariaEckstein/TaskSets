@@ -27,12 +27,15 @@ var timeout_message = "<p class='start_new_season'>Use <i>j, k</i>, or <i>l</i> 
 
 // numbers of trials
 n_blocks_phase1 = 3;  //3 how often will each season be repeated?
-n_trials_phase1 = 13;  //13 how many trials per season per alien?
+n_trials_phase1 = 12;  //13 how many trials per season per alien?
+
+n_blocks_phase1_mixed = n_blocks_phase1;
+n_trials_phase1_mixed = 1;
 
 n_blocks_cloudy = 3;  //2 how often will each season be repeated?
-n_trials_cloudy = 10;  //10 how many trials per season per alien?
+n_trials_cloudy = 9;  //10 how many trials per season per alien?
 
 n_blocks_refreshers = 2;  //2 how often will each season be repeated?
-n_trials_refreshers = 7;  //7 how many trials per season per alien?
+n_trials_refreshers = 4;  //7 how many trials per season per alien?
 
 n_blocks_rainbow = 3;

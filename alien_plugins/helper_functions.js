@@ -39,10 +39,16 @@ function create_pseudo_random_array(available_elements, target_length) {
 }
 
 // Create season timelines for feed aliens
-function create_feed_aliens_timeline(TS_order, n_blocks, n_trials, special) {
-  seasons_in_order = []
+function create_feed_aliens_timeline(TS_order, n_blocks, n_trials, notify_season, special) {
 
-  for (block = 0; block < season_names.length * n_blocks; block ++) {  // iterate through TS_order, which indicates in which block each season should be presented
+    seasons_in_order = []
+    if (notify_season) {
+      multiplier = 1
+    } else {
+      multiplier = season_names.length
+    }
+
+    for (block = 0; block < multiplier * n_blocks; block ++) {  // iterate through TS_order, which indicates in which block each season should be presented
     TS = TS_order[block]  // 0, 1, or 2
     season_name = season_names[TS]
 
@@ -50,29 +56,46 @@ function create_feed_aliens_timeline(TS_order, n_blocks, n_trials, special) {
       season_name = season_name.concat("_cloudy")
     }
 
-    start_new_season = {
-      type: "start_new_season",
-      show_clickable_nav: true,
-      pages: [
-        "<img class='background' src='img/" + season_name + ".png'>" +
-        "<p class='start_new_season'><i>The season has changed!</i></p>"
-      ]
+    if (notify_season == false) {
+        trials = [];
+    } else {
+        start_new_season = {
+            type: "start_new_season",
+            show_clickable_nav: true,
+            pages: [
+                "<img class='background' src='img/" + season_name + ".png'>" +
+                "<p class='start_new_season'><i>The season has changed!</i></p>"
+            ]
+        }
+        trials = [start_new_season];
     }
-    // trials = [start_new_season];
-    trials = [];
 
     for (tr = 0; tr < n_trials; tr ++) {
-      trial = {
-        TS: TS,
-        season: season_name,
-        timeline: TSs[TS],
-        randomize_order: true
-      }
+        if (notify_season == false){
+            for (alien in alien_order){
+                //DO. NOT. TOUCH.
+                console.log([TSs[TS][alien]])
+
+                trial = {
+                    TS: TS,
+                    season: season_name,
+                    timeline: [TSs[TS][alien]]
+                }
+            }
+        }
+        else {
+            trial = {
+                TS: TS,
+                season: season_name,
+                timeline: TSs[TS],
+                randomize_order: true,
+            }
+        }
       trials.push(trial);
     }
-
     seasons_in_order = seasons_in_order.concat(trials)
   }
+  ////console.log(TSs[TS])     //inexplicably this doesn't work?
   return seasons_in_order
 }
 

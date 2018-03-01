@@ -5,7 +5,8 @@ var get_subj_data = {
   questions: [
     "SubjID:",
     "Date of birth (mm/dd/yy):",
-    "Today's date (mm/dd/yy):"
+    "Today's date (mm/dd/yy):",
+    "Sex:",
     // "Occupation:",
     // "Highest degree (obtained or currently obtaining):"
   ]

@@ -8,7 +8,7 @@ output: html_document
 ```{r Set parameters, load packages, etc.}
 
 # TDs
-# check if participants reactivte TS in rainbow phase, or just individual associations
+# check if participants reactivate TS in rainbow phase, or just individual associations
   # order of choices -> does one TS0 action predict another?
   # "values" of choices -> do participants select the highest-valued items or the TS0 items?
   # It will be easier to do all of that when I have the new dataset because alien and item IDs will be better 
