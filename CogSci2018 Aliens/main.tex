@@ -1,0 +1,373 @@
+
+\documentclass[10pt, letterpaper]{article}
+
+\usepackage{tabularx}
+\usepackage{cogsci}
+\usepackage{pslatex}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+\usepackage{array}
+\newcolumntype{W}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{apacite}
+
+
+\title{Evidence for hierarchically-structured reinforcement learning in humans}
+
+\author{
+  Maria K Eckstein \\
+  Department of Psychology \\
+  UC Berkeley \\
+  Berkeley, CA 94720 \\
+  \texttt{maria.eckstein@berkeley.edu} \\  
+  \And
+  Anne GE Collins \\
+  Department of Psychology \\
+  UC Berkeley \\
+  Berkeley, CA 94720 \\
+  \texttt{annecollins@berkeley.edu} \\
+}
+
+
+\begin{document}
+
+\maketitle
+
+
+\begin{abstract}
+
+Flexibly adapting behavior to different contexts is a critical component of human intelligence. It requires knowledge to be structured as coherent, context-dependent action rules, or task-sets (TS). Nevertheless, inferring optimal TS is computationally complex. This paper tests the key predictions of a neurally-inspired model that employs hierarchically-structured reinforcement learning (RL) to approximate optimal inference. The model proposes that RL acts at two levels of abstraction: a higher-level RL process learns context-TS values, which guide TS selection based on context; a lower-level process learns stimulus-actions values within TS, which guide action selection in response to stimuli. In our novel task paradigm, we found evidence that participants indeed learned values at both levels: not only stimulus-action values, but also context-TS values affected learning and TS reactivation, and TS values alone determined TS generalization. This supports the claim of two RL processes, and their importance in structuring our interactions with the world.
+
+% Flexibly adapting behavior to different contexts is a critical component of human intelligence. It requires a structure of coherent, context-dependent action rules, or task-sets (TS). Nevertheless, inferring optimal TS is computationally complex. Here, we test the predictions of a neurally-inspired model to approximate this inference: a hierarchically structured reinforcement-learning (RL) process. 
+%Previous research has shown that humans approximate Bayes-optimal solutions in various domains. What mechanisms underlie these complex computations? This paper aims to test key predictions of one mechanistic model, which employs hierarchically-structured reinforcement learning (RL). 
+% The model proposes that RL acts at two levels of abstraction: a higher-level RL learns context-rule values; a lower-level RL learns stimulus-actions values for each rule selected by the higher level.  We develop a novel paradigm to test the prediction that values are learned at two levels in parallel. Results supported this prediction, showing that TS values affected learning, TS reactivation and generalization. These findings support the existence of a second, higher-level RL process, and its importance in structuring our interactions with the world.
+
+\textbf{Keywords:} 
+Reinforcement learning; structure learning; hierarchical representation; task sets
+
+\end{abstract}
+
+
+\section{Introduction}
+
+Humans structure their knowledge about the world in a way that allows them to adapt to complex, ever-changing environments. Specifically, humans create different behavioral strategies for different contexts. For example, during a meeting, people ignore phone calls and speak formally. In a different context, people might instead answer calls and speak casually. More generally, different contexts can elicit different behavioral strategies (or "task sets", TS), which in turn trigger different responses to environmental stimuli. This allows humans to respond differently to the same stimulus, depending on the context. This is a crucial function of cognitive control \cite{miller_integrative_2001}.
+
+How is such behavior achieved? The world offers an innumerable number of potential contexts. Previous research has employed a Bayesian perspective to address the question of how we decide when to create new task sets versus reuse old ones \cite{collins_reasoning_2012}. This study aims to unpack the question on an algorithmic level: How are TS selected in new or unknown contexts? What mechanisms underlie the reactivation of old TS? Can several TS be acquired in parallel? If so, how are cognitive resources allocated to each? Taking a step back, how are preferences formed for entire contexts, and do these preferences influence which contexts we seek out? Do such preferences guide behavior at a higher level of abstraction? And finally, how are TS created for novel, unfamiliar contexts? 
+
+Previous research has shown that human strategy selection approximates Bayes-optimal solutions. For example, Collins \& Koechlin (2012) showed that people behaved as if they created TS in new contexts, continuously assessed the reliability of the current TS, and explored alternative strategies when a TS became unreliable, in a Bayes-rational way \cite{collins_reasoning_2012, donoso_foundations_2014}. Given the complexity of conducting Bayesian inference on latent variables, such as TS, what algorithms do humans use to accomplish such tasks?
+
+Collins \& Frank (2012) suggested a hierarchically-structured reinforcement learning (RL) algorithm with a biologically plausible architecture. Crucially, they showed that this algorithm can approximate Bayes-optimal inference using much simpler computations \cite{collins_cognitive_2013}. The current study tests key predictions of this model.
+
+\begin{figure}[ht]
+    \begin{center}
+	\includegraphics[width=\linewidth]{fig1.png}
+    \end{center}
+    \caption{Schematic of the hierarchical RL model. The higher-level loop (blue) selects TS based on TS values; the lower-level loop (green) selects actions based on action values. TS values are retrieved based on context cues and action values are retrieved based on the current TS and stimulus. Feedback indicates whether an action was appropriate for a context-stimulus mapping. Both loops use the same feedback signal to update values.} 
+    \label{figure:2loops}
+\end{figure}
+
+The model relies on RL theory \cite{sutton_reinforcement_2017}. One basic principle of RL is the computation of stimulus-action values (or simply "action values"), which estimate how much cumulative future reward should be expected if an action is selected in response to a specific stimulus. A simple but reliable RL algorithm to learn values relies on updating estimates in proportion to a reward prediction error signal. Previous research has shown that this RL algorithm provides a good model for human and animal learning \cite{daw_model-based_2011}; furthermore, it captures important aspects of reward-based learning in the brain \cite{schultz_neural_1997}, and is likely implemented in cortico-striatal loops \cite{alexander_parallel_1986}.
+
+In the Collins \& Frank model, a lower-level RL loop acquires associations between stimuli and actions by learning stimulus-action values, through reinforcement (Fig.~\ref{figure:2loops}, green loop). Crucially, action values that are acquired in the same context are grouped into TS (coherent sets of stimulus-action mappings). Another, higher-level loop learns associations between contexts and these TS by learning context-TS values (or simply "TS values"; Fig.~\ref{figure:2loops}, blue loop); these TS values guide the activation of TS in response to contexts. Taken together, the higher-level loop influences the workings of the lower-level loop by selecting the current TS, which determines action values. The lower-level loop uses these action values to select actions. Crucially, both loops employ the same RL algorithms to compute values, and both are assumed to be implemented in similar neural substrate, cortico-striatal loops that only differ in their position on the anterior-posterior axis \cite{alexander_parallel_1986}.
+
+% This model is supported both by knowledge about the brain's structural and functional organization, and computational models of human behavior. As mentioned above, it is accepted that cortico-striatal loops implement RL computations. Furthermore, the loops originate in multiple cortical areas (such as premotor cortex and prefrontal cortex), providing the possibility that the same computations operate on different inputs and outputs. Furthermore, representations in frontal cortex follow a gradient of abstraction , aligned on the anterior-posterior axis, supporting the possibility of a hierarchical relationship between loops [Badre, Koechlin papers]. Evidence for this neural structure in EEG [Collins Cavanagh 2014...]. Thus, this model hypothesizes that these loops carry out RL simultaneously at several levels of abstraction, becoming more abstract anterior (rewrite and use the citations in the comment), and that this provides our ability to learn how to select behavioral strategies. This model makes one key prediction: that RL is performed on actions, and context-TS in parallel, and thus that humans are able to learn in parallel, from a single feedback signal, value functions for multiple state-action spaces at multiple levels of abstraction.
+
+This model is supported both by knowledge about the brain's structural and functional organization \cite{alexander_parallel_1986, badre_mechanisms_2012}, and by computational models of human behavior \cite{frank_mechanisms_2012}. The model's key prediction is that RL is performed at different levels in parallel, and thus that humans learn value functions for multiple state-action spaces at different levels of abstraction in parallel and from a single feedback signal.
+
+Here, we test this prediction and its corollaries in human behavioral data. First, we test the assumption that participants create TS, and flexibly reactivate them if needed. We then test whether participants acquire TS values and if these values affect behavior. Specifically, we predict that 1) TS values directly affect learning, such that higher-valued TS are acquired faster; 2) TS values influence context preferences, such that participants select higher-valued contexts when asked to choose; 3) participants select TS based on TS values, such that they preferentially activate TS of higher values in new or unknown contexts; 5) TS values influence generalization, such that newly created TS are more similar to higher-valued TS. Our results support these predictions.
+
+
+\subsection{Current study}
+
+In order to test these predictions, we designed a reward-based associative learning task, in which participants encountered different contexts and learned the optimal TS for each one. Contexts specified unique mappings between stimuli, responses, and outcomes, such that stimuli that were associated with high rewards in one context might be associated with small rewards in others (Fig.~\ref{figure:task sets and values}). After learning TS, participants underwent multiple testing phases, which aimed to test each of our predictions.
+
+
+\section{Methods}
+
+\subsection{Task details}
+
+In our novel task, participants encountered four aliens and were asked to "help each one grow as much as possible". In each trial, participants saw one of four possible aliens, along with three items. Participants selected one item by button press and received feedback as to how much the alien grew in response, indicated by the length of a measuring tape. In each context, only one item led to a high reward (growth) for a given alien (correct action), whereas the other two items had almost no effect (incorrect actions). Therefore, each TS was specified by the correct mapping between each of the four aliens (stimulus) with one item (response). 
+
+Participants learned a different TS in each of three contexts (hot, cold, and rainy "seasons"; Fig.~\ref{figure:task sets and values}A), such that there was a one-to-one mapping between contexts and TS. The reward value associated with each correct context-alien-item mapping was normally distributed around a fixed mean, with standard deviation 0.5. The mean reward values were predetermined such that TS differed in average reward ("TS value"), while aliens and items did not (Fig.~\ref{figure:task sets and values}B). This manipulation allowed us to test participants' sensitivity to TS values, while ruling out confounds based on stimulus and action values. 
+
+The different phases of the alien task are described in table~\ref{table:task phases}. To minimize confounds, the mappings between contexts and TS were randomized between participants, as were the images of aliens and items.
+
+\begin{figure}[ht]
+    \begin{center}
+	\includegraphics[width=\linewidth]{fig2.png}
+    \end{center}
+    \caption{TS mappings and values at all levels.
+    A) Three contexts (top row) were associated with three TS, as explained in the main text.
+    B) Reward sizes differed between stimulus-response mappings (top), leading to differences in TS values, but not alien (stimulus) or item (action) values (bottom).}
+    \label{figure:task sets and values}
+\end{figure}
+
+\begin{table}[!ht]
+\begin{center}
+\caption{Description and purpose of the task phases.}
+\label{table:task phases}
+\vskip 0.12in
+{\footnotesize
+\begin{tabular}{W{1.2cm}  W{3.5cm}  W{2.4cm}}
+\hline
+\textbf{Phase} & \textbf{Description} & \textbf{Purpose} \\
+\hline
+Initial Learning &
+    Participants see one of four aliens at a time, select one item, and receive feedback; trials of the same context are presented in a block; context order is pseudo-randomized &
+    Participants acquire different TS in each of three contexts, through trial and error \\
+\hline
+Refresher &
+    Similar to initial learning, but fewer trials; interleaved between testing phases &
+    Restore TS, alleviate carry-over effects  \\
+\hline
+Hidden Context &
+    Similar to initial learning, but current context is invisible; context changes are signaled &
+    Test whether participants have acquired TS \\
+\hline
+Comparison &
+    Participants see two stimuli at a time and indicate their preferred one; two contexts, items, aliens, or context-alien combinations are presented at a time &
+    Test whether participants learn TS values (higher-level) and stimulus values (lower-level) \\
+\hline
+Generalization &
+    Similar to initial learning, but in a novel context, without feedback &
+    Test whether TS values affect generalization \\
+\hline
+\end{tabular}
+}
+\end{center} 
+\end{table}
+
+
+\subsection{Participants}
+
+We tested 51 participants (26 women). One participant was excluded because the performance criterion of 50\% was not reached in the practice round. The mean age was 22.1 years (sd: 1.5 years). Participants were recruited from the UC Berkeley research participation pool and gave informed consent prior to participation. 
+
+
+\section{TS are created and reactivated}
+
+\subsection{Reactivation of TS in old contexts}
+
+We used the hidden-context phase to test whether participants learned coherent, context-specific TS, rather than non-hierarchical context-stimulus-response associations. In this phase, participants saw a picture of thick clouds instead of the background pictures of the contexts. Context changes were signaled. Consequently after a context change, participants needed to guess which actions were correct, but the received feedback should allow them to infer the context and to apply the correct TS \cite{collins_reasoning_2012}.
+
+A TS is a coherent, interdependent assembly of stimulus-response mappings that apply in a specific context. Because of the interdependence between mappings, certainty about some mappings should facilitate recall of the remaining mappings: for example, if participants successfully selected an umbrella for the red alien, they should infer that the context was "hot" and select the bed for the purple alien, before having observed this association (Fig.~\ref{figure:task sets and values}).
+
+In order to test whether participants had formed TS, we therefore first focused on trials in which participants saw an alien for the first time after a context change. In this situation, participants had not yet received any information about the correct item for this alien, i.e., they had no direct evidence about the stimulus-response mapping. We compared two different conditions within these trials, (1) when participants had not yet selected the correct item for any other alien, and (2) when participants had at least once selected the correct item for another alien. We expected that knowledge about some stimulus-response (alien-item) mappings within a TS would facilitate the recall of the remaining mappings, such that participants would select the correct item more often in condition (2) than (1).
+
+This was indeed the case. In condition (1), participants selected the correct item in 36.9\% of trials, compared to 45.8\% in condition (2) (chance: 33.3\%; Fig.~\ref{figure:learning values}B). The difference was statistically significant (t(49)=2.5, p=0.014), suggesting that participants retrieved stimulus-response mappings for unseen aliens based on knowledge about already-seen alien-item mappings within the same TS. These results were confirmed in a regression model encompassing all trials of the hidden-context phase, rather than just the subset used above. In this model, each trial's accuracy was predicted from four factors, including (1) participants' performance in the previous trial of the same stimulus-response mapping ("ACC same"), and (2) participants' performance in the previous trials of the other three stimulus-response mappings combined ("ACC other"). As expected, both factors significantly affected performance (table~\ref{table:acc self other}). 
+
+Similar patterns were evident in the initial-learning phase and the two refresher periods. In these phases, the background pictures provided perfect cues for the current TS, as opposed to the hidden-context phase. The fact that certainty about other mappings (ACC other) still affected performance suggests that participants used partial knowledge about TS as a cue for the remaining mappings even when a perfect cue for the TS was given.
+
+Taken together, the interdependence between stimulus-response mappings within contexts is evidence that participants acquired coherent, stable, consistent TS. This replicates prior results \cite{collins_cognitive_2013} and is a precondition to test our novel predictions.
+
+\begin{table}[!ht]
+\begin{center} 
+\caption{Logistic mixed-effects regression predicting trialwise accuracy from accuracy on the same (ACC same) and other mappings (ACC other).} 
+\label{table:acc self other} 
+\vskip 0.1in
+\small{
+\begin{tabular}{llll} 
+\hline
+Task phase          &   Predictor           &   $\beta$ &   $p$ \\
+\hline
+Initial learning    &   {\bf ACC same}      &   1.09    &   $<0.001$ \\
+                    &   {\bf ACC other}     &   0.41    &   $<0.001$ \\
+                    &   {\bf interaction}   &   0.31    &   $0.028$  \\
+                    &   {\bf Repetition}    &   0.18    &   $<$0.001 \\
+Refresher 1         &   {\bf ACC same}      &   1.74    &   $<0.001$ \\
+                    &   {\bf ACC other}     &   1.39    &   $<0.001$ \\
+                    &   {\bf interaction}   &   -0.65   &   $0.020$  \\
+                    &   Repetition          &   0.02    &   $0.74$   \\
+Refresher 2         &   {\bf ACC same}      &   1.91    &   $<0.001$ \\
+                    &   {\bf ACC other}     &   1.79    &   $<0.001$ \\
+                    &   {\bf interaction}   &   -1.11   &   $0.005$  \\
+                    &   Repetition          &   0.03    &   $0.64$   \\
+Hidden context      &   {\bf ACC same}      &   1.18    &   $<0.001$ \\
+                    &   {\bf ACC other}     &   0.72    &   $<0.001$ \\
+                    &   {\bf interaction}   &   0.45    &   $0.027$  \\
+                    &   {\bf Repetition}    &   0.14    &   $0.013$  \\
+\hline
+\end{tabular}
+}
+\end{center} 
+\end{table}
+
+
+\subsection{Transfer of TS to new contexts}
+
+Evidence for the reactivation of existing TS also comes from the generalization phase of our task. Here, participants were still presented with the same aliens, but in a novel context. Like before, participants tried to select the correct item for each alien, but no feedback was given, such that participants were continuously forced to guess.
+
+We found that participants did not guess randomly, but instead reactivated prior TS. Items that were correct in a previously-learned TS were selected more often (90.5\% of valid trials) than expected from random behavior (chance was 83.3\%=10/12 because 10 out the 12 possible stimulus-response mappings were valid in at least one TS), t(49)=4.35, $p<0.001$. This shows that when encountering novel contexts, participants reactivated old TS, rather than trying out novel stimulus-response mappings, in accordance with prior findings \cite{collins_cognitive_2013}.
+
+
+\section{Sensitivity to TS values}
+
+So far, we have established that participants created TS and flexibly reactivated them when the context was hidden or novel. We next assessed whether and in which ways TS values affected behavior.
+
+
+\subsection{TS values affect learning}
+
+To this aim, we analyzed the initial-learning phase of the task, in which participants first learned to associate each alien with the correct item, in each context. To test the effects of both stimulus-action values (lower-level RL loop) and context-TS values (higher-level loop), we used a regression model predicting accuracy in each trial from four factors: (1) the value of the current stimulus (lower-level), (2) the value of the current TS (higher-level), (3) the trial index, in order to account for learning within a context block, and (4) the repetition index, which accounts for learning across context blocks (Fig.~\ref{figure:learning values}A). The model revealed a significant effect of stimulus values (table~\ref{table:accuracy}), as predicted by traditional RL models. This shows that participants performed better when the rewards for correct responses were larger.
+
+In addition, the model revealed a significant effect of TS values, which is not predicted by standard RL theories, but by our model. This shows that performance depended on the average rewards of all mappings within a TS, in addition to their individual rewards. In other words, participants did not only perform better in higher-valued alien-item mappings, but also in mappings that were part of higher-valued TS. This effect held in the two refresher periods, supporting the claim that TS values had long-lasting effects on performance. TS values influenced performance even in the hidden-context phase, in which contexts were not shown. This supports the claim that TS values were not only associated with the observable context, but directly integrated with the TS.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=\linewidth]{fig4.png}
+\end{center}
+\caption{
+    A) Influence of TS and stimulus values on performance in the initial-learning phase.
+    B) Effect of performance in other mappings on performance in the current mapping, within a TS. Left: No prior correct responses in other mappings; right: at least one correct response.
+    C) Effect of TS values on context selection. Value difference between chosen and unchosen items (left) and TS (right).}
+\label{figure:learning values}
+\end{figure}
+
+\begin{table}[!ht]
+\begin{center} 
+\caption{Logistic mixed-effects regression predicting trialwise accuracy from stimulus values and TS values.} 
+\label{table:accuracy} 
+\vskip 0.1in
+\small{
+\begin{tabular}{llll} 
+\hline
+Task phase          &   Predictor               &   $\beta$ &   $p$ \\
+\hline
+Initial learning    &   {\bf Stimulus value}    &   0.19    &   $<0.001$ \\
+                    &   TS value                &   0.037   &   0.24     \\
+                    &   {\bf Trial index}       &   0.14    &   $<0.001$ \\
+                    &   {\bf Repetition}        &   0.30    &   $<0.001$ \\
+Refresher 1         &   {\bf Stimulus value}    &   0.12    &   $<0.001$ \\
+                    &   {\bf TS value}          &   0.18    &   $<0.001$ \\
+                    &   {\bf Trial index}       &   0.31    &   $<0.001$ \\
+                    &   Repetition              &   0.16    &   $0.053$  \\
+Refresher 2         &   {\bf Stimulus value}    &   0.12    &   $<0.001$ \\
+                    &   {\bf TS value}          &   0.18    &   0.0026   \\
+                    &   {\bf Trial index}       &   0.27    &   $<0.001$ \\
+                    &   {\bf Repetition}        &   0.22    &   $0.019$  \\
+Hidden context      &   {\bf Stimulus value}    &   0.20    &   $<0.001$ \\
+                    &   {\bf TS value}          &   0.09    &   0.048    \\
+                    &   {\bf Trial index}       &   0.27    &   $<0.001$ \\
+                    &   {\bf Repetition}        &   0.22    &   $0.0038$ \\
+\hline
+\end{tabular}
+}
+\end{center} 
+\end{table}
+
+
+\subsection{TS values affect context selection}
+
+We next assessed whether TS values influenced context selection, such that participants would prefer contexts that had been associated with higher-valued TS to those associated with lower-valued TS. We tested this prediction in the comparison phase of the task. Here, participants were presented with the images of two different contexts and were asked to select their preferred one. 
+
+We calculated individual TS values for each participant, based on individual learning history. Participants indeed chose contexts more often that had been associated with higher-valued TS (68.9\% of trials), t(49)=5.07, $p<0.001$, resulting in a significant difference between TS values of chosen (4.56) and unchosen contexts (3.75), t(49)=5.00, $p<0.001$ (Fig.~\ref{figure:learning values}C). This shows that participants indeed selected contexts based on the values of associated TS.
+
+A similar pattern arose for action (item) values. We again calculated individual values. (Although items did not differ in their objective values, slight differences arose because of participants' individual decision histories.) Participants chose higher-valued items more often (62.5 \% of trials), t(49)=3.47, $p=0.001$, although the difference between chosen (4.14) and unchosen items (4.09) was not significant, t(49)=1.09, $p=28$, presumably because of the lack of spread in item values (Fig.~\ref{figure:learning values}C). The first result still implies that participants had learned action values in addition to TS values.
+
+We also aimed to confirm that participants had acquired traditional stimulus values. To test this, we asked participants to select between two aliens in the same context. We expected that participants would prefer the aliens that were associated with larger rewards, as has been shown many times before \cite{frank_by_2004}. Unfortunately, due to a technical error, we were unable to confirm this here. Overall, our results imply that participants learned different sets of values, as predicted by our model. Higher-level TS values influenced TS learning and guided TS selection. Lower-level stimulus values affected stimulus-response learning and are expected to affect stimulus selection.
+
+
+\subsection{TS values affect generalization}
+
+Having shown that participants learned values for TS and that TS values affected learning and context selection, we next tested whether TS values also affected TS reactivation and generalization. We tested this in three ways. First, we asked whether higher-valued TS were reactivated more readily than lower-valued TS in the hidden-context phase. Second, we assessed whether TS values predicted error types in the initial-learning phase and the refreshers. Third, we tested whether higher-valued TS had a larger influence on the creation of new TS than lower-valued ones (generalization phase).
+
+With respect to our first question, we have shown above that TS values influenced accuracy in the hidden-context phase (table~\ref{table:accuracy}). One potential reason for this is that participants more readily reactivated higher-valued than lower-valued TS, leading to higher accuracy in higher-valued TS as a whole. This is in accordance with our model, which predicts that TS are selected based on TS values.
+
+Our second assessment concerned errors, specifically intrusions from other TS. We defined intrusion as the selection of an action that is correct in a context other than the current one. In the initial-learning phase, if participants made errors by selecting incorrect items uniformly at random, 75\% of all errors would be intrusions (due to the specific way TS were defined). Participants instead produced 78.4\% intrusion errors, a small but significant increase, t(49)=6.69, $p<0.001$. Within these intrusions, TS values significantly affected item selection, as shown in a logistic mixed-effects regression model (table~\ref{table:intrusions}). The effect was not driven by stimulus values. This confirms that TS values influenced TS reactivation, to the point of introducing incorrect mappings from other TS.
+
+\begin{table}[!ht]
+\begin{center} 
+\caption{Logistic mixed-effects regression predicting intrusion errors from stimulus values and TS values.} 
+\label{table:intrusions} 
+\vskip 0.1in
+\small{
+\begin{tabular}{llll} 
+\hline
+Task phase          &   Predictor               &   $\beta$ &   $p$ \\
+\hline
+Initial learning    &   Stimulus value          &   0.01    &   0.09 \\
+                    &   {\bf TS value}          &   0.05    &   0.007 \\
+                    &   {\bf Trial index}       &   -0.10   &   $<$0.001 \\
+                    &   {\bf Repetition}        &   -0.18   &   $<$0.001 \\
+Refresher 1         &   Stimulus value          &   0.02    &   0.32 \\
+                    &   TS value                &   0.01    &   0.68 \\
+                    &   {\bf Trial index}       &   -0.30   &   $<$0.001 \\
+                    &   {\bf Repetition}        &   -0.16   &   0.02 \\
+Refresher 2         &   Stimulus value          &   0.008   &   0.67 \\
+                    &   {\bf TS value}          &   0.13    &   0.003 \\
+                    &   {\bf Trial index}       &   -0.25   &   $<$0.001 \\
+                    &   Repetition              &   -0.11   &   0.09 \\
+Hidden context      &   {\bf Stimulus value}    &   0.02    &   0.035 \\
+                    &   TS value                &   0.03    &   0.29 \\
+                    &   {\bf Trial index}       &   -0.24   &   $<$0.001 \\
+                    &   Repetition              &   -0.12   &   0.05 \\
+\hline
+\end{tabular}
+}
+\end{center} 
+\end{table}
+
+Lastly, we tested the influence of TS values on the creation of new TS, hypothesizing that higher-valued TS would influence TS creation more than lower-valued TS. This should be evident in the generalization phase of our task, in that participants would apply mappings from higher-valued TS more often than mappings from lower-valued TS. We found that participants chose actions according to TS0 (largest value), TS1 (intermediate value), and TS2 (lowest value) in an average of 30.1\%, 23.9\%, and 14.1\% of trials, respectively, compared to chance levels of 3/12=25\%, 3/12=25\%, and 2/12=16.7\% (Fig.~\ref{figure:TS creation distribution}). Participants chose actions that were correct in more than one TS in 22.4\% of trials (chance 2/12=16.7\%), and actions that were not correct in any TS in 9.4\% of trials (chance 2/12=16.7\%).
+
+To test for differences between TS, we analyzed the effect of TS values on the ratio of participant-selected to chance-expected choices, using linear regression. The effect of TS values was significant, controlling for two potential confounds, the values of individual stimulus-response mappings (lower-level values), and participants' performance on each TS, a proxy for their confidence in the TS (table~\ref{table:TS creation}). In summary, these results suggest that action selection in the novel context was driven by previously-acquired TS, especially those of high value. Crucially, participants did not select items based on the values of individual alien-item mappings, or based on elevated confidence with certain TS. 
+
+\begin{table}[!ht]
+\begin{center} 
+\caption{Linear mixed-effects regression predicting TS choices from stimulus values, TS values, and TS confidence.} 
+\label{table:TS creation} 
+\vskip 0.1in
+\small{
+\begin{tabular}{llll} 
+\hline
+Task phase          &   Predictor               &   $\beta$ &   $p$   \\
+\hline
+Generalization phase&   Stimulus value          &   -0.03   &   0.59  \\
+                    &   {\bf TS value}          &   0.14    &   0.045 \\
+                    &   TS confidence           &   0.19    &   0.48  \\
+\hline
+\end{tabular}
+}
+\end{center} 
+\end{table}
+
+\begin{figure}[ht]
+    \begin{center}
+	\includegraphics[width=\linewidth]{fig6.png}
+    \end{center}
+    \caption{The distribution of TS choices in the generalization phase shows an effect of TS value.}
+    \label{figure:TS creation distribution}
+\end{figure}
+
+\section{Discussion}
+
+We have shown evidence that supports the model proposed by Collins \& Frank (2013). In this model, complex Bayes-optimal reasoning is approximated by a simpler, biologically plausible architecture: the hierarchical combination of two RL loops operating on state and action spaces at different levels of abstraction. In our task, participants learned different behavioral strategies (TS) in different contexts, and showed behavior consistent with model predictions.
+
+Specifically, participants acquired coherent, interdependent TS, replicating prior findings \cite{collins_reasoning_2012, collins_cognitive_2013}. We also found evidence for the acquisition of values at different hierarchical levels in parallel, including the levels of stimuli (items), responses (aliens), and TS (contexts). Furthermore, TS values affected participants' behavior in multiple ways: participants learned faster and made fewer errors in higher-valued TS; they preferred contexts that had been associated with higher-valued TS; and they were more likely to generalize higher-valued TS to new contexts. Taken together, participants' behavior confirmed our predictions.
+
+Some of our results also offered new insights and potential avenues for future research. First, we observed interference between different TS in the form of intrusions from higher-valued TS. Based on the current model, these errors could arise from occasionally noisy TS selection, in combination with the increased probability of selecting higher-valued TS. In other words, intrusion errors arose when participants momentarily switched to a different TS. Another, intuitive explanation for these errors is that participants instead did not differentiate perfectly between TS, as assumed by our model, but instead blended several TS together. The current model cannot encode relationships between TS: it cannot capture similarity between TS, prototypical TS that can easily be modified to new circumstances, or TS with common ancestors that later diverge. Representations of this kind would require another level of hierarchy, and offer room for future work.
+
+Second, we found that TS values had a strong influence on learning. This supports our model because it shows that TS values are indeed encoded, but it also raises new questions. What is the exact role of TS values? The finding suggests that they are not just used to select appropriate TS, but also to allocate attentional resources to specific TS during learning. We have shown that TS values also determine context preferences. More generally, TS values therefore seem to play a motivational role besides their decision making function; future research will need to establish this more precisely.
+
+Third, we found that TS were reactivated faster when some mappings within the TS had already been executed, irrespective of whether context cues were or were not present. This shows that context cues are not the only and need not be the strongest determinants of TS activation, as implied by Fig.~\ref{figure:2loops}. Instead, just the execution of the current TS plays a critical role in keeping it activated. Prior studies have modeled this behavior by assuming that TS are persistent \cite{collins_reasoning_2012}. Our model offers a simple, mechanistic interpretation of this behavior: each mapping within a TS triggers the remaining mappings, such that TS get reinforced just by being executed. This explanation requires no additional model parameters, as long as the coherence of mappings within TS is modeled explicitly. Future research should investigate this "TS inertia" more closely and determine the respective weights of context and current TS in determining TS selection. 
+
+Our results shed some light on how we learn rule structures. In addition to its scientific interest, we hope that this research might prove useful in understanding behavioral problems related to task switching and attention control, including psychiatric conditions such as obsessive-compulsive and attention-deficit disorder.
+
+% As a next step, we will apply the Collins \& Frank model to the current task, in order to compare its behavior to that of human participants. We will also compare the performance of both humans and the model to the Bayesian baseline, in order to verify that optimal results are approximated. 
+
+% As a next step, we will create a hierarchically-structured RL algorithm inspired by Collins' \& Frank's neural-network model. We will employ this model to determine which components contribute to participants' behavior, and--after fitting it to participants' data--to extract trial-by-trial regressors that can be used in the analysis of physiological data.
+
+% A promising step for the future is to apply function magnetic resonance imaging (fMRI) to the current paradigm. This would allow to test our hypotheses about the implementation of this algorithm in the brain. We expect signatures of both RL loops in areas previously associated with RL, notably frontal cortical areas (values) and the basal ganglia (RPEs). We specifically expect signatures of the higher-level loop anterior to those of the lower-level loop, in accordance with prior research \cite{collins_reasoning_2012, badre_mechanisms_2012}. In addition to fMRI, pupillometry and EEG offer ways to verify that RPEs at both levels elicit DA responses, with better temporal resolution.
+
+% Lastly, these findings can potnetially inform current research efforts in artificial intelligence. Currently, structure is seldom exploited in large-scale, main-stream algorithms (Bengio Science paper; Sergio Levine "bigger is better", "deep-learning steamroller"), despite continuous (options framework; MaxQ) as well as recent arguments for its importance (making machines that learn and think like people). Only in the most recent advances of "meta-learning" have people started to exploit hierarchical structure (RL\^2, Peter Abbeel's stuff; Chelsea Finn's stuff). Our model suggests that hierarchically-structured RL can approximate near-optimal inference, and is likely implemented in the human brain, the smartest object known to us. So they should consider it.
+
+\section{Acknowledgments}
+
+We thank Lucy Whitmore and Sarah Master for their help with task design and data collection. 
+
+
+\bibliographystyle{apacite}
+
+\setlength{\bibleftmargin}{.125in}
+\setlength{\bibindent}{-\bibleftmargin}
+
+\bibliography{Aliens}
+
+
+\end{document}
