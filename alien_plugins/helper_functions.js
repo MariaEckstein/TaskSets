@@ -30,86 +30,84 @@ function shuffle(array) {
 function create_pseudo_random_array(available_elements, target_length) {
   array = shuffle(available_elements)
   while (array.length < target_length) {
-    new_block = shuffle(available_elements)
-    if (new_block[0] != array[array.length-1]) {
-      array = array.concat(new_block)
+    new_section = shuffle(available_elements)
+    if (new_section[0] != array[array.length-1]) {
+      array = array.concat(new_section)
     }
   }
   return array
 }
 
 // Create season timelines for feed aliens
-function create_feed_aliens_timeline(TS_order, n_blocks, n_trials, notify_season, special) {
+function create_feed_aliens_block(TS_order, n_trials_per_alien, block_type="normal") {
 
-    seasons_in_order = []
-    if (notify_season) {
-      multiplier = 1
-    } else {
-      multiplier = season_names.length
+    // Create one section of trials for each TS in TS_order
+    all_sections = []
+    for (section_i = 0; section_i < TS_order.length; section_i ++) {
+        section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)
+        all_sections = all_sections.concat(section)
     }
 
-    for (block = 0; block < multiplier * n_blocks; block ++) {  // iterate through TS_order, which indicates in which block each season should be presented
-    TS = TS_order[block]  // 0, 1, or 2
-    season_name = season_names[TS]
-
-    if (special == "cloudy") {
-      season_name = season_name.concat("_cloudy")
-    }
-
-    if (notify_season == false) {
-        trials = [];
-    } else {
+    // Create start_new_season for mixed blocks
+    if (block_type == "mixed") {
         start_new_season = {
             type: "start_new_season",
             show_clickable_nav: true,
             pages: [
-                "<img class='background' src='img/" + season_name + ".png'>" +
-                "<p class='start_new_season'><i>The season has changed!</i></p>"
+                "<img class='background' src='img/alien_blank.png'>" +
+                "<p class='start_new_season'><i>This is the beginning of the chaotic season!</i></p>"
             ]
         }
-        trials = [start_new_season];
+
+        // Randomize trials in mixed blocks
+        all_sections = jsPsych.randomization.shuffle(all_sections)
+        all_sections.unshift(start_new_season)  // add the start_new_season screen
     }
 
-    for (tr = 0; tr < n_trials; tr ++) {
-        if (notify_season == false){
-            for (alien_choice in alien_order){
-                //DO. NOT. TOUCH.
-                console.log(alien_choice);
-                console.log(alien_order);
-                console.log(alien_order[alien_choice]);
-                console.log([TSs[TS][alien_choice]]);
-                console.log([TSs[TS][alien_order[alien_choice]]]);
-                console.log(TSs[TS]);
-
-                trial = {
-                    TS: TS,
-                    season: season_name,
-                    timeline: [TSs[TS][alien_order[alien_choice]]]
-                }
-            }
-        }
-        else {
-            trial = {
-                TS: TS,
-                season: season_name,
-                timeline: TSs[TS],
-                randomize_order: true,
-            }
-        }
-      trials.push(trial);
-    }
-    seasons_in_order = seasons_in_order.concat(trials)
-  }
-  ////console.log(TSs[TS])     //inexplicably this doesn't work?
-  return seasons_in_order
+    // Return `all_sections`, the array of all trials
+    return all_sections
 }
 
-// Convert name of the season into the corresponding number
-// var season2number = {
-//   "hot": 0,
-//   "hot_cloudy": 0,
-//   "cold": 1,
-//   "cold_cloudy": 1,
-//   "rainy": 2,
-//   "rainy_cloudy": 2
-// }
+function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type) {
+
+    // Figure out which TS and season will be shown in this section
+    TS_name = TS_order[section_i]  // 0, 1, or 2
+    TS = TSs[TS_name]
+    season_name = season_names[TS_name]  // season_names = shuffle(["hot", "cold", "rainy"])
+    if (block_type == "cloudy") {
+        season_name = season_name.concat("_cloudy")
+    }
+
+    // Create start_new_season for normal blocks and put at the beginning of `section`
+    if (block_type != "mixed") {
+        start_new_season = {
+            type: "start_new_season",
+            show_clickable_nav: true,
+            pages: [
+              "<img class='background' src='img/" + season_name + ".png'>" +
+              "<p class='start_new_season'><i>The season has changed!</i></p>"
+            ]
+        }
+        section = [start_new_season];
+    } else {
+        section = [];
+    }
+
+    // Add n_trials_per_alien trials per alien to `section`
+    for (tr = 0; tr < n_trials_per_alien; tr ++) {
+        four_trials = []
+        for (alien = 0; alien < TS.length; alien ++) {  // TS.length = number of aliens = 4
+            alien_trial = TS[alien]
+            trial = {
+                season: season_name,
+                sad_alien: alien_trial["sad_alien"],
+                key_answer: alien_trial["key_answer"],
+                reward: alien_trial["reward"],
+                TS: alien_trial["TS"],
+            }
+            four_trials.push(trial);
+        }
+        section = section.concat(jsPsych.randomization.shuffle(four_trials))  // shuffle trial order and add to `section`
+    }
+    return section
+}

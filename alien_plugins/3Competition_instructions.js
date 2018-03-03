@@ -55,12 +55,6 @@ exmpl_item_buttons =
     item_buttons[0] +
     item_buttons[1] +
   "</div></center>"
-//
-// exmpl_alien_season_buttons_rest =
-//   "<center><div class='response_buttons'>" +
-//     alien_season_buttons[0] +
-//     alien_season_buttons[5] +
-//   "</div></center>"
 
 intro_slide_item =
   "<center><p>Thank you for selecting your aliens!<p>" +
@@ -69,7 +63,13 @@ intro_slide_item =
   "<p><i>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</i>.</p>" +
   exmpl_item_buttons +
   "<p>Your opponent will automatically get the other alien! "
-
+//
+// exmpl_alien_season_buttons_rest =
+//   "<center><div class='response_buttons'>" +
+//     alien_season_buttons[0] +
+//     alien_season_buttons[5] +
+//   "</div></center>"
+//
 // intro_slide_alien_rest_season =
 //   "<center><p>Last in the selection process, " +
 //   "you can indicate which <i>combinations of aliens and seasons</i> you would prefer for the competition. " +

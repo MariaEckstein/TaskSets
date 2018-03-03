@@ -155,11 +155,19 @@ training_block = {
   choices: [left_key, middle_key, right_key],
   aliens: pr_alien_names,
   show_stim_with_feedback: true,
-  randomize_order: true,
   timing_feedback_duration: feedback_duration_train,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
-  timeline: TS_train
+  timeline: [
+    {timeline: TS_train, randomize_order: true},
+    {timeline: TS_train, randomize_order: true},
+    {timeline: TS_train, randomize_order: true},
+    {timeline: TS_train, randomize_order: true},
+    {timeline: TS_train, randomize_order: true},
+    {timeline: TS_train, randomize_order: true},
+    {timeline: TS_train, randomize_order: true},
+    {timeline: TS_train, randomize_order: true},
+  ]
 }
 
 // More instructions

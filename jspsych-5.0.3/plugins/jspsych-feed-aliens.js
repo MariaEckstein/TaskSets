@@ -1,6 +1,41 @@
 
 jsPsych.plugins["feed-aliens"] = (function() {
 
+  /*
+  feed-aliens displays a single trial in the initial-learning phase of the Aliens task.
+  In a trial, participants see an alien together with three items, situated
+  in one specific season. The goal is to select the item that leads to the
+  largest reward in terms of the length of a measuring tape displayed after the
+  choice.
+
+  feed-aliens requires the following variables:
+  season: a name in ["hot", "cold", "rainy", "hot_cloudy", "cold_cloudy", ...]
+    Used to load the background picture and added to the trial data
+  sad_alien: a number in [0, 1, 2] specifying which alien is shown
+    Used to load the image of the current alien with trial.aliens[trial.sad_alien];
+    also added to trial data
+  aliens: an array of alien names (e.g., alien_names).
+    Used to load the image of the current alien with trial.aliens[trial.sad_alien];
+    also added to trial data
+  key_answer: indicates the correct response (one in item_names)
+    Its only use: if (trial.key_answer == chosen_item_name) {correct = true}
+  reward: a number (e.g., between 2-10)
+    Its only use is to calculate the trial reward, by adding noise
+  TS: an element in [0, 1, 2, "train", "rainbow"], naming the TS
+    Its only use: saved in the trial data
+  choices: specifies allowed buttons (e.g., [left_key, middle_key, right_key])
+    Its only use: valid_responses: trial.choices
+  phase: a name (e.g., "1Mixed")
+    Its only use: saved in the trial data
+  timing_response: indicates participants' max response time (e.g., max_RT)
+  timing_feedback_duration: feedback_duration,
+  timing_post_trial: ITI_duration,
+  timeout_message: timeout_message
+
+  feed-aliens was created by maria.eckstein@berkeley.edu, based on code
+  from Josh de Leuw's awesome jsPsych library.
+  */
+
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('animation', 'stimulus', 'image');
@@ -117,11 +152,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
         "sad_alien_name": trial.aliens[trial.sad_alien],
         "TS": trial.TS,
         "season": trial.season,
-        // "TS": TS_rand[season2number[trial.season]],
-        // "season": trial.season,
         "phase": trial.phase,
       };
-      console.log(chosen_item_name);
 
       display_element.html('');  // clears display before feedback screen
 

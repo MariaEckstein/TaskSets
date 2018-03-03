@@ -40,14 +40,17 @@ for (se = 0; se < season_names.length; se ++) {
   }
 }
 
+// TS names
+TS_names = [0, 1, 2]
+
 // TS order
-TS_order = create_pseudo_random_array([0,1,2], n_blocks_phase1);
-TS_order_mixed = jsPsych.randomization.repeat([0,1,2], n_blocks_phase1)   //true randomize mixed blocks
-//TS_order_mixed = jsPsych.randomization.repeat([0,1,2,3,4,5,6,7,8,9,10,11], 1)   //true randomize mixed blocks
-TS_order_cloudy = create_pseudo_random_array([0,1,2], 3 * n_blocks_cloudy);
-TS_order_refresher2 = jsPsych.randomization.repeat([0,1,2], n_blocks_refreshers);   //changed from 3*blocks
-TS_order_refresher3 = jsPsych.randomization.repeat([0,1,2], n_blocks_refreshers);   //changed from 3*blocks
-TS_order_phase4 = create_pseudo_random_array([0,1,2], 3 * n_blocks_rainbow);
+// TS_order = create_pseudo_random_array([0,1,2], n_blocks_phase1);
+// TS_order_mixed = jsPsych.randomization.repeat([0,1,2], n_blocks_phase1)   //true randomize mixed blocks
+// //TS_order_mixed = jsPsych.randomization.repeat([0,1,2,3,4,5,6,7,8,9,10,11], 1)   //true randomize mixed blocks
+// TS_order_cloudy = create_pseudo_random_array([0,1,2], 3 * n_blocks_cloudy);
+// TS_order_refresher2 = jsPsych.randomization.repeat([0,1,2], n_blocks_refreshers);   //changed from 3*blocks
+// TS_order_refresher3 = jsPsych.randomization.repeat([0,1,2], n_blocks_refreshers);   //changed from 3*blocks
+// TS_order_phase4 = create_pseudo_random_array([0,1,2], 3 * n_blocks_rainbow);
 alien_order = jsPsych.randomization.repeat([0,1,2,3], 1)
 
 
