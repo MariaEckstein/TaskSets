@@ -76,9 +76,33 @@ function create_pick_aliens_timeline(names, buttons, alien_season) {
 }
 
 // Create timelines for feed-aliens phase
-function create_feed_aliens_block(TS_order, n_trials_per_alien, block_type="normal") {
+function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, interleave_mixed=false, block_type="normal") {
+
+  // Add normal blocks
+  timeline = []
+  for (i = 0; i < n_blocks; i ++) {
+    timeline = timeline.concat(
+      create_feed_aliens_block(n_trials_per_alien=n_trials_per_alien,
+                               block_type=block_type))
+
+    // Interleave mixed blocks
+    if (interleave_mixed) {
+      if (i < n_blocks_phase1 - 1) {
+        timeline = timeline.concat(
+          create_feed_aliens_block(n_trials_per_alien=n_trials_per_alien / 4,
+                                   block_type="mixed"))
+       }
+    }
+  }
+  return timeline
+}
+
+// Create block for feed-aliens phase
+function create_feed_aliens_block(n_trials_per_alien, block_type="normal", TS_order=jsPsych.randomization.shuffle(TS_names)) {
 
     // Create one section of trials for each TS in TS_order
+    console.log(TS_names)
+    console.log(TS_order)
     all_sections = []
     for (section_i = 0; section_i < TS_order.length; section_i ++) {
         section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)

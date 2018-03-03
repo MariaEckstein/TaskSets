@@ -25,13 +25,15 @@ jsPsych.plugins["feed-aliens"] = (function() {
     Its only use is to calculate the trial reward, by adding noise
   TS: an element in [0, 1, 2, "train", "rainbow"], naming the TS
     Its only use: saved in the trial data
-  choices: specifies allowed buttons (e.g., [left_key, middle_key, right_key])
-    Its only use: valid_responses: trial.choices
   phase: a name (e.g., "1Mixed")
     Its only use: saved in the trial data
+
+  in addition to standard jsPsych variables:
+  choices: specifies allowed buttons (e.g., [left_key, middle_key, right_key])
+    Its only use: valid_responses: trial.choices
   timing_response: indicates participants' max response time (e.g., max_RT)
-  timing_feedback_duration: feedback_duration,
-  timing_post_trial: ITI_duration,
+  timing_feedback_duration: feedback_duration
+  timing_post_trial: ITI_duration
   timeout_message: timeout_message
 
   feed-aliens was created by maria.eckstein@berkeley.edu, based on code
@@ -195,7 +197,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
           "<img class='ruler' src='img/measuringtape.png' style= 'clip: rect(0px, " + ruler_length + "px, 200px, 0px);'>" +
         "</div>"
 
-      if (trial.TS == "rainbow") {  // no feedback in rainbow season!
+      if (trial.season == "rainbow") {  // no feedback in rainbow season!
         ruler = ""
       }
 

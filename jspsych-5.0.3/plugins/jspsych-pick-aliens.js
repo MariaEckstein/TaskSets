@@ -90,7 +90,6 @@ jsPsych.plugins["pick-aliens"] = (function() {
         unchosen_button_name = l_button_name;
       } else {
         chosen_button_name = NaN
-        unchosen_button_name = NaN
       }
 
       // save data
@@ -103,7 +102,6 @@ jsPsych.plugins["pick-aliens"] = (function() {
         "item_chosen_name": chosen_button_name,
         "phase": 2,
       };
-      console.log(chosen_button_name);
 
       var timeout = info.rt == -1;
       correct = -1;

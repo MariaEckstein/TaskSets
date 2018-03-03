@@ -148,6 +148,10 @@ var phase1_instructions = {
 }
 
 // Training trials
+training_timeline = []
+for (i = 0; i < n_blocks_training; i ++) {
+  training_timeline.push({timeline: TS_train, randomize_order: true})
+}
 training_block = {
   type: "feed-aliens",
   phase: "0Training",
@@ -158,16 +162,7 @@ training_block = {
   timing_feedback_duration: feedback_duration_train,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
-  timeline: [
-    {timeline: TS_train, randomize_order: true},
-    {timeline: TS_train, randomize_order: true},
-    {timeline: TS_train, randomize_order: true},
-    {timeline: TS_train, randomize_order: true},
-    {timeline: TS_train, randomize_order: true},
-    {timeline: TS_train, randomize_order: true},
-    {timeline: TS_train, randomize_order: true},
-    {timeline: TS_train, randomize_order: true},
-  ]
+  timeline: training_timeline
 }
 
 // More instructions
