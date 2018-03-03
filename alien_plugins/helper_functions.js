@@ -38,7 +38,44 @@ function create_pseudo_random_array(available_elements, target_length) {
   return array
 }
 
-// Create season timelines for feed aliens
+// Create timelines for pick-aliens phase
+function create_pick_aliens_timeline(names, buttons, alien_season) {
+
+  // Loop through buttons and select two for each trial to present
+  timeline = []
+  for (x1 = 0; x1 < buttons.length; x1 ++) {  // button1 can be any
+    for (x2 = 0; x2 < buttons.length; x2 ++) {  // button2 can be any
+      if (x1 < x2) {  // but they cannot be the same
+
+        // Check if this pair will be added
+        add_this_pair = false
+        if (alien_season == undefined) {  // default: all pairs are added
+          add_this_pair = true
+        } else {  // it depends for alien-same-season and alien-different-season
+          if (Math.floor(x1 / alien_names.length) == (Math.floor(x2 / alien_names.length))) {  // both buttons are in the same season
+            if (alien_season == "same") {
+              add_this_pair = true
+            }
+          } else {  // both buttons are in different seasons
+            if (alien_season == "different") {
+              add_this_pair = true
+            }
+          }
+        }
+
+        // Add the selected pair to the timeline
+        if (add_this_pair) {
+          timeline.push(  // presentation order is not shuffled here because it will be shuffled inside pick-aliens
+            {buttons: [buttons[x1], buttons[x2]],
+            button_names: [names[x1], names[x2]]})
+        }
+      }
+    }
+  }
+  return timeline
+}
+
+// Create timelines for feed-aliens phase
 function create_feed_aliens_block(TS_order, n_trials_per_alien, block_type="normal") {
 
     // Create one section of trials for each TS in TS_order

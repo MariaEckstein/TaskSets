@@ -2,6 +2,8 @@
 jsPsych.plugins["feed-aliens"] = (function() {
 
   /*
+  DOCUMENTATION
+
   feed-aliens displays a single trial in the initial-learning phase of the Aliens task.
   In a trial, participants see an alien together with three items, situated
   in one specific season. The goal is to select the item that leads to the
@@ -183,6 +185,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.append(trial.timeout_message);
+        trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
 
       // add reward measuringtape

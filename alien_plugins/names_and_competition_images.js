@@ -28,14 +28,17 @@ for (al = 0; al < alien_names.length; al ++) {
 }
 
 // Season-aliens
+alien_season_names = []
 alien_season_buttons = []
 for (se = 0; se < season_names.length; se ++) {
   for (al = 0; al < alien_names.length; al ++) {
+    button_name = alien_names[al] + season_names[se]
     button =
-      "<center><div class='alien_box' id='" + alien_names[al] + season_names[se] + "-button'>" +
+      "<center><div class='alien_box' id='" + button_name + "-button'>" +
         "<img class='phase2_button' src='img/" + alien_names[al] + ".png' style='position:absolute; left: 25%'>" +
         "<img class='phase2_button' src='img/" + season_names[se] + ".png'>" +
       "</div></center>"
+    alien_season_names.push(button_name)
     alien_season_buttons.push(button)
   }
 }

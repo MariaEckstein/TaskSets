@@ -1,11 +1,11 @@
 // Timing variables
 // Main experiment
-max_RT = 1500
+max_RT_initial_learn = 1500
+max_RT_pick_aliens = 2 * max_RT_initial_learn
 feedback_duration = 400  //500
 ITI_duration = 200  //250
 // Training block
-max_RT_phase2 = max_RT
-max_RT_train = 2 * max_RT
+max_RT_train = 2 * max_RT_initial_learn
 feedback_duration_train = 1.5 * feedback_duration
 ITI_duration_train = 1.5 * ITI_duration
 
@@ -23,7 +23,7 @@ left_key = 74;
 middle_key = 75;
 right_key = 76;
 
-timeout_message = "<p class='start_new_season'>Use <i>j, k</i>, or <i>l</i> to respond.</p>"
+timeout_message = "<p class='start_new_season'>Please use <i>j, k</i>, or <i>l</i> to respond.</p>"
 
 // numbers of trials
 n_trials_per_alien_phase1 = 12;  //13 how many trials per season per alien?

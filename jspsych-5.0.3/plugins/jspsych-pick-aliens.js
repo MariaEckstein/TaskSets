@@ -1,6 +1,34 @@
 
 jsPsych.plugins["pick-aliens"] = (function() {
 
+    /*
+    DOCUMENTATION
+
+    pick-aliens displays a single trial in the pick-aliens phase of the Aliens task.
+    In each trial, participants see two images and need to select one. The
+    images can eiher be two different seasons, two different aliens, or two
+    different aliens in the same season. The goal is to select the picture that
+    has the larger "value", i.e., was associated with larger overall reward during
+    the intial-learning phase. There is no feedback.
+
+    pick-aliens requires the following variables:
+    button_names: an array of two xyz_names (e.g., [xyz_names[0], xyz_names[1]])
+      xyz_names can be one of:
+      season_names = shuffle(["hot", "cold", "rainy"])
+      item_names = shuffle(["bed", "umbrella", "plant"])
+      alien_names = shuffle(["alien1", "alien2", "alien3", "alien4"])
+      Also saved in the trial data (item_left_name, item_right_name, item_chosen_name)
+    buttons: an array of two alien_buttons (e.g., [xyz_buttons[0], xyz_buttons[1]])
+      xyz_buttons are xyz_names, translated into html, e.g.,
+      "<img class='phase2_button' src='img/" + alien_names[al] + ".png' id='" + alien_names[al] + "-button'>"
+    assess: class of the shown pictures, e.g., "alien", "item", "season", "season-alien"
+      Its only use: saved in the trial data
+    in addition to the standard jsPych variables like choice, timing_response, etc.
+
+    pick-aliens was created by maria.eckstein@berkeley.edu, based on code
+    from Josh de Leuw's awesome jsPsych library.
+    */
+
   var plugin = {};
 
   jsPsych.pluginAPI.registerPreload('animation', 'stimulus', 'image');
@@ -32,7 +60,6 @@ jsPsych.plugins["pick-aliens"] = (function() {
     l_button_name = trial.button_names[button_order[0]]
     r_button_name = trial.button_names[button_order[1]]
 
-    // shuffled_buttons = shuffle(trial.buttons)
     response_buttons =
       "<center><div class='response_buttons'>" +
         l_button_html + r_button_html +
@@ -61,6 +88,9 @@ jsPsych.plugins["pick-aliens"] = (function() {
       } else if (info.key == right_key) {
         chosen_button_name = r_button_name;
         unchosen_button_name = l_button_name;
+      } else {
+        chosen_button_name = NaN
+        unchosen_button_name = NaN
       }
 
       // save data
@@ -104,6 +134,7 @@ jsPsych.plugins["pick-aliens"] = (function() {
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.html("");
         display_element.append(trial.timeout_message);
+        trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
         // hide non-selected stimulus
         $("#" + unchosen_button_name + "-button").css('visibility', 'hidden');
