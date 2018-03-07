@@ -28,7 +28,7 @@ timeout_message = "<p class='start_new_season'>Please use <i>j, k</i>, or <i>l</
 
 // numbers of trials
 n_blocks_training = 8;
-n_trials_per_alien_phase1 = 12;  //13 how many trials per season per alien?
+n_trials_per_alien_phase1 = 1//2;  //13 how many trials per season per alien?
 n_blocks_phase1 = 3;
 
 n_trials_per_alien_cloudy = 9;  //10 how many trials per season per alien?

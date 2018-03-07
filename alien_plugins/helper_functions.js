@@ -101,8 +101,6 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, interleave_mi
 function create_feed_aliens_block(n_trials_per_alien, block_type="normal", TS_order=jsPsych.randomization.shuffle(TS_names)) {
 
     // Create one section of trials for each TS in TS_order
-    console.log(TS_names)
-    console.log(TS_order)
     all_sections = []
     for (section_i = 0; section_i < TS_order.length; section_i ++) {
         section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)
