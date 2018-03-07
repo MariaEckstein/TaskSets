@@ -1,7 +1,7 @@
 // Timing variables
 // Main experiment
 max_RT_initial_learn = 1500
-max_RT_pick_aliens = 2 * max_RT_initial_learn
+max_RT_competition = 2 * max_RT_initial_learn
 max_RT_rainbow = 2 * max_RT_initial_learn
 feedback_duration = 400  //500
 ITI_duration = 200  //250
@@ -24,7 +24,8 @@ left_key = 74;
 middle_key = 75;
 right_key = 76;
 
-timeout_message = "<p class='start_new_season'>Please use <i>j, k</i>, or <i>l</i> to respond.</p>"
+timeout_message = "<p class='start_new_season'>Please respond using <i>j, k</i>, or <i>l</i>.</p>"
+timeout_message_comp = "<p class='start_new_season'>Please respond using <i>j</i> or <i>l</i>.</p>"
 
 // numbers of trials
 n_blocks_training = 8;

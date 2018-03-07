@@ -40,10 +40,10 @@ item = {
 phase3_pick_aliens = {
   type: "pick-aliens",
   phase: "3PickAliens",
-  choices: [left_key, middle_key, right_key],
+  choices: [left_key, right_key],
   timing_feedback_duration: feedback_duration,
-  timing_response: max_RT_pick_aliens,
-  timeout_message: timeout_message,
+  timing_response: max_RT_competition,
+  timeout_message: timeout_message_comp,
   timing_post_trial: ITI_duration,
   timeline: [].concat(
     intro_season, season, season,  // comes first because that's what I'm interested in - shouldn't be influenced by the other things
