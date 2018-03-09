@@ -78,12 +78,13 @@ function create_pick_aliens_timeline(names, buttons, alien_season) {
 // Create timelines for feed-aliens phase
 function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, interleave_mixed=false, block_type="normal") {
 
+  b = block_type  // block_type gets overwritten, so it needs to be a different variable
   timeline = []
   for (i = 0; i < n_blocks; i ++) {
     // Add normal blocks
     timeline = timeline.concat(
       create_feed_aliens_block(n_trials_per_alien=n_trials_per_alien,
-                               block_type="normal"))
+                               block_type=b))
 
     // Interleave mixed blocks
     if (interleave_mixed) {
