@@ -35,23 +35,23 @@
 
     /* create experiment timeline array */
     var timeline = [
-      // get_subj_data,
-      // phase1_instructions,
-      // training_block,
-      // training_instructions_post,
-      // phase1_initial_learn,
-      // phase1_instructions_post,
-      // phase2_instructions,
-      // phase2_cloudy,
-      // phase2_instructions_post,
-      // refresher_block_2,
+      get_subj_data,
+      phase1_instructions,
+      training_block,
+      training_instructions_post,
+      phase1_initial_learn,
+      phase1_instructions_post,
+      phase2_instructions,
+      phase2_cloudy,
+      phase2_instructions_post,
+      refresher_block_2,
       phase3_instructions,
       phase3_pick_aliens,
-      // phase3_post,
-      // refresher_block_3,
-      // phase5_instructions,
-      // rainbow_season_phase5,
-      // phase5_after,  // to get rid of rainbow background
+      phase3_post,
+      refresher_block_3,
+      phase5_instructions,
+      rainbow_season_phase5,
+      phase5_after,  // to get rid of rainbow background
       strategy_questionnaire,
       goodbye
     ]
@@ -67,7 +67,7 @@
         jsPsych.init({
             timeline: timeline,
             //show_preload_progress_bar: false, // hide preload progress bar
-            // fullscreen: true,
+            fullscreen: true,
             preload_images: images,
             on_finish: function () {
                 jsPsych.data.localSave('test.csv', 'csv')
