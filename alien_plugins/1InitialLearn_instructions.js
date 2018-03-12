@@ -172,6 +172,8 @@ instructions7 =
   "<p> When you're ready, press 'Next' to move on to the real game, with <i>four new aliens</i>. </p>" +
   "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +
   "Keep in mind that <i>aliens' preferences depend on the season</i>! </p>" +
+  "<p> In the chaotic season, the weather changes quickly from day to day." +
+  "It could be hot one day and rainy the next! </p>"+
   "<p> You will notice that aliens grow differently in different seasons - " +
   "<i>pay attention to how much each alien grows in each season!</i> </p>" +
   "</center>"
@@ -209,4 +211,17 @@ var phase1_instructions_post = {
   pages: [instructions1],
   show_clickable_nav: true,
   timing_post_trial: 200
+}
+
+instructions_chaos =
+    "<center><p> Great job! You helped these aliens grow a lot! </p>" +
+    happy_aliens +
+    move_on +
+    "</center>"
+
+var chaotic_instructions = {
+    type: 'instructions',
+    pages: [instructions_chaos],
+    show_clickable_nav: true,
+    timing_post_trial: 200
 }
