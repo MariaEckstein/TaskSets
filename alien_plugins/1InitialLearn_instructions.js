@@ -147,24 +147,6 @@ var phase1_instructions = {
   timing_post_trial: 200
 }
 
-// Training trials
-training_timeline = []
-for (i = 0; i < n_blocks_training; i ++) {
-  training_timeline.push({timeline: TS_train, randomize_order: true})
-}
-training_block = {
-  type: "feed-aliens",
-  phase: "0Training",
-  season: "training",
-  choices: [left_key, middle_key, right_key],
-  aliens: pr_alien_names,
-  show_stim_with_feedback: true,
-  timing_feedback_duration: feedback_duration_train,
-  timing_response: max_RT_train,
-  timeout_message: timeout_message,
-  timeline: training_timeline
-}
-
 // More instructions
 instructions7 =
   "<center><p> Great job! You helped these aliens grow a lot! </p>" +
