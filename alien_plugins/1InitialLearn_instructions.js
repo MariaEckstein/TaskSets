@@ -102,7 +102,7 @@ instructions4 =
     "<p>When this happens, you can offer it one of several things to help it grow.</p>" +
     "<p>How about an umbrella for catching cosmic rays? " +
     "In the game, you'll be able to <i>select an item using the keys 'j', 'k', and 'l'</i> on your keyboard. " +
-    "'j' will select the left-most item (bed in this case), 'k' middle one (umbrella), and 'l' the right one (backpack).</p>" +
+    "'j' will select the left-most item , 'k' the middle one , and 'l' the right one .</p>" +
     "<p>Let's pretend you pressed 'k' and offered the alien the red umbrella - click 'Next' to see what happens.</p>" +
   "</div>" +
   response_buttons +
@@ -172,7 +172,7 @@ instructions7 =
   "<p> When you're ready, press 'Next' to move on to the real game, with <i>four new aliens</i>. </p>" +
   "<p> This time, you'll be on the aliens' planet, so the seasons will change! " +
   "Keep in mind that <i>aliens' preferences depend on the season</i>! </p>" +
-  "<p> In the chaotic season, the weather changes quickly from day to day." +
+  "<p> In the chaotic season, the weather changes quickly from day to day. " +
   "It could be hot one day and rainy the next! </p>"+
   "<p> You will notice that aliens grow differently in different seasons - " +
   "<i>pay attention to how much each alien grows in each season!</i> </p>" +
