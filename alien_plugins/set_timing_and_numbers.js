@@ -39,4 +39,4 @@ n_blocks_cloudy = 3;  //2 how often will each season be repeated?
 n_trials_per_alien_refreshers = 7;  //7 how many trials per season per alien?
 n_blocks_refreshers = 2;  //2 how often will each season be repeated?
 
-n_blocks_rainbow = 3;
+n_blocks_rainbow = 6;
