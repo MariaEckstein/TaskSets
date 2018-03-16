@@ -1,14 +1,10 @@
 // Instruction slides
 instructions1 =
   "<center><p>The time for the competition has finally come!</p>" +
-  "<p>In the competition, two opponents play against each other. " +
-  "Each opponent is taking care of some aliens. " +
-  "<i>The goal is to make the own aliens grow more than the opponent's aliens</i>, " +
-  "for the amusement of the spectators.</p></center>"
-instructions2 =
+  "<p>In the competition, your goal is to <i>make your aliens grow as much as you can</i>." +
   "<center><p>Before the competition starts, " +
-  "each competitor is allowed to pick the aliens and seasons they want to use in the competition. " +
-  "You wil be one of the competitors! Make sure you <i>pick the best aliens and seasons</i> " +
+  "you are allowed to pick the aliens and seasons that you want to use in the competition. " +
+  "Make sure you <i>pick the best aliens and seasons</i> " +
   "using your experience in the game so far!</p>" +
   "('Best' here means biggest growth, i.e., longest measuring tape.)" +
   "<p>Click 'Next' to learn how the selection process works!</p></center>"
@@ -21,11 +17,10 @@ exmpl_season_buttons =
 
 intro_slide_season =
   "<center><p>You will first select which <i>seasons</i> you want for the competition. " +
-  "For example, you might see the two seasons below. <i>Pick the better one for yourself!</i></p>" +
+  "For example, you might see the two seasons below. <i>Pick the better one!</i></p>" +
   "<p>In the competititon, you will press 'j' for the season on top and 'l' for the season on the bottom.</p>" +
   "<p>Click 'Next' to pick your seasons!</p></center>" +
   exmpl_season_buttons
-
 
 exmpl_alien_season_buttons =
   "<center><div class='response_buttons'>" +
@@ -35,7 +30,7 @@ exmpl_alien_season_buttons =
 
 intro_slide_alien_same_season =
   "<center><p>You can now select which <i>aliens</i> you want in each season. " +
-  "For example, you might see the two aliens in the season below. <i>Pick the better one for yourself!</i></p>" +
+  "For example, you might see the two aliens in the season below. <i>Pick the better one!</i></p>" +
   "<p>In the competititon, you will press 'j' for the alien on top and 'l' for the alien on the bottom.</p>" +
   "<p>Click 'Next' to pick your aliens!</p></center>" +
   exmpl_alien_season_buttons
@@ -48,7 +43,7 @@ exmpl_alien_buttons =
 
 intro_slide_alien =
   "<center><p>You can now select which <i>aliens</i> you want in general, that is, independent of the season. " +
-  "For example, you might see the two aliens below. <i>Pick the better one for yourself!</i></p>" +
+  "For example, you might see the two aliens below. <i>Pick the better one!</i></p>" +
   "<p>In the competititon, you will press 'j' for the alien on the left and 'l' for the alien on the right.</p>" +
   "<p>Click 'Next' to pick your aliens!</p></center>" +
   exmpl_alien_buttons
@@ -61,7 +56,7 @@ exmpl_item_buttons =
 
 intro_slide_item =
   "<center><p>You can now select which <i>items</i> you want for the competition. " +
-  "For example, you might see the two items below. <i>Pick the better one for yourself!</i></p>" +
+  "For example, you might see the two items below. <i>Pick the better one!</i></p>" +
   "<p>In the competititon, you will press 'j' for the item on the left and 'l' for the item on the right.</p>" +
   "<p>Click 'Next' to pick your items!</p></center>" +
   exmpl_item_buttons
@@ -112,7 +107,6 @@ var phase3_instructions = {
   type: 'instructions',
   pages: [
       instructions1,
-      instructions2,
   ],
   show_clickable_nav: true,
   timing_post_trial: 200

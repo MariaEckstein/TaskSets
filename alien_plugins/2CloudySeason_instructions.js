@@ -2,7 +2,7 @@ instructions =
   "<img class=background src='img/hot_cloudy.png'>" +
   "<center><p>Suddenly, a massive layer of clouds appears. " +
   "The clouds are so thick that you are unable to recognize anything around you, " +
-  "not even what season it is currently.</p>" +
+  "not even what season it is currently (hot, cold, or rainy).</p>" +
   "<p>Your alien friends quickly assure you that this is a common phenomenon, and not dangerous. " +
   "They tell you: '<i>Just keep doing what you are doing, the clouds will go away eventually!</i>'</p>" +
   "<p>So try your best to help the aliens grow as much as you can, without seeing the current season!</p>" +
