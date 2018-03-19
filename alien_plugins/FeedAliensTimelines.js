@@ -31,7 +31,7 @@ var phase1_initial_learn = {
                                           interleave_mixed=true)
 }
 
-// Create timeline for Cloudy Season: x normal blocks
+// Create timeline for Cloudy Season: x cloudy blocks
 var phase2_cloudy = {
   type: "feed-aliens",
   phase: "2CloudySeason",

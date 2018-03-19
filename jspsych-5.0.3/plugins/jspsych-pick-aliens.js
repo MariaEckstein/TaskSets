@@ -97,9 +97,9 @@ jsPsych.plugins["pick-aliens"] = (function() {
         "rt": info.rt,
         "key": info.key,
         "assess": trial.assess,
-        "item_left": l_button_name,
-        "item_right": r_button_name,
-        "item_chosen": chosen_button_name,
+        "item_left_name": l_button_name,
+        "item_right_name": r_button_name,
+        "item_chosen_name": chosen_button_name,
         "phase": trial.phase,
       };
 

@@ -166,6 +166,7 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
                 key_answer: alien_trial["key_answer"],
                 reward: alien_trial["reward"],
                 TS: alien_trial["TS"],
+                block_type: block_type,
             }
             four_trials.push(trial);
         }
