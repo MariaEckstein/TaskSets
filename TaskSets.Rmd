@@ -245,9 +245,8 @@ if (!run_on_simulated_data) {
   plot(as.numeric(demographics$age) / 365.242)  # plot to check
 }
 ```
-```{r Learned values - final performance - objective values}
-# Learned values
-## Function to summarize over items, aliens, TS, ..., to get average rewards for each
+```{r Create all_values_perf which contains TS and item values (subj and obj) and task performance}
+# Function to summarize over items, aliens, TS, ..., to get average rewards for each
 get_values_and_perf = function(feed_aliens_data, instance_names, instance_ids, assess_name) {
   
   value_dat = ddply(feed_aliens_data, c("subjID", "phase", instance_names, instance_ids), summarize,
@@ -268,18 +267,15 @@ get_values_and_perf = function(feed_aliens_data, instance_names, instance_ids, a
   return(value_dat)
 }
 
-## True objective values for each season-alien pair
+# True objective values for each season-alien pair
 alien_TS_obj = expand.grid(sad_alien = 0:3, TS = 0:2)
 alien_TS_obj$value_obj = c(6, 4, 5, 10,
                            2, 8, 7, 3,
                            7, 3, 3, 2)
 alien_TS_obj$id = apply(alien_TS_obj[,c("sad_alien", "TS")], 1, paste, collapse = "")
-# alien_TS_obj$id = factor(alien_TS_obj$sad_alien)
-# alien_TS_obj$assess = factor(alien_TS_obj$TS)
-# alien_TS_obj$phase = NA
 
-## Put all the average rewards into one dataframe
-dat = subset(all_files, phase %in% c("1InitialLearning", "Refresher2", "Refresher3") & !is.na(item_chosen))  # this includes the MIXED blocks!!
+# Put all the average rewards into one dataframe
+dat = subset(all_files, phase %in% c("1InitialLearning", "Refresher2", "Refresher3") & !is.na(item_chosen) & block.type != "mixed")  # this includes the MIXED blocks!!
 
 alien_values = get_values_and_perf(dat, "sad_alien_name", "sad_alien", "alien")
 alien_values$value_obj = 5
@@ -524,8 +520,7 @@ gg_subj_obj_values = ggplot(subset(feed_aliens, phase != "0Training"), aes(group
   geom_line(aes(item_value_subj, item_value_obj), color = "red", alpha = 0.3) +
   geom_point(aes(TS_value_subj, TS_value_obj), color = "blue") +
   geom_line(aes(TS_value_subj, TS_value_obj), color = "blue", alpha = 0.3) +
-  labs(x = "Subj. values", y = "Obj. values (item: red; TS: blue)") +
-  facet_grid(~ phase)
+  labs(x = "Subj. values", y = "Obj. values (item: red; TS: blue)")
 
 # Plot learning curves dependent on TS value (subj and obj)
 gg_learning_curves_TS_value_obj = ggplot(subset(feed_aliens, phase != "0Training"), aes(alien_trial_sum, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +
@@ -558,7 +553,7 @@ gg_learning_curves_wide = ggplot(subset(feed_aliens, phase != "0Training"), aes(
   facet_grid(phase ~ paste("It. val.", item_value_obj))
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "/2gg_subj_obj_values.png"), gg_subj_obj_values, width = 10, height = 3)
+  ggsave(file.path(plot_dir, "/2gg_subj_obj_values.png"), gg_subj_obj_values, width = 4, height = 3)
   
   ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_obj.png"), gg_learning_curves_TS_value_obj, width = 10, height = 4)
   ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_subj.png"), gg_learning_curves_TS_value_subj, width = 10, height = 4)
@@ -952,23 +947,23 @@ None_choices = rainbow_sum$None
 mean(None_choices / Valid_choices)
 t.test(None_choices - 2 / 12 * Valid_choices)
 
-mean(rainbow_sum$TS0)
-mean(rainbow_sum$TS0 / Valid_choices)
-t.test(rainbow_sum$TS0 - 3 / 12 * Valid_choices)
-mean(rainbow_sum$TS1)
-mean(rainbow_sum$TS1 / Valid_choices)
-t.test(rainbow_sum$TS1 - 3 / 12 * Valid_choices)
-t.test(rainbow_sum$TS0 - rainbow_sum$TS1)
-mean(rainbow_sum$TS2)
-mean(rainbow_sum$TS2 / Valid_choices)
-t.test(rainbow_sum$TS2 - 2 / 12 * Valid_choices)
-mean(rainbow_sum$None)
-mean(rainbow_sum$None / Valid_choices)
-t.test(rainbow_sum$None - 2 / 12 * Valid_choices)
-Double_TS_choices = rainbow_sum$TS0and2 + rainbow_sum$TS1and2
-mean(Double_TS_choices)
-mean(Double_TS_choices / Valid_choices)
-t.test(Double_TS_choices - 2 / 12 * Valid_choices)
+# mean(rainbow_sum$TS0)
+# mean(rainbow_sum$TS0 / Valid_choices)
+# t.test(rainbow_sum$TS0 - 3 / 12 * Valid_choices)
+# mean(rainbow_sum$TS1)
+# mean(rainbow_sum$TS1 / Valid_choices)
+# t.test(rainbow_sum$TS1 - 3 / 12 * Valid_choices)
+# t.test(rainbow_sum$TS0 - rainbow_sum$TS1)
+# mean(rainbow_sum$TS2)
+# mean(rainbow_sum$TS2 / Valid_choices)
+# t.test(rainbow_sum$TS2 - 2 / 12 * Valid_choices)
+# mean(rainbow_sum$None)
+# mean(rainbow_sum$None / Valid_choices)
+# t.test(rainbow_sum$None - 2 / 12 * Valid_choices)
+# Double_TS_choices = rainbow_sum$TS0and2 + rainbow_sum$TS1and2
+# mean(Double_TS_choices)
+# mean(Double_TS_choices / Valid_choices)
+# t.test(Double_TS_choices - 2 / 12 * Valid_choices)
 ```
 ```{r Same for cloudy}
 cloudy_aliens = merge(subset(feed_aliens, phase == "2CloudySeason" & trial == 1, select = c("subjID", "sad_alien", "item_chosen")), all.x = T,
