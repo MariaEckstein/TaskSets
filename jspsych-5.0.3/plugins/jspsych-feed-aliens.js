@@ -132,7 +132,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
       }
 
       // get feedback amount
-      if (!correct) {  // incorrect response or no answer
+      if (!correct) {  // incorrect response
         feedback_amount = 0
       } else {  // correct response
         for (i = 0; i < item_names.length; i++) {

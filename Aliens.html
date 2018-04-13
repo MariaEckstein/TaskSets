@@ -37,20 +37,20 @@
     var timeline = [
       get_subj_data,
       phase1_instructions,
-      training_block,
+      training_block,  // v1.0: 10 blocks; v2.0: 8 blocks; v2.1: ??? blocks
       training_instructions_post,
-      phase1_initial_learn,
+      phase1_initial_learn,  // all v: 3 blocks per season, 13 trials per alien per block
       phase1_instructions_post,
       phase2_instructions,
-      phase2_cloudy,
+      phase2_cloudy,  // v1.0: 2 blocks per season, v2.0: 3 blocks per season; both: 10 trials per alien per block
       phase2_instructions_post,
-      refresher_block_2,
+      refresher_block_2,  // all v: 2 blocks, 7 trials per alien per block
       phase3_instructions,
-      phase3_pick_aliens,
+      phase3_pick_aliens,  // v1.0: 2 trials per pair (4 trials per image for aliens [because I missed alien3], seasons, and items; 6 trials for alien-same-season); v2.0: 4 trials per season, alien, and item pairs, 2 trials per alien-same-season (8 trials per season and item images, 12 trials per alien image, 6 trials per alien-same-season)
       phase3_post,
-      refresher_block_3,
+      refresher_block_3,  // all v: 2 blocks, 7 trials per alien per block
       phase5_instructions,
-      rainbow_season_phase5,
+      rainbow_season_phase5,  // v1.0: 3 blocks; v2.1: 6 blocks; v2.1: ??? blocks
       phase5_after,  // to get rid of rainbow background
       strategy_questionnaire,
       goodbye

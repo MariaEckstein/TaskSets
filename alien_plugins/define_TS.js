@@ -37,10 +37,3 @@ if (short_version) {
     [TS2[0]],
   ]
 }
-//if (notify_season = false) {
-  //  TSs = [].concat(TS0, TS1, TS2)
-//}
- // notify_season = false
- //if (notify_season == false){
- //   TSs = [TS0, TS1, TS2]
-//  }

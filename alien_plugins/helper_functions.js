@@ -45,7 +45,7 @@ function create_pick_aliens_timeline(names, buttons, alien_season) {
   timeline = []
   for (x1 = 0; x1 < buttons.length; x1 ++) {  // button1 can be any
     for (x2 = 0; x2 < buttons.length; x2 ++) {  // button2 can be any
-      if (x1 < x2) {  // but they cannot be the same
+      if (x1 < x2) {  // but they cannot be the same, and each pair is only allowed once
 
         // Check if this pair will be added
         add_this_pair = false
@@ -78,7 +78,7 @@ function create_pick_aliens_timeline(names, buttons, alien_season) {
 // Create timelines for feed-aliens phase
 function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, interleave_mixed=false, block_type="normal") {
 
-  b = block_type  // block_type gets overwritten, so it needs to be a different variable
+  b = block_type  // block_type gets overwritten, so it needs a different name
   n_trials = n_trials_per_alien  // same for n_trials_per_alien
 
   timeline = []
@@ -90,7 +90,7 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, interleave_mi
 
     // Interleave mixed blocks
     if (interleave_mixed) {
-      if (i < n_blocks_phase1 - 1) {  // interleaved blocks only appear between normal blocks, not at the very end
+      if (i < n_blocks - 1) {  // interleaved blocks only appear between normal blocks, not at the very end
         timeline = timeline.concat(
           create_feed_aliens_block(n_trials_per_alien=n_trials / 4,
                                    block_type="mixed"))
