@@ -45,20 +45,33 @@ function create_pick_aliens_timeline(names, buttons, alien_season) {
 
 function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='normal') {
 
-  // Create timeline for Initial Learn: n_blocks_phase1 non-mixed blocks
-  n_sections = n_blocks * TS_names.length
-  random_number = Math.floor(Math.random() * TS_orders.length)
-  TS_order = TS_orders[random_number].slice(0, n_sections)
+  if (block_type != 'mixed') {
+    // Create timeline for Initial Learn: n_blocks_phase1 non-mixed blocks
+    n_sections = n_blocks * TS_names.length
+    random_number = Math.floor(Math.random() * TS_orders.length)
+    TS_order = TS_orders[random_number].slice(0, n_sections)
 
-  // Concate all the TS sections for the block (one section per TS in TS_order)
-  all_sections = []
-  for (section_i = 0; section_i < n_sections; section_i ++) {
-    section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)
-    all_sections = all_sections.concat(section)
-  }
+    // Concate all the TS sections for the block (one section per TS in TS_order)
+    all_sections = []
+    for (section_i = 0; section_i < n_sections; section_i ++) {
+      section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)
+      all_sections = all_sections.concat(section)
+    }
 
-  // To create a mixed block, put just one new-season screen at the very beginning
-  if (block_type == 'mixed') {
+  } else {  // if (block_type == 'mixed')
+    // Create a block that consists of multiple sections of 12 trials; order is randomized within each section
+    all_sections = []
+    for (i = 0; i < n_trials_per_alien; i ++) {
+      section = []
+      for (section_i = 0; section_i < 3; section_i ++) {
+        section = section.concat(
+          create_feed_aliens_section(section_i, [0, 1, 2], 1, block_type))  // create 1 trial per alien per TS -> 12 trials total
+      }
+      section = jsPsych.randomization.shuffle(section)
+      all_sections = all_sections.concat(section)
+    }
+
+    // Add new-season screen at the very beginning
     start_new_season = {
         type: "start_new_season",
         show_clickable_nav: true,
@@ -66,10 +79,7 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='n
           "<p class='start_new_season'><i>A new chaotic season has begun!</i></p>"
         ]
       }
-
-     // Randomize trials in mixed blocks and add new-season screen
-     all_sections = jsPsych.randomization.shuffle(all_sections)
-     all_sections.unshift(start_new_season)
+    all_sections.unshift(start_new_season)
   }
   return all_sections
 }
@@ -106,7 +116,6 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
         //// Add the 4-alien block to section (if this does not create an alien repetition)
         four_trials = jsPsych.randomization.shuffle(four_trials);  // randomize order within each chunk of 4 trials
         first_alien_new_chunk = four_trials[0].sad_alien
-        console.log(last_alien_old_chunk, first_alien_new_chunk)
         if (first_alien_new_chunk != last_alien_old_chunk) {  // make sure that the same alien does not come up twice in a row (has no effect on mixed blocks because they'll be randomized independently after)
           section = section.concat(four_trials)
           last_alien_old_chunk = four_trials[four_trials.length-1].sad_alien
