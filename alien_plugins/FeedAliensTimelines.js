@@ -16,6 +16,7 @@ training_block = {
   timeline: training_timeline
 }
 
+
 // Create timeline for InitialLearn: n_blocks_phase1 blocks
 var phase1_initial_learn = {
     type: "feed-aliens",

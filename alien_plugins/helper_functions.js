@@ -100,26 +100,26 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
     last_alien_old_chunk = "none"
     //// Create a block of 4 aliens
     while (section.length < section_target_length) {  // add trials until I have the right number
-        four_trials = []
-        for (alien = 0; alien < alien_names.length; alien ++) {
-            alien_trial = TS[alien]
-            trial = {
-                season: season_name,
-                sad_alien: alien_trial["sad_alien"],
-                key_answer: alien_trial["key_answer"],
-                reward: alien_trial["reward"],
-                TS: alien_trial["TS"],
-                block_type: block_type,
-            }
-            four_trials.push(trial);
-        }
-        //// Add the 4-alien block to section (if this does not create an alien repetition)
-        four_trials = jsPsych.randomization.shuffle(four_trials);  // randomize order within each chunk of 4 trials
-        first_alien_new_chunk = four_trials[0].sad_alien
-        if (first_alien_new_chunk != last_alien_old_chunk) {  // make sure that the same alien does not come up twice in a row (has no effect on mixed blocks because they'll be randomized independently after)
-          section = section.concat(four_trials)
-          last_alien_old_chunk = four_trials[four_trials.length-1].sad_alien
-        }
+      four_trials = []
+      for (alien = 0; alien < alien_names.length; alien ++) {
+          alien_trial = TS[alien]
+          trial = {
+              season: season_name,
+              sad_alien: alien_trial["sad_alien"],
+              key_answer: alien_trial["key_answer"],
+              reward: alien_trial["reward"],
+              TS: alien_trial["TS"],
+              block_type: block_type,
+          }
+          four_trials.push(trial);
+      }
+      //// Add the 4-alien block to section (if this does not create an alien repetition)
+      four_trials = jsPsych.randomization.shuffle(four_trials);  // randomize order within each chunk of 4 trials
+      first_alien_new_chunk = four_trials[0].sad_alien
+      if (first_alien_new_chunk != last_alien_old_chunk) {  // make sure that the same alien does not come up twice in a row (has no effect on mixed blocks because they'll be randomized independently after)
+        section = section.concat(four_trials)
+        last_alien_old_chunk = four_trials[four_trials.length-1].sad_alien
+      }
     }
 
     // Create start_new_season (non-mixed blocks) and put at the beginning of `section`
