@@ -133,16 +133,13 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       // get feedback amount
       if (!correct) {  // incorrect response
-        feedback_amount = 0
+        reward = 1
       } else {  // correct response
-        for (i = 0; i < item_names.length; i++) {
-          if (chosen_item_name == item_names[i]) {
-            noised_amount = trial.reward + 0.5 * randn_bm()
-            rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
-            feedback_amount = Math.max(0, rounded_amount)
-          }
-        }
+        reward = trial.reward
       }
+      noised_amount = reward + 0.5 * randn_bm()
+      rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
+      feedback_amount = Math.max(0, rounded_amount)
 
       // save data
       trial_data = {
