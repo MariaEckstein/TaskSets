@@ -16,6 +16,7 @@ training_block = {
   timeline: training_timeline
 }
 
+// Create timeline for InitialLearn: n_blocks_phase1 blocks
 var phase1_initial_learn = {
     type: "feed-aliens",
     phase: "1InitialLearning",
@@ -29,7 +30,7 @@ var phase1_initial_learn = {
                                           n_trials_per_alien=n_trials_per_alien_phase1)
 }
 
-// Create timeline for Cloudy Season: x cloudy blocks
+// Create timeline for Cloudy Season: n_blocks_cloudy cloudy blocks
 var phase2_cloudy = {
   type: "feed-aliens",
   phase: "2CloudySeason",
@@ -44,7 +45,28 @@ var phase2_cloudy = {
                                         block_type="cloudy")
 }
 
-// Create timeline for Refershers: x normal blocks with x-1 mixed blocks interleaved
+// Create timeline for mixed block at the end: n_trial_mixed trials
+mixed_timeline = []
+for (i = 0; i < n_blocks_mixed; i ++) {
+  mixed_timeline = mixed_timeline.concat(
+                    create_feed_aliens_timeline(n_blocks=1,
+                                                n_trials_per_alien=n_trials_per_season_alien_mixed,
+                                                block_type='mixed'))
+}
+
+var phase6_mixed_block = {
+    type: "feed-aliens",
+    phase: "Mixed",
+    choices: [left_key, middle_key, right_key],
+    aliens: alien_names,
+    timing_response: max_RT_mixed,
+    timing_feedback_duration: feedback_duration,
+    timing_post_trial: ITI_duration,
+    timeout_message: timeout_message,
+    timeline: mixed_timeline,
+}
+
+// Create timeline for Refershers: n_blocks_refreshers blocks
 var refresher_block_2 = {
     type: "feed-aliens",
     phase: "Refresher2",

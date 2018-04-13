@@ -3,6 +3,7 @@
 max_RT_initial_learn = 1500  // v1.0: 1500; v2.0: 1800; v3.0: 1500
 max_RT_competition = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
 max_RT_rainbow = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
+max_RT_mixed = 2 * max_RT_initial_learn  // v3.0: 2 * max_RT
 feedback_duration = 500  // v1.0: 500; v2.0: 400; v3.0: 500
 ITI_duration = 250  // v1.0: 250; v2.0: 200; v3.0: 250
 // Training block
@@ -40,6 +41,9 @@ n_trials_per_alien_refreshers = 7;  // all vs: 7 how many trials per season per 
 n_blocks_refreshers = 2;  // all vs: 2 how often will each season be repeated?
 
 n_blocks_rainbow = 3;  // v1.0: 3; v2.0: 6; v3.0: 3
+
+n_trials_per_season_alien_mixed = 7;  // v3.0: 7
+n_blocks_mixed = 3; // v3.0: 3
 
 // TS orders
 TS_orders = [
