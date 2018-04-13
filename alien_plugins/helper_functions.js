@@ -22,21 +22,20 @@ function shuffle(array) {
     array[currentIndex] = array[randomIndex];
     array[randomIndex] = temporaryValue;
   }
-
   return array;
 }
 
-// Randomize season order
-function create_pseudo_random_array(available_elements, target_length) {
-  array = shuffle(available_elements)
-  while (array.length < target_length) {
-    new_section = shuffle(available_elements)
-    if (new_section[0] != array[array.length-1]) {
-      array = array.concat(new_section)
-    }
-  }
-  return array
-}
+// // Randomize season order
+// function create_pseudo_random_array(available_elements, target_length) {
+//   array = shuffle(available_elements)
+//   while (array.length < target_length) {
+//     new_section = shuffle(available_elements)
+//     if (new_section[0] != array[array.length-1]) {  // make sure the first element of the new section and the last element of the old section are not the saame
+//       array = array.concat(new_section)
+//     }
+//   }
+//   return array
+// }
 
 // Create timelines for pick-aliens phase
 function create_pick_aliens_timeline(names, buttons, alien_season) {
@@ -75,72 +74,33 @@ function create_pick_aliens_timeline(names, buttons, alien_season) {
   return timeline
 }
 
-// Create timelines for feed-aliens phase
-function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, interleave_mixed=false, block_type="normal") {
+function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='normal') {
 
-  b = block_type  // block_type gets overwritten, so it needs a different name
-  n_trials = n_trials_per_alien  // same for n_trials_per_alien
+  // Create timeline for Initial Learn: n_blocks_phase1 non-mixed blocks
+  random_number = Math.floor(Math.random() * TS_orders.length)
+  n_sections = n_blocks * TS_names.length
+  TS_order = TS_orders[random_number].slice(0, n_sections)
 
-  timeline = []
-  for (i = 0; i < n_blocks; i ++) {
-    // Add normal blocks
-    timeline = timeline.concat(
-      create_feed_aliens_block(n_trials_per_alien=n_trials,
-                               block_type=b))
-
-    // Interleave mixed blocks
-    if (interleave_mixed) {
-      if (i < n_blocks - 1) {  // interleaved blocks only appear between normal blocks, not at the very end
-        timeline = timeline.concat(
-          create_feed_aliens_block(n_trials_per_alien=n_trials / 4,
-                                   block_type="mixed"))
-       }
-    }
+  // Concate all the TS sections for the block (one section per TS in TS_order)
+  all_sections = []
+  for (section_i = 0; section_i < TS_order.length; section_i ++) {
+      section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)
+      all_sections = all_sections.concat(section)
   }
-  return timeline
-}
-
-// Create block for feed-aliens phase
-function create_feed_aliens_block(n_trials_per_alien, block_type="normal", TS_order=jsPsych.randomization.shuffle(TS_names)) {
-
-    // Create one section of trials for each TS in TS_order
-    all_sections = []
-    for (section_i = 0; section_i < TS_order.length; section_i ++) {
-        section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)
-        all_sections = all_sections.concat(section)
-    }
-
-    // Create start_new_season for mixed blocks
-    if (block_type == "mixed") {
-        start_new_season = {
-            type: "start_new_season",
-            show_clickable_nav: true,
-            pages: [
-                "<img class='background' src='img/alien_blank.png'>" +
-                "<p class='start_new_season'><i>This is the beginning of the chaotic season!</i></p>"
-            ]
-        }
-
-        // Randomize trials in mixed blocks
-        all_sections = jsPsych.randomization.shuffle(all_sections)
-        all_sections.unshift(start_new_season)  // add the start_new_season screen
-    }
-
-    // Return `all_sections`, the array of all trials
-    return all_sections
+  return all_sections
 }
 
 function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type) {
 
     // Figure out which TS and season will be shown in this section
     TS_name = TS_order[section_i]  // 0, 1, or 2
-    TS = TSs[TS_name]
+    TS = TSs[TS_name]  // as defined in define_TS.js
     season_name = season_names[TS_name]  // season_names = shuffle(["hot", "cold", "rainy"])
     if (block_type == "cloudy") {
         season_name = season_name.concat("_cloudy")
     }
 
-    // Create start_new_season for normal blocks and put at the beginning of `section`
+    // Create start_new_season (non-mixed blocks) and put at the beginning of `section`
     if (block_type != "mixed") {
         start_new_season = {
             type: "start_new_season",
@@ -151,7 +111,7 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
             ]
         }
         section = [start_new_season];
-    } else {
+    } else {  // if (block_type == "mixed")
         section = [];
     }
 

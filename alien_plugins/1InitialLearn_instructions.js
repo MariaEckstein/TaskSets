@@ -4,8 +4,8 @@ var get_subj_data = {
   type: "survey-text",
   questions: [
     "SubjID:",
-    "Date of birth (mm/dd/yy):",
-    "Today's date (mm/dd/yy):",
+    "Date of birth (please use format yyyy/mm/dd):",
+    "Today's date (please use format yyyy/mm/dd):",
     "Sex:",
     // "Occupation:",
     // "Highest degree (obtained or currently obtaining):"

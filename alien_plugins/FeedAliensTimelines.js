@@ -16,7 +16,6 @@ training_block = {
   timeline: training_timeline
 }
 
-// Create timeline for Initial Learn: x normal blocks with x-1 mixed blocks interleaved
 var phase1_initial_learn = {
     type: "feed-aliens",
     phase: "1InitialLearning",
@@ -27,8 +26,7 @@ var phase1_initial_learn = {
     timing_post_trial: ITI_duration,
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_phase1,
-                                          n_trials_per_alien=n_trials_per_alien_phase1,
-                                          interleave_mixed=true)
+                                          n_trials_per_alien=n_trials_per_alien_phase1)
 }
 
 // Create timeline for Cloudy Season: x cloudy blocks
@@ -43,7 +41,6 @@ var phase2_cloudy = {
   timeout_message: timeout_message,
   timeline: create_feed_aliens_timeline(n_blocks=n_blocks_cloudy,
                                         n_trials_per_alien=n_trials_per_alien_cloudy,
-                                        interleave_mixed=false,
                                         block_type="cloudy")
 }
 
@@ -58,8 +55,7 @@ var refresher_block_2 = {
     timing_post_trial: ITI_duration,
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_refreshers,
-                                          n_trials_per_alien=n_trials_per_alien_refreshers,
-                                          interleave_mixed=true)
+                                          n_trials_per_alien=n_trials_per_alien_refreshers)
 }
 
 var refresher_block_3 = {
@@ -72,8 +68,7 @@ var refresher_block_3 = {
     timing_post_trial: ITI_duration,
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_refreshers,
-                                          n_trials_per_alien=n_trials_per_alien_refreshers,
-                                          interleave_mixed=true)
+                                          n_trials_per_alien=n_trials_per_alien_refreshers)
 }
 
 // Create timeline for Rainbow Season: x rainbow blocks, without feedback
