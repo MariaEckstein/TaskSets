@@ -14,9 +14,9 @@ jsPsych.plugins["pick-aliens"] = (function() {
     pick-aliens requires the following variables:
     button_names: an array of two xyz_names (e.g., [xyz_names[0], xyz_names[1]])
       xyz_names can be one of:
-      season_names = shuffle(["hot", "cold", "rainy"])
-      item_names = shuffle(["bed", "umbrella", "plant"])
-      alien_names = shuffle(["alien1", "alien2", "alien3", "alien4"])
+      season_names = jsPsych.randomization.shuffle(["hot", "cold", "rainy"])
+      item_names = jsPsych.randomization.shuffle(["bed", "umbrella", "plant"])
+      alien_names = jsPsych.randomization.shuffle(["alien1", "alien2", "alien3", "alien4"])
       Also saved in the trial data (item_left_name, item_right_name, item_chosen_name)
     buttons: an array of two alien_buttons (e.g., [xyz_buttons[0], xyz_buttons[1]])
       xyz_buttons are xyz_names, translated into html, e.g.,
@@ -54,7 +54,7 @@ jsPsych.plugins["pick-aliens"] = (function() {
     var setTimeoutHandlers = [];
 
     // prepare the two buttons that will be shown
-    button_order = shuffle([0, 1])
+    button_order = jsPsych.randomization.shuffle([0, 1])
     l_button_html = trial.buttons[button_order[0]]
     r_button_html = trial.buttons[button_order[1]]
     l_button_name = trial.button_names[button_order[0]]

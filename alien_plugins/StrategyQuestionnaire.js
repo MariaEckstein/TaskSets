@@ -4,8 +4,7 @@ questionnaire_instructions =
   "<center><p>This questionnaire is the final part of the experiment. " +
   "You can <i>adjust the size of the text boxes</i> by pulling on the right bottom corner.</p>" +
   "<p><b>QUESTIONNAIRE</b></p>" +
-  "<p>You don't need to answer all questions if you don't want to. " +
-  "<i>Please still click Submit Answers at the bottom of the page because your data will not be saved otherwise.</i></p></center>"
+  "<i>Please click Submit Answers at the bottom of the page when you're done.</i></p></center>"
 quest1 =
   "<p>Recall the first part of this experiment in which seasons changed and you took care of 4 aliens.</p>" +
   "<p><i>How did you learn which items go with which aliens?</i><p>"
