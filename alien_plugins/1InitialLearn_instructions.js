@@ -103,7 +103,7 @@ instructions4 =
     "<p>How about an umbrella for catching cosmic rays? " +
     "In the game, you'll be able to <i>select an item using the keys 'j', 'k', and 'l'</i> on your keyboard. " +
     "'j' will select the left-most item , 'k' the middle one , and 'l' the right one .</p>" +
-    "<p>Let's pretend you pressed 'k' and offered the alien the red umbrella - click 'Next' to see what happens.</p>" +
+    "<p>Let's pretend you pressed 'k' and selected the middle option - click 'Next' to see what happens.</p>" +
   "</div>" +
   response_buttons +
   "</center>"
