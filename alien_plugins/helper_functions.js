@@ -76,7 +76,9 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='n
         type: "start_new_season",
         show_clickable_nav: true,
         pages: [
-          "<p class='start_new_season'><i>A new chaotic season has begun!</i></p>"
+          "<p class='start_new_season'><i>A new chaotic season has begun!</i></p>"+
+          "<p>In the chaotic season, the weather changes very quickly. </p>"+
+          "<p>It could be rainy one day, and then then cloudy the next. </p>"
         ]
       }
     all_sections.unshift(start_new_season)
