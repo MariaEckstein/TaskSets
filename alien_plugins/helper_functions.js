@@ -63,9 +63,9 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='n
     all_sections = []
     for (i = 0; i < n_trials_per_alien; i ++) {
       section = []
-      for (section_i = 0; section_i < 3; section_i ++) {
+      for (section_i = 0; section_i < season_names.length; section_i ++) {  // loop over seasons to get each item once in each season
         section = section.concat(
-          create_feed_aliens_section(section_i, [0, 1, 2], 1, block_type))  // create 1 trial per alien per TS -> 12 trials total
+          create_feed_aliens_section(section_i, [0, 1, 2], 1, block_type))  // create 1 trial per alien per season -> 12 trials total
       }
       section = jsPsych.randomization.shuffle(section)
       all_sections = all_sections.concat(section)
@@ -76,9 +76,7 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='n
         type: "start_new_season",
         show_clickable_nav: true,
         pages: [
-          "<p class='start_new_season'><i>A new chaotic season has begun!</i></p>"+
-          "<p>In the chaotic season, the weather changes very quickly. </p>"+
-          "<p>It could be rainy one day, and then then cloudy the next. </p>"
+          "<p class='start_new_season'><i>A new chaotic season has begun!</i></p>"
         ]
       }
     all_sections.unshift(start_new_season)
