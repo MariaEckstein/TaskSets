@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.2.19)  1 FEB 2018 19:24
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.2.19)  11 MAY 2018 12:02
 entering extended mode
 **./main.tex
 (main.tex
@@ -230,48 +230,45 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 33.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 40.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 44.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 46.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 50.
 
 
-LaTeX Warning: Citation `collins_reasoning_2012' undefined on input line 50.
+LaTeX Warning: Citation `miller_integrative_2001' undefined on input line 52.
 
 
-LaTeX Warning: Citation `donoso_foundations_2014' undefined on input line 52.
+LaTeX Warning: Citation `collins_reasoning_2012' undefined on input line 54.
 
 
-LaTeX Warning: Citation `marr_vision:_1982' undefined on input line 52.
+LaTeX Warning: Citation `donoso_foundations_2014' undefined on input line 56.
 
 
-LaTeX Warning: Citation `collins_cognitive_2013' undefined on input line 54.
+LaTeX Warning: Citation `collins_cognitive_2013' undefined on input line 58.
 
 
-Underfull \hbox (badness 3713) in paragraph at lines 54--55
+Underfull \hbox (badness 3713) in paragraph at lines 58--59
 []\OT1/ptm/m/n/10 Collins & Frank (2012) sug-gested a hierarchically-
  []
 
 <images/fig1.png, id=1, 1030.60031pt x 612.78937pt>
 File: images/fig1.png Graphic file (type png)
  <use images/fig1.png>
-Package pdftex.def Info: images/fig1.png used on input line 58.
+Package pdftex.def Info: images/fig1.png used on input line 62.
 (pdftex.def)             Requested size: 243.91125pt x 145.0247pt.
 
 
-LaTeX Warning: Citation `sutton_reinforcement_2017' undefined on input line 64.
+LaTeX Warning: Citation `sutton_reinforcement_2017' undefined on input line 68.
 
 
 
-LaTeX Warning: Citation `tricomi_value_2015' undefined on input line 64.
+LaTeX Warning: Citation `daw_model-based_2011' undefined on input line 68.
 
 
-LaTeX Warning: Citation `daw_model-based_2011' undefined on input line 64.
+LaTeX Warning: Citation `schultz_neural_1997' undefined on input line 68.
 
 
-LaTeX Warning: Citation `schultz_neural_1997' undefined on input line 64.
-
-
-LaTeX Warning: Citation `alexander_parallel_1986' undefined on input line 64.
+LaTeX Warning: Citation `alexander_parallel_1986' undefined on input line 68.
 
 [1{C:/Users/maria/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
 
@@ -279,44 +276,46 @@ LaTeX Warning: Citation `alexander_parallel_1986' undefined on input line 64.
 
  <./images/fig1.png>]
 
-LaTeX Warning: Citation `badre_mechanisms_2012' undefined on input line 70.
+LaTeX Warning: Citation `badre_mechanisms_2012' undefined on input line 74.
 
 
-LaTeX Warning: Citation `frank_mechanisms_2012' undefined on input line 70.
+LaTeX Warning: Citation `frank_mechanisms_2012' undefined on input line 74.
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 75.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 79.
 <images/fig2.png, id=11, 774.2526pt x 409.53pt>
 File: images/fig2.png Graphic file (type png)
  <use images/fig2.png>
-Package pdftex.def Info: images/fig2.png used on input line 92.
+Package pdftex.def Info: images/fig2.png used on input line 96.
 (pdftex.def)             Requested size: 243.91125pt x 129.00888pt.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 106.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 110.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 106.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 110.
  [2 <./images/fig2.png>] [3] <images/fig4.png, id=22, 570.4512pt x 241.3818pt>
 File: images/fig4.png Graphic file (type png)
 
 <use images/fig4.png>
-Package pdftex.def Info: images/fig4.png used on input line 208.
+Package pdftex.def Info: images/fig4.png used on input line 214.
 (pdftex.def)             Requested size: 243.91125pt x 103.2102pt.
 
 
-LaTeX Warning: Citation `frank_by_2004' undefined on input line 254.
+LaTeX Warning: Citation `frank_by_2004' undefined on input line 264.
 
 [4 <./images/fig4.png>]
-Underfull \hbox (badness 1303) in paragraph at lines 305--305
+Underfull \hbox (badness 1303) in paragraph at lines 313--313
 []\OT1/ptm/m/n/10 Table 5: Lin-ear mixed-effects re-gres-sion pre-dict-ing TS
  []
 
 <images/fig6.png, id=28, 1505.625pt x 903.375pt>
 File: images/fig6.png Graphic file (type png)
  <use images/fig6.png>
-Package pdftex.def Info: images/fig6.png used on input line 324.
+Package pdftex.def Info: images/fig6.png used on input line 332.
 (pdftex.def)             Requested size: 243.91125pt x 146.33492pt.
  [5 <./images/fig6.png>]
-No file main.bbl.
+Underfull \vbox (badness 1803) has occurred while \output is active []
+
+ (main.bbl)
 [6] (main.aux)
 
 LaTeX Warning: There were undefined references.
@@ -324,9 +323,9 @@ LaTeX Warning: There were undefined references.
  ) 
 Here is how much of TeX's memory you used:
  2353 strings out of 493333
- 32480 string characters out of 3139194
- 102121 words of memory out of 3000000
- 5843 multiletter control sequences out of 15000+200000
+ 32468 string characters out of 3139194
+ 103131 words of memory out of 3000000
+ 5841 multiletter control sequences out of 15000+200000
  35581 words of font info for 73 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  39i,10n,25p,1277b,284s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -337,7 +336,7 @@ pe1/urw/courier/ucrr8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/symbol/
 usyr.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Prog
 ram Files/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Program Files/MiKTeX 
 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (6 pages, 757196 bytes).
+Output written on main.pdf (6 pages, 758672 bytes).
 PDF statistics:
  59 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

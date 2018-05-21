@@ -9,25 +9,35 @@ output: html_document
 library("ggplot2"); library("plyr"); library("lme4"); library("reshape2")
 theme_set(theme_bw())
 
-run_on_simulated_data = F
-gg_save = F
+# TDs
+# competition phase: check if RTs are faster for context-season and for season choices, because Q(s,a) and Q(c) are traditional RL things, and Q(a) and Q(s) are not.
+
+run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
+gg_save = T
 run_regression = F
 exclude_participants = T
 n_aliens = 4
-feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refresher3")
-if (!run_on_simulated_data) {
-  n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
+n_seasons = 3
+n_blocks = 7
+n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
+n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
+subj_value_phase = "Refresher2"
+if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
   plot_dir = file.path(data_dir, "plots")
 } else {
-  n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)  # data.frame(a = 12, b = 9, x = 4, d = 3)
-  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienSimulations/"
-  patt = "AL_hier"
-  plot_dir = file.path(data_dir, paste0(patt, "plots"))
+  n_trials = data.frame(a = 13, b = 10, x = 13, d = 13)
+  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/"
+  patt = "sim_5...csv"  # "alien_..csv" -> sID1-9, "alien_...csv" -> sID10-99, "alien_....csv" -> sID100-999
+  plot_dir = file.path(data_dir, "plots")
+  simulated_keep_columns = c("sID", "trial_index", "phase", "TS", "context", "sad_alien", "item_chosen", "reward", "correct", "block.type", "trial_type", "learning_style", "mix_probs", "fit_pars", "RT", "Q_TS", "Q_action", "p_TS", "p_action")
 }
-colnames(n_trials) = paste("X", feed_aliens_phases, sep = "")
+feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refresher3")
+colnames(n_trials) = paste0("X", feed_aliens_phases)
+colnames(n_blocks) = paste0("X", feed_aliens_phases)
 n_trials
+n_blocks
 if (!dir.exists(plot_dir)) {
   dir.create(plot_dir)
 }
@@ -41,8 +51,8 @@ demo_row = 1
 
 for (filename in filenames) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "NaN", "-1"))
-  
-  if (!run_on_simulated_data) {
+
+  if (run_on == "humans") {
     # Get demographics
     demos = gsub("[^A-Za-z0-9/]", "", as.character(subj_file$responses)[1])  # get rid of all funny characters
     Q0split = strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1]
@@ -80,17 +90,35 @@ for (filename in filenames) {
     subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
 
   } else {
-    # Add season column column to subj file
-    subj_file$TS = NULL
-    colnames(subj_file)[colnames(subj_file) == "contexts"] = "TS"
+    for (col in simulated_keep_columns) {
+      if (! col %in% colnames(subj_file)) {
+        subj_file[col] = NA
+      }
+    }
+    # Subset important columns
+    subj_file = subset(subj_file, select = simulated_keep_columns)
+    # Rename "TS" column to "selected_TS"
+    colnames(subj_file)[colnames(subj_file) == "TS"] = "selected_TS"
+    # Rename "context" column to "TS"
+    colnames(subj_file)[colnames(subj_file) == "context"] = "TS"
+    # Add "season" column (with hot, cold, rainy)
     TS_seasons = data.frame(TS = 0:2, season = sample(c("hot", "cold", "rainy")))
-    subj_file = merge(subj_file, TS_seasons)
+    subj_file = merge(subj_file, TS_seasons, all.x = T)
     # Add sad_alien_name column
     alien_ids_names = data.frame(sad_alien = 0:3, sad_alien_name = sample(paste0("alien", 0:3)))
-    subj_file = merge(subj_file, alien_ids_names)
+    subj_file = merge(subj_file, alien_ids_names, all.x = T)
     # Add item_chosen_name column
     item_ids_names = data.frame(item_chosen = 0:2, item_chosen_name = sample(c("bed", "plant", "umbrella")))
-    subj_file = merge(subj_file, item_ids_names)
+    subj_file = merge(subj_file, item_ids_names, all.x = T)
+    # # Add phase column
+    # if (is.na(subj_file$phase[0])) {
+    #   n_trials_total = 0
+    #   for (phas in paste0("X", feed_aliens_phases[feed_aliens_phases != "2CloudySeason"])) {
+    #     n_trials_phase = as.numeric(n_seasons * n_aliens * n_blocks[phas] * n_trials[phas])
+    #     subj_file$phase[subj_file$trial_index > n_trials_total] = gsub("X", "", phas)
+    #     n_trials_total = n_trials_total + n_trials_phase
+    #   }
+    # }
   }
 
   # Add trial column: counter within blocks
@@ -100,7 +128,8 @@ for (filename in filenames) {
     if (is.na(subj_file$season[row])) {
       trial = NA
     } else {
-      new_season = ifelse(!run_on_simulated_data, is.na(subj_file$season[row-1]), subj_file$season[row] != subj_file$season[row-1])
+      new_season_sim = (subj_file$season[row] != subj_file$season[row-1]) & !is.na(subj_file$season[row] != subj_file$season[row-1])
+      new_season = ifelse(run_on != "simulations", is.na(subj_file$season[row-1]), new_season_sim)
       if (new_season) {
         trial = 1
       } else {
@@ -110,7 +139,8 @@ for (filename in filenames) {
     subj_file$trial[row] = trial
   }
   
-  # Add alien_trial and repetition columns (alien_trial: how often has this alien been presented in this season?; repetition: How often has this season been presented?)
+  # Add alien_trial and repetition columns (alien_trial: how often has this alien been presented in this season? repetition: How often has this season been presented?)
+  subj_file = subj_file[order(subj_file$trial_index, subj_file$phase, subj_file$sad_alien, subj_file$TS),]
   subj_file$alien_trial = NA
   subj_file$repetition = NA
   # Create counters for seasons and alien-season combinations
@@ -123,29 +153,50 @@ for (filename in filenames) {
                                     hot_cloudy = rep(0, n_aliens), cold_cloudy = rep(0, n_aliens), rainy_cloudy = rep(0, n_aliens),
                                     rainbow = rep(0, n_aliens))
 
-  for (row in 1:nrow(subj_file)) {
-    sad_alien = subj_file$sad_alien[row] + 1  # Python starts at 0, I start at 1
-    block.type = subj_file$block.type[row]
-    good_block_type = is.na(block.type) | block.type != "mixed" | block.type == 0
-    if (!is.na(sad_alien) & good_block_type) {  # trials in mixed blocks are not counted
-      season = as.character(subj_file$season[row])
-      # Update counters, add new count to subj_file
-      if (row > 1) {
-        new_season = ifelse(!run_on_simulated_data, is.na(subj_file$season[row-1]), subj_file$season[row] != subj_file$season[row-1])
-        if (new_season) {
+  if (run_on == "humans") {
+    for (row in 1:nrow(subj_file)) {
+      sad_alien = subj_file$sad_alien[row] + 1  # Python starts at 0, I start at 1
+      block.type = subj_file$block.type[row]
+      good_block_type = is.na(block.type) | block.type != "mixed" | block.type == 0
+      if (!is.na(sad_alien) & good_block_type) {  # trials in mixed blocks are not counted
+        season = as.character(subj_file$season[row])
+        # Update counters, add new count to subj_file
+        if (row > 1) {
+          new_season = is.na(subj_file$season[row-1])
+          if (new_season) {
+            season_counter[season] = season_counter[season] + 1
+          }
+        }
+        subj_file$repetition[row] = season_counter[season][[1]]
+        alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
+        subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
+      }
+    }
+  } else if (run_on == "simulations") {
+    for (row in 1:nrow(subj_file)) {
+      sad_alien = subj_file$sad_alien[row] + 1  # Python starts at 0, I start at 1
+      if (!is.na(sad_alien)) {
+        season = as.character(subj_file$season[row])
+        # Update counters, add new count to subj_file
+        if (row == 1) {
+          new_season = T
+        } else {
+          new_season = subj_file$season[row] != subj_file$season[row-1]
+        }
+        if (new_season & !is.na(new_season)) {
           season_counter[season] = season_counter[season] + 1
         }
+        subj_file$repetition[row] = season_counter[season][[1]]
+        alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
+        subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
       }
-      subj_file$repetition[row] = season_counter[season][[1]]
-      alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
-      subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
     }
   }
   all_files = rbind(all_files, subj_file)
 }
 
 # More beautification
-if (run_on_simulated_data) {
+if (run_on == "simulations") {
   all_files$rt = 1
   if (is.null(all_files$phase)) {
     all_files$phase = "1InitialLearning"
@@ -159,6 +210,8 @@ if (run_on_simulated_data) {
   all_files$block.type[all_files$phase == "0Training"] = "normal"
   demographics
 }
+all_files$phase = factor(all_files$phase)
+all_files = subset(all_files, !is.na(phase))
 all_files$subjID = as.numeric(as.character(all_files$subjID))
 all_files$block.type = factor(all_files$block.type)
 all_files$sad_alien = factor(all_files$sad_alien)
@@ -167,6 +220,7 @@ all_files$time_elapsed = all_files$points0 = all_files$points1 = all_files$point
 ```
 ```{r Show all_files and make test plots to check that everything looks good}
 all_files
+summary(all_files)
 
 # Make sure that the dataset has legit responses for each phase
 ggplot(all_files, aes(trial_index, item_chosen, color = phase)) +
@@ -174,11 +228,29 @@ ggplot(all_files, aes(trial_index, item_chosen, color = phase)) +
   geom_point()
 
 # Make sure that participants are rewarded according to a legit TS in a specific context ("rainiy")
-ddply(subset(all_files, season = "rainy"), .(subjID, TS, sad_alien, item_chosen), summarize,
+ddply(subset(all_files, season == "rainy" & ACC == 1), .(subjID, TS, sad_alien, item_chosen), summarize,
       rew = mean(reward, na.rm = T))
 ```
+```{r Read in simulated agents and check generated versus recovered Qs}
+if (run_on %in% c("gen_rec", "simulations")) {
+  
+  # Check if TS values and action values are correlated for the current TS and current action
+  gg_Q_high_low = ggplot(all_files, aes(Q_TS, Q_action, color = subjID, shape = mix_probs)) +
+    geom_point() +
+    facet_grid( ~ learning_style)
+  gg_p_high_low = gg_Q_high_low + aes(p_TS, p_action)
+  
+  # Check if TS values and action values are correlated for any TS and any action
+  
+  
+  if (gg_save) {
+    ggsave(file.path(plot_dir, "gg_Q_high_low.png"), gg_Q_high_low)
+    ggsave(file.path(plot_dir, "gg_p_high_low.png"), gg_p_high_low)
+  }
+}
+```
 ```{r Exclude subjects who don't reach criterion in training block and plot performance and missed trials}
-if (!run_on_simulated_data) {
+if (run_on == "humans") {
   subset(all_files, season == "training")
   perf_dat = ddply(subset(all_files, season == "training" & alien_trial %in% 7:10),
                    .(subjID), summarize,
@@ -220,13 +292,17 @@ overall_learning_curves =
 
 overall_RTs = overall_learning_curves + aes(trial_index, rt, color = phase) + labs(x = "Trial", y = "Response time (msec)")
 
+if (run_on == "gen_rec") {
+  overall_learning_curves =
+    overall_learning_curves + aes(color = mix_probs, group = mix_probs) + facet_grid(~ learning_style)
+}
 if (gg_save) {
   ggsave(file.path(plot_dir, "1overall_learning_curves.png"), overall_learning_curves, width = 25, height = 3)
   ggsave(file.path(plot_dir, "1overall_RTs.png"), overall_RTs, width = 25, height = 3)
 }
 ```
 ```{r demographics}
-# if (!run_on_simulated_data) {
+# if (run_on != "simulations") {
 #   demographics$age = with(demographics, as.Date(testing_date) - as.Date(dob))
 #   nrow(demographics)  # number of participants
 #   demographics = subset(demographics, subjID %in% unique(all_files$subjID))
@@ -266,7 +342,7 @@ alien_TS_obj$value_obj = c(6, 4, 5, 10,
 alien_TS_obj$id = apply(alien_TS_obj[,c("sad_alien", "TS")], 1, paste, collapse = "")
 
 # Put all the average rewards into one dataframe
-dat = subset(all_files, phase %in% c("1InitialLearning", "Refresher2", "Refresher3") & !is.na(item_chosen) & block.type != "mixed")  # this includes the MIXED blocks!!
+dat = subset(all_files, phase %in% c("1InitialLearning", "Refresher2", "Refresher3") & !is.na(item_chosen) & block.type != "mixed")
 
 alien_values = get_values_and_perf(dat, "sad_alien_name", "sad_alien", "alien")
 alien_values$value_obj = 5
@@ -284,7 +360,7 @@ all_values_perf = rbind(alien_values, TS_values, item_values, season_alien_value
 all_values_perf
 ```
 ```{r Create pick_aliens data}
-if (!run_on_simulated_data) {
+if (run_on != "gen_rec") {
   
   # Subset all_files to get pick_aliens (phase 3)
   pick_aliens = subset(all_files, trial_type == "pick-aliens",
@@ -362,6 +438,7 @@ if (!run_on_simulated_data) {
 }
 ```
 ```{r Plot competition phase}
+if (run_on != "simulations") {
 # Plot difference between chosen and unchosen item in each trial, in terms of subj. value, obj. value, and performance
 gg_pick_aliens_value_subj_ = ggplot(pick_aliens, aes(trial_index, value_subj_diff, color = assess)) +
   geom_point() +
@@ -426,8 +503,10 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "4gg_pick_aliens_perc_subj.png"), gg_pick_aliens_perc_subj, width = 4, height = 3)
   ggsave(file.path(plot_dir, "4gg_pick_aliens_perc_obj.png"), gg_pick_aliens_perc_obj, width = 4, height = 3)
 }
+}
 ```
 ```{r Plot learned values and true objective values}
+## TD FOR SIMULATED DATA: TS MEANS SOMETHING ELSE IN THESE DATA
 # Values for aliens, items, TS (subj & obj)
 value_plot_ids = ggplot(subset(all_values_perf, assess != "alien-same-season"), aes(assess, value_subj, fill = id)) +
   stat_summary(fun.data = "mean_se", geom = "bar", position = "dodge") +
@@ -463,7 +542,7 @@ if (gg_save) {
 feed_aliens = subset(all_files, trial_type == "feed-aliens" & block.type != "mixed")
 
 ## Add season-alien values (subj. and obj.)
-all_values_perf_sub = subset(all_values_perf, phase == "Refresher2" & assess == "alien-same-season")
+all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "alien-same-season")
 all_values_perf_sub$TS = substr(all_values_perf_sub$id, 2, 2)
 all_values_perf_sub$sad_alien = substr(all_values_perf_sub$id, 1, 1)
 all_values_perf_sub = subset(all_values_perf_sub, select = c("subjID", "TS", "sad_alien", "value_subj", "value_obj"))
@@ -474,7 +553,7 @@ feed_aliens = merge(feed_aliens, all.x = T,
                     by = c("subjID", "sad_alien", "TS"))
 
 ## Add TS values (subj. and obj.)
-all_values_perf_sub = subset(all_values_perf, phase == "Refresher2" & assess == "season")
+all_values_perf_sub = subset(all_values_perf, phase ==subj_value_phase & assess == "season")
 colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("id", "value_subj", "value_obj")] = c("TS", "TS_value_subj", "TS_value_obj")
 
 feed_aliens = merge(feed_aliens, all.x = T,
@@ -489,7 +568,6 @@ for (phas in feed_aliens_phases) {
   # Let each phase start at alien_trial == 1
   subs = feed_aliens$phase == phas & !is.na(feed_aliens$alien_trial)
   feed_aliens[subs, "alien_trial"] = feed_aliens[subs, "alien_trial"] - feed_aliens[subs, "alien_trial"][1] + 1
-  feed_aliens[subs,]
   
   # Add alien_trial_sum: starts at 1 every time a TS is repeated
   feed_aliens[subs, "alien_trial_sum"] = feed_aliens[subs, "alien_trial"]
@@ -1027,7 +1105,7 @@ mixed_block = merge(mixed_block, all.x = T,
                     by = c("subjID", "sad_alien", "TS"))
 
 # Add TS values (subj. and obj.)
-all_values_perf_sub = subset(all_values_perf, phase == "Refresher2" & assess == "season")
+all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "season")
 colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("id", "value_subj", "value_obj")] = c("TS", "TS_value_subj", "TS_value_obj")
 
 mixed_block = merge(mixed_block, all.x = T,
