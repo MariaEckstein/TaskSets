@@ -5,33 +5,34 @@ date: "July 19, 2017"
 output: html_document
 ---
 
-```{r Set parameters, load packages, etc.}
+# Preprocessing
+
+```{r Set parameters load packages etc.}
 library("ggplot2"); library("plyr"); library("lme4"); library("reshape2")
 theme_set(theme_bw())
 
 # TDs
-# competition phase: check if RTs are faster for context-season and for season choices, because Q(s,a) and Q(c) are traditional RL things, and Q(a) and Q(s) are not.
+# line 61ff.!
+# Figure out what to do with item_chosen in competition phase; change humans, change simulations, change both? how?
 
 run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
 gg_save = T
-run_regression = F
+run_regression = T
 exclude_participants = T
 n_aliens = 4
 n_seasons = 3
-n_blocks = 7
 n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
+wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "trial_type", "learning_style", "mix_probs", "fit_pars", "RT", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
 if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
   plot_dir = file.path(data_dir, "plots")
 } else {
-  n_trials = data.frame(a = 13, b = 10, x = 13, d = 13)
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/"
-  patt = "sim_5...csv"  # "alien_..csv" -> sID1-9, "alien_...csv" -> sID10-99, "alien_....csv" -> sID100-999
+  patt = "sim_5...csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   plot_dir = file.path(data_dir, "plots")
-  simulated_keep_columns = c("sID", "trial_index", "phase", "TS", "context", "sad_alien", "item_chosen", "reward", "correct", "block.type", "trial_type", "learning_style", "mix_probs", "fit_pars", "RT", "Q_TS", "Q_action", "p_TS", "p_action")
 }
 feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refresher3")
 colnames(n_trials) = paste0("X", feed_aliens_phases)
@@ -43,180 +44,232 @@ if (!dir.exists(plot_dir)) {
 }
 perf_criterion = 0.5  # participants who perform worse that that at the end of training (last 4 trials per alien) are excluded
 ```
-```{r Read in data}
+```{r Read in all data}
 filenames = list.files(data_dir, pattern = patt)
 all_files = data.frame()
-demographics = data.frame()
-demo_row = 1
 
 for (filename in filenames) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "NaN", "-1"))
-
-  if (run_on == "humans") {
-    # Get demographics
-    demos = gsub("[^A-Za-z0-9/]", "", as.character(subj_file$responses)[1])  # get rid of all funny characters
-    Q0split = strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1]
-    Q1split = strsplit(strsplit(demos, "Q1")[[1]][2], "Q2")[[1]][1]
-    Q1split = gsub("[^0-9/]", "", Q1split)  # remove non-numbers
-    Q2split = strsplit(strsplit(demos, "Q2")[[1]][2], "Q3")[[1]][1]
-    Q2split = gsub("[^0-9/]", "", Q2split)  # remove non-numbers
-    Q3split = strsplit(demos, "Q3")[[1]][2]
-    
-    # Subj ID & sex
-    subjID = as.numeric(Q0split)
-    demographics[demo_row, "subjID"] = subjID
-    demographics[demo_row, "sex"] = Q3split
-    
-    # Date of birth (year, month, day is all wrong!!! let Lucy fix it and then rewrite!)
-    month = as.numeric(strsplit(Q1split, "/")[[1]][1])
-    day = as.numeric(strsplit(Q1split, "/")[[1]][2])
-    year = as.numeric(strsplit(Q1split, "/")[[1]][3])
-    if (nchar(year) == 2) {
-      year = paste("19", year, sep = "")
-    }
-    demographics[demo_row, "dob"] = paste(year, month, day, sep = "-")
-    
-    # Testing date
-    month = as.numeric(strsplit(Q2split, "/")[[1]][1])
-    day = as.numeric(strsplit(Q2split, "/")[[1]][2])
-    year = as.numeric(strsplit(Q2split, "/")[[1]][3])
-    if (nchar(year) == 2) {
-      year = paste("20", year, sep = "")
-    }
-    demographics[demo_row, "testing_date"] = paste(year, month, day, sep = "-")
-    demo_row = demo_row + 1
-    
-    subj_file$subjID = subjID
-    subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
-
-  } else {
-    for (col in simulated_keep_columns) {
-      if (! col %in% colnames(subj_file)) {
-        subj_file[col] = NA
-      }
-    }
-    # Subset important columns
-    subj_file = subset(subj_file, select = simulated_keep_columns)
-    # Rename "TS" column to "selected_TS"
-    colnames(subj_file)[colnames(subj_file) == "TS"] = "selected_TS"
-    # Rename "context" column to "TS"
-    colnames(subj_file)[colnames(subj_file) == "context"] = "TS"
-    # Add "season" column (with hot, cold, rainy)
-    TS_seasons = data.frame(TS = 0:2, season = sample(c("hot", "cold", "rainy")))
-    subj_file = merge(subj_file, TS_seasons, all.x = T)
-    # Add sad_alien_name column
-    alien_ids_names = data.frame(sad_alien = 0:3, sad_alien_name = sample(paste0("alien", 0:3)))
-    subj_file = merge(subj_file, alien_ids_names, all.x = T)
-    # Add item_chosen_name column
-    item_ids_names = data.frame(item_chosen = 0:2, item_chosen_name = sample(c("bed", "plant", "umbrella")))
-    subj_file = merge(subj_file, item_ids_names, all.x = T)
-    # # Add phase column
-    # if (is.na(subj_file$phase[0])) {
-    #   n_trials_total = 0
-    #   for (phas in paste0("X", feed_aliens_phases[feed_aliens_phases != "2CloudySeason"])) {
-    #     n_trials_phase = as.numeric(n_seasons * n_aliens * n_blocks[phas] * n_trials[phas])
-    #     subj_file$phase[subj_file$trial_index > n_trials_total] = gsub("X", "", phas)
-    #     n_trials_total = n_trials_total + n_trials_phase
-    #   }
-    # }
-  }
-
-  # Add trial column: counter within blocks
-  subj_file$trial = NA  # trial within block / season
-  trial = NA
-  for (row in 2:nrow(subj_file)) {
-    if (is.na(subj_file$season[row])) {
-      trial = NA
-    } else {
-      new_season_sim = (subj_file$season[row] != subj_file$season[row-1]) & !is.na(subj_file$season[row] != subj_file$season[row-1])
-      new_season = ifelse(run_on != "simulations", is.na(subj_file$season[row-1]), new_season_sim)
-      if (new_season) {
-        trial = 1
-      } else {
-        trial = trial + 1
-      }
-    }
-    subj_file$trial[row] = trial
-  }
-  
-  # Add alien_trial and repetition columns (alien_trial: how often has this alien been presented in this season? repetition: How often has this season been presented?)
-  subj_file = subj_file[order(subj_file$trial_index, subj_file$phase, subj_file$sad_alien, subj_file$TS),]
-  subj_file$alien_trial = NA
-  subj_file$repetition = NA
-  # Create counters for seasons and alien-season combinations
-  season_counter = data.frame(training = 0,
-                              hot = 0, cold = 0, rainy = 0,
-                              hot_cloudy = 0, cold_cloudy = 0, rainy_cloudy = 0,
-                              rainbow = 0)
-  alien_season_counter = data.frame(training = rep(0, n_aliens),
-                                    hot = rep(0, n_aliens), cold = rep(0, n_aliens), rainy = rep(0, n_aliens),
-                                    hot_cloudy = rep(0, n_aliens), cold_cloudy = rep(0, n_aliens), rainy_cloudy = rep(0, n_aliens),
-                                    rainbow = rep(0, n_aliens))
-
-  if (run_on == "humans") {
-    for (row in 1:nrow(subj_file)) {
-      sad_alien = subj_file$sad_alien[row] + 1  # Python starts at 0, I start at 1
-      block.type = subj_file$block.type[row]
-      good_block_type = is.na(block.type) | block.type != "mixed" | block.type == 0
-      if (!is.na(sad_alien) & good_block_type) {  # trials in mixed blocks are not counted
-        season = as.character(subj_file$season[row])
-        # Update counters, add new count to subj_file
-        if (row > 1) {
-          new_season = is.na(subj_file$season[row-1])
-          if (new_season) {
-            season_counter[season] = season_counter[season] + 1
-          }
-        }
-        subj_file$repetition[row] = season_counter[season][[1]]
-        alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
-        subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
-      }
-    }
-  } else if (run_on == "simulations") {
-    for (row in 1:nrow(subj_file)) {
-      sad_alien = subj_file$sad_alien[row] + 1  # Python starts at 0, I start at 1
-      if (!is.na(sad_alien)) {
-        season = as.character(subj_file$season[row])
-        # Update counters, add new count to subj_file
-        if (row == 1) {
-          new_season = T
-        } else {
-          new_season = subj_file$season[row] != subj_file$season[row-1]
-        }
-        if (new_season & !is.na(new_season)) {
-          season_counter[season] = season_counter[season] + 1
-        }
-        subj_file$repetition[row] = season_counter[season][[1]]
-        alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
-        subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
-      }
-    }
-  }
   all_files = rbind(all_files, subj_file)
 }
+subj_file
+all_files
+```
+```{r Get simulated data into the right forma}
+# Rename TS-related columns
+colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
+colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
+colnames(all_files)[colnames(all_files) == "context"] = "TS"
 
-# More beautification
-if (run_on == "simulations") {
-  all_files$rt = 1
-  if (is.null(all_files$phase)) {
-    all_files$phase = "1InitialLearning"
+# Remove unwanted rows
+all_files = subset(all_files, phase != 0)
+
+# Add season and xyz_name columns
+all_files$item_chosen[all_files$phase != '3PickAliens'] = as.numeric(as.character(all_files$item_chosen[all_files$phase != '3PickAliens']))
+new_all_files = data.frame()
+for (subjIDi in unique(all_files$subjID)) {
+  
+  subj_feedaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase != "3PickAliens")
+  subj_pickaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase == "3PickAliens")
+  subj_file_feed = all_files[subj_feedaliens_rows,]
+  subj_file_pick = all_files[subj_pickaliens_rows,]
+  
+  TS_seasons = data.frame(TS = c(0, 1, 2, 4), season = c(sample(c("hot", "cold", "rainy")), "rainbow"))
+  alien_ids_names = data.frame(sad_alien = 0:3, sad_alien_name = sample(paste0("alien", 0:3)))
+  item_ids_names = data.frame(item = 0:2, item_name = sample(c("bed", "plant", "umbrella")))
+  
+  # Add season and xyz_name columns (feed-aliens phases)
+  subj_file_feed = merge(subj_file_feed, TS_seasons, all.x = T)
+  subj_file_feed = merge(subj_file_feed, alien_ids_names, all.x = T)
+  for (item in c("item_left", "item_right", "item_chosen")) {
+    subj_file_feed = merge(subj_file_feed, item_ids_names, by.x = item, by.y = "item", all.x = T)
+    colnames(subj_file_feed)[colnames(subj_file_feed) == "item_name"] = paste0(item, "_name")
   }
-  colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
-} else {
-  all_files$TS = as.character(all_files$TS)
-  all_files$TS[is.na(all_files$TS)] = as.character(all_files$season[is.na(all_files$TS)])  # if column TS is NA, replace it with season column
-  all_files$TS = factor(all_files$TS)
-  all_files$reward[is.na(all_files$key)] = 0
-  all_files$block.type[all_files$phase == "0Training"] = "normal"
-  demographics
+  
+  # Add xyz_name columns (pick-aliens phase)
+  subj_file_pick_items = subset(subj_file_pick, assess == "item")
+  subj_file_pick_aliens = subset(subj_file_pick, assess == "alien")
+  subj_file_pick_seasons = subset(subj_file_pick, assess == "season")
+  subj_file_pick_alienseasons = subset(subj_file_pick, assess == "alien-same-season")
+  
+  for (item in c("item_left", "item_right", "item_chosen")) {
+    subj_file_pick_items = merge(subj_file_pick_items, item_ids_names, by.x = item, by.y = "item", all.x = T)
+    colnames(subj_file_pick_items)[colnames(subj_file_pick_items) == "item_name"] = paste0(item, "_name")
+  }
+  
+  for (item in c("item_left", "item_right", "item_chosen")) {
+    subj_file_pick_aliens = merge(subj_file_pick_aliens, alien_ids_names, by.x = item, by.y = "sad_alien", all.x = T)
+    colnames(subj_file_pick_aliens)[colnames(subj_file_pick_aliens) == "sad_alien_name"] = paste0(item, "_name")
+  }
+
+  for (item in c("item_left", "item_right", "item_chosen")) {
+    subj_file_pick_seasons = merge(subj_file_pick_seasons, TS_seasons, by.x = item, by.y = "TS", all.x = T)
+    colnames(subj_file_pick_seasons)[colnames(subj_file_pick_seasons) == "season"] = paste0(item, "_name")
+  }
+
+  for (item in c("item_left", "item_right", "item_chosen")) {
+    subj_file_pick_alienseasons$TS_ = substr(subj_file_pick_alienseasons[,item], 2, 2)
+    subj_file_pick_alienseasons$sad_alien_ = substr(subj_file_pick_alienseasons[,item], 5, 5)
+
+    subj_file_pick_alienseasons = merge(subj_file_pick_alienseasons, TS_seasons, by.x = "TS_", by.y = "TS", all.x = T)
+    colnames(subj_file_pick_alienseasons)[colnames(subj_file_pick_alienseasons) == "season"] = paste0(item, "_name_season")
+    subj_file_pick_alienseasons = merge(subj_file_pick_alienseasons, alien_ids_names, by.x = "sad_alien_", by.y = "sad_alien", all.x = T)
+    colnames(subj_file_pick_alienseasons)[colnames(subj_file_pick_alienseasons) == "sad_alien_name"] = paste0(item, "_name_alien")
+
+    subj_file_pick_alienseasons[,paste0(item, "_name")] = paste0(subj_file_pick_alienseasons[,paste0(item, "_name_alien")], subj_file_pick_alienseasons[,paste0(item, "_name_season")])
+    subj_file_pick_alienseasons$TS_ = subj_file_pick_alienseasons$sad_alien_ = subj_file_pick_alienseasons[,paste0(item, "_name_season")] = subj_file_pick_alienseasons[,paste0(item, "_name_alien")] = NULL
+  }
+  
+  new_all_files = rbind(new_all_files,
+                        subj_file_feed,
+                        cbind(subj_file_pick_items, season = NA, sad_alien_name = NA),
+                        cbind(subj_file_pick_aliens, season = NA, sad_alien_name = NA),
+                        cbind(subj_file_pick_seasons, season = NA, sad_alien_name = NA),
+                        cbind(subj_file_pick_alienseasons, season = NA, sad_alien_name = NA))
 }
-all_files$phase = factor(all_files$phase)
-all_files = subset(all_files, !is.na(phase))
+assertthat::assert_that(dim(new_all_files)[1] == dim(all_files)[1])
+all_files = new_all_files
+```
+```{r Get simulated data into the right format - add / rename remaining columns remove excess rows}
+# Add NAs for all other wanted_columns
+for (wanted_column in wanted_columns) {
+  if (! wanted_column %in% colnames(all_files)) {
+    all_files[wanted_column] = NA
+  }
+}
+all_files = subset(all_files, select = wanted_columns)
+
+# Factors and other beautification
+all_files$correct[all_files$phase == "3PickAliens"] = NA
+all_files$correct = as.logical(all_files$correct)
+all_files$trial_type = factor(all_files$trial_type)
+all_files = all_files[order(all_files$subjID, all_files$trial_index, all_files$phase, all_files$sad_alien, all_files$TS),]
+summary(all_files)
+```
+```{r Human demographics}
+# 
+#     # Get demographics
+#     demos = gsub("[^A-Za-z0-9/]", "", as.character(subj_file$responses)[1])  # get rid of all funny characters
+#     Q0split = strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1]
+#     Q1split = strsplit(strsplit(demos, "Q1")[[1]][2], "Q2")[[1]][1]
+#     Q1split = gsub("[^0-9/]", "", Q1split)  # remove non-numbers
+#     Q2split = strsplit(strsplit(demos, "Q2")[[1]][2], "Q3")[[1]][1]
+#     Q2split = gsub("[^0-9/]", "", Q2split)  # remove non-numbers
+#     Q3split = strsplit(demos, "Q3")[[1]][2]
+#     
+#     # Subj ID & sex
+#     subjID = as.numeric(Q0split)
+#     demographics[demo_row, "subjID"] = subjID
+#     demographics[demo_row, "sex"] = Q3split
+#     
+#     # Date of birth (year, month, day is all wrong!!! let Lucy fix it and then rewrite!)
+#     month = as.numeric(strsplit(Q1split, "/")[[1]][1])
+#     day = as.numeric(strsplit(Q1split, "/")[[1]][2])
+#     year = as.numeric(strsplit(Q1split, "/")[[1]][3])
+#     if (nchar(year) == 2) {
+#       year = paste("19", year, sep = "")
+#     }
+#     demographics[demo_row, "dob"] = paste(year, month, day, sep = "-")
+#     
+#     # Testing date
+#     month = as.numeric(strsplit(Q2split, "/")[[1]][1])
+#     day = as.numeric(strsplit(Q2split, "/")[[1]][2])
+#     year = as.numeric(strsplit(Q2split, "/")[[1]][3])
+#     if (nchar(year) == 2) {
+#       year = paste("20", year, sep = "")
+#     }
+#     demographics[demo_row, "testing_date"] = paste(year, month, day, sep = "-")
+#     demo_row = demo_row + 1
+#     
+#     subj_file$subjID = subjID
+#     subj_file = subset(subj_file, select = -c(responses, internal_node_id, view_history))
+
+```
+```{r Get human data into the right format}
+# TD!
+# remove training trials
+# Remove everything except trial_type %in% c("feed-aliens", "pick-aliens")
+# rename "cloudy_xyz" to "xyz"
+
+# all_files$TS = as.character(all_files$TS)
+# all_files$TS[is.na(all_files$TS)] = as.character(all_files$season[is.na(all_files$TS)])  # if column TS is NA, replace it with season column
+# all_files$TS = factor(all_files$TS)
+# all_files$reward[is.na(all_files$key)] = 0
+# all_files$block.type[all_files$phase == "0Training"] = "normal"
+# all_files$learning_style = "human"
+```
+```{r Make sure all_files looks good}
+correct_nrows = assertthat::are_equal(nrow(subj_file) * length(filenames), nrow(all_files))
+if (!correct_nrows) {
+  warning(paste("all_files does not have the expected number of rows. Expected: nrow(subj_file) * length(filenames) =", nrow(subj_file), "*", length(filenames), "=", nrow(subj_file) * length(filenames), "- Actual:", nrow(all_files)))
+}
+
+for (wanted_column in wanted_columns) {
+  if (! wanted_column %in% colnames(all_files)) {
+    stop(paste("The column", wanted_column, "is missing in all_files!"))
+  }
+}
+```
+```{r Add columns alien_trial and repetition}
+old_allfiles_dim = dim(all_files)
+
+# Create new columns
+all_files$alien_trial = NA
+all_files$repetition = NA
+  
+for (subjIDi in unique(all_files$subjID)) {
+  
+  # Get data from one subject
+  subj_phase_rows = all_files$subjID == subjIDi & all_files$phase != "3PickAliens"
+  subj_file = all_files[subj_phase_rows,]
+  
+  # Create counters for seasons and alien_season combos
+  season_counter = data.frame(hot = 0, cold = 0, rainy = 0, rainbow = 0)
+  alien_season_counter = data.frame(hot = rep(0, n_aliens), cold = rep(0, n_aliens), rainy = rep(0, n_aliens), rainbow = rep(0, n_aliens))
+
+  for (row in 1:nrow(subj_file)) {
+    
+    # Get current alien and season
+    sad_alien = subj_file$sad_alien[row] + 1  # Python starts at 0, I start at 1
+    season = as.character(subj_file$season[row])
+    
+    # Figure out whether season changed
+    if (row == 1) {
+      new_season = T
+    } else {
+      new_season = subj_file$season[row] != subj_file$season[row-1]
+    }
+    
+    # Update season and season-alien counters
+    if (new_season) {
+      season_counter[season] = season_counter[season] + 1
+    }
+    alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
+    
+    # Update repetition and alien_trial in the subj_file
+    subj_file$repetition[row] = season_counter[season][[1]]
+    subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
+  }
+  
+  # Add subject data back into all_files
+  all_files[subj_phase_rows,] = subj_file
+}
+```
+```{r Code factors as factors}
+all_files$phase = factor(all_files$phase, levels = c("1InitialLearning", "2CloudySeason", "Refresher2", "3PickAliens", "Refresher3", "5RainbowSeason"))
 all_files$subjID = as.numeric(as.character(all_files$subjID))
 all_files$block.type = factor(all_files$block.type)
 all_files$sad_alien = factor(all_files$sad_alien)
-all_files$ACC = ifelse(as.character(all_files$correct) %in% c("true", "True"), 1, 0)
-all_files$time_elapsed = all_files$points0 = all_files$points1 = all_files$points2 = all_files$X = NULL  # Remove unnecessary columns
+all_files$ACC = ifelse(as.character(all_files$correct) %in% c("true", "True", T), 1, 0)
+```
+```{r Verify that everything looks good}
+assertthat::are_equal(old_allfiles_dim[1], dim(all_files)[1])
+
+assertthat::are_equal(max(all_files$alien_trial, na.rm = T), sum(n_trials))
+assertthat::are_equal(min(all_files$alien_trial, na.rm = T), 1)  # or 0?
+
+assertthat::are_equal(max(all_files$repetition, na.rm = T), sum(n_blocks))
+assertthat::are_equal(min(all_files$repetition, na.rm = T), 1)  # or 0?
 ```
 ```{r Show all_files and make test plots to check that everything looks good}
 all_files
@@ -230,24 +283,6 @@ ggplot(all_files, aes(trial_index, item_chosen, color = phase)) +
 # Make sure that participants are rewarded according to a legit TS in a specific context ("rainiy")
 ddply(subset(all_files, season == "rainy" & ACC == 1), .(subjID, TS, sad_alien, item_chosen), summarize,
       rew = mean(reward, na.rm = T))
-```
-```{r Read in simulated agents and check generated versus recovered Qs}
-if (run_on %in% c("gen_rec", "simulations")) {
-  
-  # Check if TS values and action values are correlated for the current TS and current action
-  gg_Q_high_low = ggplot(all_files, aes(Q_TS, Q_action, color = subjID, shape = mix_probs)) +
-    geom_point() +
-    facet_grid( ~ learning_style)
-  gg_p_high_low = gg_Q_high_low + aes(p_TS, p_action)
-  
-  # Check if TS values and action values are correlated for any TS and any action
-  
-  
-  if (gg_save) {
-    ggsave(file.path(plot_dir, "gg_Q_high_low.png"), gg_Q_high_low)
-    ggsave(file.path(plot_dir, "gg_p_high_low.png"), gg_p_high_low)
-  }
-}
 ```
 ```{r Exclude subjects who don't reach criterion in training block and plot performance and missed trials}
 if (run_on == "humans") {
@@ -282,23 +317,36 @@ if (run_on == "humans") {
   }
 }
 ```
+
+# Results
+
+```{r Check if TS values and action values are correlated for the current TS and current action}
+gg_Q_high_low = ggplot(all_files, aes(Q_TS, Q_action, color = subjID, shape = mix_probs)) +
+  geom_point() +
+  facet_grid( ~ learning_style)
+gg_p_high_low = gg_Q_high_low + aes(p_TS, p_action)
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "gg_Q_high_low.png"), gg_Q_high_low)
+  ggsave(file.path(plot_dir, "gg_p_high_low.png"), gg_p_high_low)
+}
+```
 ```{r Plot overall learning}
 # Plot learning curves (and RTs) overall
 overall_learning_curves =
   ggplot(all_files, aes(trial_index, 100 * ACC, color = phase, group = phase, shape = factor(block.type))) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
   geom_hline(yintercept = 100/3, linetype = "dotted") +
-  labs(x = "Trial", y = "% correct")
+  labs(x = "Trial", y = "% correct") +
+  facet_grid(~ learning_style)
 
-overall_RTs = overall_learning_curves + aes(trial_index, rt, color = phase) + labs(x = "Trial", y = "Response time (msec)")
-
-if (run_on == "gen_rec") {
-  overall_learning_curves =
-    overall_learning_curves + aes(color = mix_probs, group = mix_probs) + facet_grid(~ learning_style)
+if (run_on == "humans") {
+  overall_RTs = overall_learning_curves + aes(y = rt, color = phase) + labs(x = "Trial", y = "Response time (msec)")
+  ggsave(file.path(plot_dir, "1overall_RTs.png"), overall_RTs, width = 25, height = 3)
 }
+
 if (gg_save) {
   ggsave(file.path(plot_dir, "1overall_learning_curves.png"), overall_learning_curves, width = 25, height = 3)
-  ggsave(file.path(plot_dir, "1overall_RTs.png"), overall_RTs, width = 25, height = 3)
 }
 ```
 ```{r demographics}
@@ -316,7 +364,7 @@ if (gg_save) {
 # Function to summarize over items, aliens, TS, ..., to get average rewards for each
 get_values_and_perf = function(feed_aliens_data, instance_names, instance_ids, assess_name) {
   
-  value_dat = ddply(feed_aliens_data, c("subjID", "phase", instance_names, instance_ids), summarize,
+  value_dat = ddply(feed_aliens_data, c("subjID", "phase", "learning_style", instance_names, instance_ids), summarize,
                     value_subj = mean(reward, na.rm = T),
                     av_ACC = mean(ACC, na.rm = T))
   
@@ -358,14 +406,16 @@ season_alien_values = merge(season_alien_values, subset(alien_TS_obj, select = c
 
 all_values_perf = rbind(alien_values, TS_values, item_values, season_alien_values)
 all_values_perf
+
+all_files
 ```
 ```{r Create pick_aliens data}
 if (run_on != "gen_rec") {
   
   # Subset all_files to get pick_aliens (phase 3)
   pick_aliens = subset(all_files, trial_type == "pick-aliens",
-                       select = c("subjID", "trial_index", "item_left_name", "item_right_name", "item_chosen_name", "assess"))
-  # Add column iten_unchosen_name
+                       select = c("subjID", "trial_index", "item_left_name", "item_right_name", "item_chosen_name", "assess", "learning_style"))
+  # Add column item_unchosen_name
   pick_aliens$item_unchosen_name = with(pick_aliens, ifelse(as.character(item_chosen_name) == as.character(item_right_name), as.character(item_left_name), as.character(item_right_name)))
   pick_aliens$item_left_name = pick_aliens$item_right_name = NULL
   
@@ -384,7 +434,6 @@ if (run_on != "gen_rec") {
   pick_aliens$value_subj_diff = with(pick_aliens, value_subj_chosen - value_subj_unchosen)
   pick_aliens$value_obj_diff = with(pick_aliens, value_obj_chosen - value_obj_unchosen)
   pick_aliens$av_ACC_diff = with(pick_aliens, av_ACC_chosen - av_ACC_unchosen)
-  pick_aliens
   
   # Order and determine how often participants selected the higher-valued option
   pick_aliens = pick_aliens[order(pick_aliens$subjID, pick_aliens$assess, pick_aliens$item_chosen, pick_aliens$item_unchosen),]
@@ -393,7 +442,7 @@ if (run_on != "gen_rec") {
   
   # Ddply to get average ACCs and rewards for each condition (aliens, items, seasons, alien-seasons)
   pick_aliens_avs = ddply(pick_aliens,
-                          .(subjID, assess), summarize,
+                          .(subjID, assess, learning_style), summarize,
                           value_subj_chosen = mean(value_subj_chosen, na.rm = T),
                           value_subj_unchosen = mean(value_subj_unchosen, na.rm = T),
                           value_subj_diff = mean(value_subj_diff, na.rm = T),
@@ -407,26 +456,26 @@ if (run_on != "gen_rec") {
   
   # Get counts for how often each instance was chosen (alien0, alien1, ..., item0, ..., hot, cold, ..., TS0, TS1, ...)
   pick_aliens_counts_chosen_names = ddply(subset(pick_aliens, !is.na(item_chosen_name)),
-                                          .(subjID, assess, item_chosen_name), summarize,
+                                          .(subjID, assess, item_chosen_name, learning_style), summarize,
                                           count_chosen = length(item_chosen_name))
   pick_aliens_counts_unchosen_names = ddply(subset(pick_aliens, !is.na(item_chosen_name)),
-                                            .(subjID, assess, item_unchosen_name), summarize,
+                                            .(subjID, assess, item_unchosen_name, learning_style), summarize,
                                             count_unchosen = length(item_unchosen_name))
   pick_aliens_counts_names = merge(pick_aliens_counts_chosen_names, pick_aliens_counts_unchosen_names, all = T,
-                                   by.x = c("subjID", "assess", "item_chosen_name"),
-                                   by.y = c("subjID", "assess", "item_unchosen_name"))
+                                   by.x = c("subjID", "assess", "item_chosen_name", "learning_style"),
+                                   by.y = c("subjID", "assess", "item_unchosen_name", "learning_style"))
   colnames(pick_aliens_counts_names)[colnames(pick_aliens_counts_names) == "item_chosen_name"] = "item_chosen"
   pick_aliens_counts_names$type = "names"
   
   pick_aliens_counts_chosen_ids = ddply(subset(pick_aliens, !is.na(id_chosen)),
-                                        .(subjID, assess, id_chosen), summarize,
+                                        .(subjID, assess, id_chosen, learning_style), summarize,
                                         count_chosen = length(id_chosen))
   pick_aliens_counts_unchosen_ids = ddply(subset(pick_aliens, !is.na(id_unchosen)),
-                                          .(subjID, assess, id_unchosen), summarize,
+                                          .(subjID, assess, id_unchosen, learning_style), summarize,
                                           count_unchosen = length(id_unchosen))
   pick_aliens_counts_ids = merge(pick_aliens_counts_chosen_ids, pick_aliens_counts_unchosen_ids, all = T,
-                                 by.x = c("subjID", "assess", "id_chosen"),
-                                 by.y = c("subjID", "assess", "id_unchosen"))
+                                 by.x = c("subjID", "assess", "id_chosen", "learning_style"),
+                                 by.y = c("subjID", "assess", "id_unchosen", "learning_style"))
   colnames(pick_aliens_counts_ids)[colnames(pick_aliens_counts_ids) == "id_chosen"] = "item_chosen"
   pick_aliens_counts_ids$type = "ids"
   
@@ -438,7 +487,7 @@ if (run_on != "gen_rec") {
 }
 ```
 ```{r Plot competition phase}
-if (run_on != "simulations") {
+if (run_on != "gen_rec") {
 # Plot difference between chosen and unchosen item in each trial, in terms of subj. value, obj. value, and performance
 gg_pick_aliens_value_subj_ = ggplot(pick_aliens, aes(trial_index, value_subj_diff, color = assess)) +
   geom_point() +
@@ -456,7 +505,7 @@ gg_pick_aliens_ACC_subj_ = gg_pick_aliens_value_subj_ + aes(y = av_ACC_diff) +
 gg_pick_aliens_raw_ch = ggplot(pick_aliens_counts, aes(assess, count_chosen, color = item_chosen, group = item_chosen)) +
   stat_summary(fun.data = mean_se, geom = "pointrange", position = position_dodge(width = 0.9)) +
   labs(x = "", y = "# Chosen", color = "") +
-  facet_grid(~ type)
+  facet_grid(learning_style ~ type)
 gg_pick_aliens_raw_unch = gg_pick_aliens_raw_ch +
   aes(y = count_unchosen) +
   labs(y = "# Unchosen")
@@ -470,7 +519,8 @@ gg_pick_aliens_value_subj = ggplot(pick_aliens_avs, aes(assess, value_subj_diff,
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
   labs(x = "", y = "Value chosen minus unchosen (subj.)", color = "Participant") +
-  geom_point(position = "jitter", alpha = 0.3)
+  geom_point(position = "jitter", alpha = 0.3) +
+  facet_grid(~ learning_style)
 
 gg_pick_aliens_value_obj = gg_pick_aliens_value_subj + aes(y = value_obj_diff) +
   labs(y = "Value chosen minus unchosen (obj.)")
@@ -482,7 +532,8 @@ gg_pick_aliens_ACC = gg_pick_aliens_value_subj + aes(y = av_ACC_diff) +
 gg_pick_aliens_perc_subj = ggplot(pick_aliens, aes(assess, as.numeric(selected_better_subj))) +
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
   labs(x = "", y = "% selected better option (subj. value)") +
-  geom_hline(yintercept = 0.5, linetype = "dotted")
+  geom_hline(yintercept = 0.5, linetype = "dotted") +
+  facet_grid(~ learning_style)
 
 gg_pick_aliens_perc_obj = gg_pick_aliens_perc_subj + aes(y = as.numeric(selected_better_obj)) +
   labs(x = "", y = "% selected better option (obj. value)")
@@ -506,14 +557,13 @@ if (gg_save) {
 }
 ```
 ```{r Plot learned values and true objective values}
-## TD FOR SIMULATED DATA: TS MEANS SOMETHING ELSE IN THESE DATA
 # Values for aliens, items, TS (subj & obj)
 value_plot_ids = ggplot(subset(all_values_perf, assess != "alien-same-season"), aes(assess, value_subj, fill = id)) +
   stat_summary(fun.data = "mean_se", geom = "bar", position = "dodge") +
   stat_summary(fun.data = "mean_se", geom = "pointrange", position = position_dodge(width = 0.9)) +
   labs(y = "Average reward / trial", x = "", fill = "") +
   scale_y_continuous(breaks = seq(0, 10, 2)) +
-  facet_wrap(~ phase)
+  facet_grid(learning_style ~ phase)
 value_plot_ids_subj = value_plot_ids + facet_wrap(phase ~ paste("Subj", subjID))
 value_plot_names = value_plot_ids + aes(fill = name)
 value_plot_ids_obj = value_plot_ids + aes(y = value_obj) +
@@ -589,7 +639,8 @@ gg_subj_obj_values = ggplot(subset(feed_aliens, phase != "0Training"), aes(group
   geom_line(aes(item_value_subj, item_value_obj), color = "red", alpha = 0.3) +
   geom_point(aes(TS_value_subj, TS_value_obj), color = "blue") +
   geom_line(aes(TS_value_subj, TS_value_obj), color = "blue", alpha = 0.3) +
-  labs(x = "Subj. values", y = "Obj. values (item: red; TS: blue)")
+  labs(x = "Subj. values", y = "Obj. values (item: red; TS: blue)") +
+  facet_grid(~ learning_style)
 
 # Plot learning curves dependent on TS value (subj and obj)
 gg_learning_curves_TS_value_obj = ggplot(subset(feed_aliens, phase != "0Training"), aes(alien_trial_sum, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +
@@ -599,7 +650,7 @@ gg_learning_curves_TS_value_obj = ggplot(subset(feed_aliens, phase != "0Training
   coord_cartesian(y = c(0, 100)) +
   labs(x = "Trial", y = "% correct", color = "Value") +
   theme(legend.position = "none") +
-  facet_grid(~ phase)
+  facet_grid(learning_style ~ phase)
 
 gg_learning_curves_TS_value_subj = gg_learning_curves_TS_value_obj + aes(color = round(TS_value_subj), group = round(TS_value_subj))
   
@@ -637,7 +688,7 @@ if (gg_save) {
 # Regression data: regr_dat
 ## Bring in the right order for regression: each line must be the predictor of the immediate next line!
 feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$phase, feed_aliens$sad_alien, feed_aliens$TS, feed_aliens$alien_trial),]
-regr_dat = subset(feed_aliens, phase != "0Training", select = c("subjID", "phase", "sad_alien", "TS", "reward", "TS_value_subj", "TS_value_obj", "item_value_subj", "item_value_obj", "trial", "alien_trial_sum", "alien_trial", "repetition", "ACC"))
+regr_dat = subset(feed_aliens, phase != "0Training", select = c("subjID", "phase", "sad_alien", "TS", "reward", "TS_value_subj", "TS_value_obj", "item_value_subj", "item_value_obj", "alien_trial_sum", "alien_trial", "repetition", "ACC", "learning_style"))#, "trial"
 
 ACC_1back_self = c(NA, regr_dat$ACC[1:length(regr_dat$ACC)-1])
 ACC_1back_self[regr_dat$alien_trial_sum == 1] = NA
@@ -670,7 +721,7 @@ regr_dat$sad_alien = factor(regr_dat$sad_alien)
 dat = subset(regr_dat, alien_trial_sum == 1)
 
 # Add n-back columns
-dat = dat[order(dat$subjID, dat$TS, dat$alien_trial, dat$trial),]
+dat = dat[order(dat$subjID, dat$TS, dat$alien_trial),]
 for (n in 1:(n_aliens-1)) {
   col = paste("back", n, sep = "")
   dat[,col] = c(rep(NA, n), dat$ACC[1:(length(dat$ACC)-n)])
@@ -688,7 +739,7 @@ gg_value_guess = ggplot(dat, aes(cum_ACC, 100 * ACC)) +  # , color = cum_ACC_1ba
   geom_hline(yintercept = 100/3, linetype = "dotted") +
   coord_cartesian(ylim = c(0, 100)) +
   labs(x = "# of previous correct trials", y = "% correct", color = "TS") +
-  facet_grid(~ phase)
+  facet_grid(learning_style ~ phase)
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_value_guess.png"), gg_value_guess, width = 10, height = 3)
@@ -764,8 +815,6 @@ for (TSi in 0:2) {
 }
 ```
 ```{r Plot perseverance mistakes and run regression models}
-# for (phas in feed_aliens_phases) {
-  
 dat = subset(feed_aliens, phase != "0Training")  # subset(feed_aliens, phase == phas)
 
 # Melt feed_aliens along ACC0, ACC1, ACC2, ACCNone
@@ -826,6 +875,7 @@ grand_av = ddply(subj_av, .(), summarize,
 
 gg_otherTS_ACC2 = gg_otherTS_ACC
 gg_otherTS_ACC2$data = dat_l
+gg_otherTS_ACC2 = gg_otherTS_ACC2 + facet_grid(phase ~ learning_style)  # learning_style does not show up for some reason..
 gg_otherTS_ACC_value2 = gg_otherTS_ACC_value
 gg_otherTS_ACC_value2$data = dat_l
 gg_otherTS_ACC_alien2 = gg_otherTS_ACC_alien
@@ -835,7 +885,7 @@ gg_prevTS_ACC2$data = dat_l2
 
 gg_otherTS_ACC3 = gg_otherTS_ACC2 + aes(x = alien_trial_sum, color = ACC_TS, shape = factor(current_TS, labels = c("Other TS", "Current TS"))) +
   labs(x = "", color = "", shape = "") +
-  facet_grid(phase ~ facet)
+  facet_grid(phase ~ learning_style)
 gg_otherTS_ACC3$data = dat_l
 gg_otherTS_ACC4 = gg_otherTS_ACC3 + aes(x = "") + theme(legend.position = "none")
 
@@ -870,7 +920,6 @@ if (gg_save) {
   # ggsave(paste(plot_dir, "/2gg_otherTS_ACC_alien2_", phas, ".png", sep = ""), gg_otherTS_ACC_alien2, width = 9, height = 6)
   ggsave(file.path(plot_dir, "/2gg_prevTS_ACC2.png"), gg_prevTS_ACC2, width = 4, height = 10)
 }
-# }
 ```
 ```{r Run regressions: Participants infer complete TS rather than individual mappings}
 regression_plot = TS_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "% correct", fill = "Alien")
