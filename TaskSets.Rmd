@@ -12,26 +12,25 @@ library("ggplot2"); library("plyr"); library("lme4"); library("reshape2")
 theme_set(theme_bw())
 
 # TDs
-# line 61ff.!
-# Figure out what to do with item_chosen in competition phase; change humans, change simulations, change both? how?
+# Make sure everything has model_name -> every plot has facets!
 
 run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
 gg_save = T
-run_regression = T
+run_regression = F
 exclude_participants = T
 n_aliens = 4
 n_seasons = 3
 n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
-wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "learning_style", "mix_probs", "fit_pars", "RT", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
+wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "model_name", "RT", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
 if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
   plot_dir = file.path(data_dir, "plots")
 } else {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/"
-  patt = "sim_5...csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
+  patt = "sim_....csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   plot_dir = file.path(data_dir, "plots")
   parameter_names = c("alpha", "alpha_high", "beta", "epsilon", "forget", "forget_high", "suppress_prev_TS", "create_TS_biased")
 }
@@ -56,17 +55,10 @@ for (filename in filenames) {
 subj_file
 all_files
 ```
-```{r Get parameter_dat}
-if (run_on %in% c("gen_rec", "simulations")) {
-  parameter_dat = ddply(all_files, c("sID", "learning_style", parameter_names), summarize,
-                       alpha = alpha[1],
-                       beta = beta[1],
-                       forget = forget[1])
-  parameter_dat
-  colnames(parameter_dat)[colnames(parameter_dat) == "sID"] = "subjID"
-}
-```
 ```{r Get simulated data into the right format}
+
+all_files[all_files$learning_style %in% c("flat", "s-flat"), "alpha_high"] = 0
+all_files[all_files$learning_style %in% c("flat", "s-flat"), "forget_high"] = 0
 # Rename TS-related columns
 colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
 colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
@@ -79,6 +71,11 @@ all_files = subset(all_files, phase != 0)
 all_files$item_chosen[all_files$phase != '3PickAliens'] = as.numeric(as.character(all_files$item_chosen[all_files$phase != '3PickAliens']))
 new_all_files = data.frame()
 for (subjIDi in unique(all_files$subjID)) {
+  
+  subj_rows = all_files$subjID == subjIDi
+  subj_learning_style = all_files[subj_rows, "learning_style"][1]
+  subj_model_parameters = paste(parameter_names[all_files[subj_rows, parameter_names][1,] != 0], collapse="_")[1]
+  all_files[subj_rows, "model_name"] = paste0(subj_learning_style, "_", subj_model_parameters)
   
   subj_feedaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase != "3PickAliens")
   subj_pickaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase == "3PickAliens")
@@ -141,7 +138,16 @@ for (subjIDi in unique(all_files$subjID)) {
 assertthat::assert_that(dim(new_all_files)[1] == dim(all_files)[1])
 all_files = new_all_files
 ```
-```{r Get simulated data into the right format - add / rename remaining columns remove excess rows}
+```{r Get parameter_dat}
+if (run_on %in% c("gen_rec", "simulations")) {
+  parameter_dat = ddply(all_files, c("subjID", "model_name", parameter_names), summarize,
+                       alpha = alpha[1],
+                       beta = beta[1],
+                       forget = forget[1])
+  parameter_dat
+}
+```
+```{r Get simulated data into the right format - remove excess columns and rows}
 # Add NAs for all other wanted_columns
 for (wanted_column in wanted_columns) {
   if (! wanted_column %in% colnames(all_files)) {
@@ -154,6 +160,7 @@ all_files = subset(all_files, select = wanted_columns)
 all_files$correct[all_files$phase == "3PickAliens"] = NA
 all_files$correct = as.logical(all_files$correct)
 all_files$trial_type = factor(all_files$trial_type)
+all_files$model_name = factor(all_files$model_name)
 all_files = all_files[order(all_files$subjID, all_files$trial_index, all_files$phase, all_files$sad_alien, all_files$TS),]
 summary(all_files)
 ```
@@ -207,7 +214,7 @@ summary(all_files)
 # all_files$TS = factor(all_files$TS)
 # all_files$reward[is.na(all_files$key)] = 0
 # all_files$block.type[all_files$phase == "0Training"] = "normal"
-# all_files$learning_style = "human"
+# all_files$model_name = "human"
 ```
 ```{r Make sure all_files looks good}
 correct_nrows = assertthat::are_equal(nrow(subj_file) * length(filenames), nrow(all_files))
@@ -336,9 +343,9 @@ if (run_on == "humans") {
 # Results
 
 ```{r Check if TS values and action values are correlated for the current TS and current action}
-gg_Q_high_low = ggplot(all_files, aes(Q_TS, Q_action, color = subjID, shape = mix_probs)) +
+gg_Q_high_low = ggplot(all_files, aes(Q_TS, Q_action, color = subjID)) +
   geom_point() +
-  facet_grid( ~ learning_style)
+  facet_grid(model_name ~ .)
 gg_p_high_low = gg_Q_high_low + aes(p_TS, p_action)
 
 if (gg_save) {
@@ -353,7 +360,7 @@ overall_learning_curves =
   stat_summary(fun.data = mean_se, geom = "pointrange") +
   geom_hline(yintercept = 100/3, linetype = "dotted") +
   labs(x = "Trial", y = "% correct") +
-  facet_grid(~ learning_style)
+  facet_grid(model_name ~ .)
 
 if (run_on == "humans") {
   overall_RTs = overall_learning_curves + aes(y = rt, color = phase) + labs(x = "Trial", y = "Response time (msec)")
@@ -361,7 +368,7 @@ if (run_on == "humans") {
 }
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "1overall_learning_curves.png"), overall_learning_curves, width = 25, height = 3)
+  ggsave(file.path(plot_dir, "1overall_learning_curves.png"), overall_learning_curves, width = 20, height = 8)
 }
 ```
 ```{r demographics}
@@ -379,7 +386,7 @@ if (gg_save) {
 # Function to summarize over items, aliens, TS, ..., to get average rewards for each
 get_values_and_perf = function(feed_aliens_data, instance_names, instance_ids, assess_name) {
   
-  value_dat = ddply(feed_aliens_data, c("subjID", "phase", "learning_style", instance_names, instance_ids), summarize,
+  value_dat = ddply(feed_aliens_data, c("subjID", "phase", "model_name", instance_names, instance_ids), summarize,
                     value_subj = mean(reward, na.rm = T),
                     av_ACC = mean(ACC, na.rm = T))
   
@@ -429,7 +436,7 @@ if (run_on != "gen_rec") {
   
   # Subset all_files to get pick_aliens (phase 3)
   pick_aliens = subset(all_files, trial_type == "pick-aliens",
-                       select = c("subjID", "trial_index", "item_left_name", "item_right_name", "item_chosen_name", "assess", "learning_style"))
+                       select = c("subjID", "trial_index", "item_left_name", "item_right_name", "item_chosen_name", "assess", "model_name"))
   # Add column item_unchosen_name
   pick_aliens$item_unchosen_name = with(pick_aliens, ifelse(as.character(item_chosen_name) == as.character(item_right_name), as.character(item_left_name), as.character(item_right_name)))
   pick_aliens$item_left_name = pick_aliens$item_right_name = NULL
@@ -457,7 +464,7 @@ if (run_on != "gen_rec") {
   
   # Ddply to get average ACCs and rewards for each condition (aliens, items, seasons, alien-seasons)
   pick_aliens_avs = ddply(pick_aliens,
-                          .(subjID, assess, learning_style), summarize,
+                          .(subjID, assess, model_name), summarize,
                           value_subj_chosen = mean(value_subj_chosen, na.rm = T),
                           value_subj_unchosen = mean(value_subj_unchosen, na.rm = T),
                           value_subj_diff = mean(value_subj_diff, na.rm = T),
@@ -471,26 +478,26 @@ if (run_on != "gen_rec") {
   
   # Get counts for how often each instance was chosen (alien0, alien1, ..., item0, ..., hot, cold, ..., TS0, TS1, ...)
   pick_aliens_counts_chosen_names = ddply(subset(pick_aliens, !is.na(item_chosen_name)),
-                                          .(subjID, assess, item_chosen_name, learning_style), summarize,
+                                          .(subjID, assess, item_chosen_name, model_name), summarize,
                                           count_chosen = length(item_chosen_name))
   pick_aliens_counts_unchosen_names = ddply(subset(pick_aliens, !is.na(item_chosen_name)),
-                                            .(subjID, assess, item_unchosen_name, learning_style), summarize,
+                                            .(subjID, assess, item_unchosen_name, model_name), summarize,
                                             count_unchosen = length(item_unchosen_name))
   pick_aliens_counts_names = merge(pick_aliens_counts_chosen_names, pick_aliens_counts_unchosen_names, all = T,
-                                   by.x = c("subjID", "assess", "item_chosen_name", "learning_style"),
-                                   by.y = c("subjID", "assess", "item_unchosen_name", "learning_style"))
+                                   by.x = c("subjID", "assess", "item_chosen_name", "model_name"),
+                                   by.y = c("subjID", "assess", "item_unchosen_name", "model_name"))
   colnames(pick_aliens_counts_names)[colnames(pick_aliens_counts_names) == "item_chosen_name"] = "item_chosen"
   pick_aliens_counts_names$type = "names"
   
   pick_aliens_counts_chosen_ids = ddply(subset(pick_aliens, !is.na(id_chosen)),
-                                        .(subjID, assess, id_chosen, learning_style), summarize,
+                                        .(subjID, assess, id_chosen, model_name), summarize,
                                         count_chosen = length(id_chosen))
   pick_aliens_counts_unchosen_ids = ddply(subset(pick_aliens, !is.na(id_unchosen)),
-                                          .(subjID, assess, id_unchosen, learning_style), summarize,
+                                          .(subjID, assess, id_unchosen, model_name), summarize,
                                           count_unchosen = length(id_unchosen))
   pick_aliens_counts_ids = merge(pick_aliens_counts_chosen_ids, pick_aliens_counts_unchosen_ids, all = T,
-                                 by.x = c("subjID", "assess", "id_chosen", "learning_style"),
-                                 by.y = c("subjID", "assess", "id_unchosen", "learning_style"))
+                                 by.x = c("subjID", "assess", "id_chosen", "model_name"),
+                                 by.y = c("subjID", "assess", "id_unchosen", "model_name"))
   colnames(pick_aliens_counts_ids)[colnames(pick_aliens_counts_ids) == "id_chosen"] = "item_chosen"
   pick_aliens_counts_ids$type = "ids"
   
@@ -520,7 +527,7 @@ gg_pick_aliens_ACC_subj_ = gg_pick_aliens_value_subj_ + aes(y = av_ACC_diff) +
 gg_pick_aliens_raw_ch = ggplot(pick_aliens_counts, aes(assess, count_chosen, color = item_chosen, group = item_chosen)) +
   stat_summary(fun.data = mean_se, geom = "pointrange", position = position_dodge(width = 0.9)) +
   labs(x = "", y = "# Chosen", color = "") +
-  facet_grid(learning_style ~ type)
+  facet_grid(model_name ~ type)
 gg_pick_aliens_raw_unch = gg_pick_aliens_raw_ch +
   aes(y = count_unchosen) +
   labs(y = "# Unchosen")
@@ -535,7 +542,7 @@ gg_pick_aliens_value_subj = ggplot(pick_aliens_avs, aes(assess, value_subj_diff,
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
   labs(x = "", y = "Value chosen minus unchosen (subj.)", color = "Participant") +
   geom_point(position = "jitter", alpha = 0.3) +
-  facet_grid(~ learning_style)
+  facet_grid(model_name ~ .)
 
 gg_pick_aliens_value_obj = gg_pick_aliens_value_subj + aes(y = value_obj_diff) +
   labs(y = "Value chosen minus unchosen (obj.)")
@@ -548,7 +555,7 @@ gg_pick_aliens_perc_subj = ggplot(pick_aliens, aes(assess, as.numeric(selected_b
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
   labs(x = "", y = "% selected better option (subj. value)") +
   geom_hline(yintercept = 0.5, linetype = "dotted") +
-  facet_grid(~ learning_style)
+  facet_grid(model_name ~ .)
 
 gg_pick_aliens_perc_obj = gg_pick_aliens_perc_subj + aes(y = as.numeric(selected_better_obj)) +
   labs(x = "", y = "% selected better option (obj. value)")
@@ -558,16 +565,16 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "4gg_pick_aliens_value_obj_.png"), gg_pick_aliens_value_obj_, width = 15, height = 15)
   ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC_subj_.png"), gg_pick_aliens_ACC_subj_, width = 15, height = 15)
   
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_ch.png"), gg_pick_aliens_raw_ch, width = 8, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_unch.png"), gg_pick_aliens_raw_unch, width = 8, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_diff.png"), gg_pick_aliens_raw_diff, width = 8, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_ch.png"), gg_pick_aliens_raw_ch, width = 8, height = 10)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_unch.png"), gg_pick_aliens_raw_unch, width = 8, height = 10)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_raw_diff.png"), gg_pick_aliens_raw_diff, width = 8, height = 10)
   
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_value_subj.png"), gg_pick_aliens_value_subj, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_value_obj.png"), gg_pick_aliens_value_obj, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC.png"), gg_pick_aliens_ACC, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_value_subj.png"), gg_pick_aliens_value_subj, width = 4, height = 10)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_value_obj.png"), gg_pick_aliens_value_obj, width = 4, height = 10)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_ACC.png"), gg_pick_aliens_ACC, width = 4, height = 10)
   
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_perc_subj.png"), gg_pick_aliens_perc_subj, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "4gg_pick_aliens_perc_obj.png"), gg_pick_aliens_perc_obj, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_perc_subj.png"), gg_pick_aliens_perc_subj, width = 4, height = 10)
+  ggsave(file.path(plot_dir, "4gg_pick_aliens_perc_obj.png"), gg_pick_aliens_perc_obj, width = 4, height = 10)
 }
 }
 ```
@@ -578,7 +585,7 @@ value_plot_ids = ggplot(subset(all_values_perf, assess != "alien-same-season"), 
   stat_summary(fun.data = "mean_se", geom = "pointrange", position = position_dodge(width = 0.9)) +
   labs(y = "Average reward / trial", x = "", fill = "") +
   scale_y_continuous(breaks = seq(0, 10, 2)) +
-  facet_grid(learning_style ~ phase)
+  facet_grid(model_name ~ phase)
 value_plot_ids_subj = value_plot_ids + facet_wrap(phase ~ paste("Subj", subjID))
 value_plot_names = value_plot_ids + aes(fill = name)
 value_plot_ids_obj = value_plot_ids + aes(y = value_obj) +
@@ -593,13 +600,13 @@ TS_plot_subj = TS_plot + facet_wrap(~ paste("Subj", subjID))
 TS_plot_obj = TS_plot + aes(y = value_obj)
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "0value_plot_ids.png"), value_plot_ids, width = 9, height = 3)
-  ggsave(file.path(plot_dir, "0value_plot_ids_obj.png"), value_plot_ids_obj, width = 9, height = 3)
-  ggsave(file.path(plot_dir, "0value_plot_ids_subj.png"), value_plot_ids_subj, width = 15, height = 15)
-  ggsave(file.path(plot_dir, "0value_plot_names.png"), value_plot_names, width = 9, height = 3)
-  ggsave(file.path(plot_dir, "0TS_plot.png"), TS_plot, width = 9, height = 3)
-  ggsave(file.path(plot_dir, "0TS_plot_obj.png"), TS_plot_obj, width = 9, height = 3)
-  ggsave(file.path(plot_dir, "0TS_plot_subj.png"), TS_plot_subj, width = 15, height = 15)
+  ggsave(file.path(plot_dir, "0value_plot_ids.png"), value_plot_ids, width = 9, height = 9)
+  ggsave(file.path(plot_dir, "0value_plot_ids_obj.png"), value_plot_ids_obj, width = 9, height = 9)
+  # ggsave(file.path(plot_dir, "0value_plot_ids_subj.png"), value_plot_ids_subj, width = 15, height = 15)
+  ggsave(file.path(plot_dir, "0value_plot_names.png"), value_plot_names, width = 9, height = 9)
+  ggsave(file.path(plot_dir, "0TS_plot.png"), TS_plot, width = 9, height = 9)
+  ggsave(file.path(plot_dir, "0TS_plot_obj.png"), TS_plot_obj, width = 9, height = 9)
+  # ggsave(file.path(plot_dir, "0TS_plot_subj.png"), TS_plot_subj, width = 15, height = 15)
 }
 ```
 ```{r Prepare feed_aliens}
@@ -655,7 +662,7 @@ gg_subj_obj_values = ggplot(subset(feed_aliens, phase != "0Training"), aes(group
   geom_point(aes(TS_value_subj, TS_value_obj), color = "blue") +
   geom_line(aes(TS_value_subj, TS_value_obj), color = "blue", alpha = 0.3) +
   labs(x = "Subj. values", y = "Obj. values (item: red; TS: blue)") +
-  facet_grid(~ learning_style)
+  facet_grid(model_name ~ .)
 
 # Plot learning curves dependent on TS value (subj and obj)
 gg_learning_curves_TS_value_obj = ggplot(subset(feed_aliens, phase != "0Training"), aes(alien_trial_sum, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +
@@ -665,7 +672,7 @@ gg_learning_curves_TS_value_obj = ggplot(subset(feed_aliens, phase != "0Training
   coord_cartesian(y = c(0, 100)) +
   labs(x = "Trial", y = "% correct", color = "Value") +
   theme(legend.position = "none") +
-  facet_grid(learning_style ~ phase)
+  facet_grid(model_name ~ phase)
 
 gg_learning_curves_TS_value_subj = gg_learning_curves_TS_value_obj + aes(color = round(TS_value_subj), group = round(TS_value_subj))
   
@@ -688,12 +695,12 @@ gg_learning_curves_wide = ggplot(subset(feed_aliens, phase != "0Training"), aes(
   facet_grid(phase ~ paste("It. val.", item_value_obj))
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "/2gg_subj_obj_values.png"), gg_subj_obj_values, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "/2gg_subj_obj_values.png"), gg_subj_obj_values, width = 3, height = 7)
   
-  ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_obj.png"), gg_learning_curves_TS_value_obj, width = 10, height = 4)
-  ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_subj.png"), gg_learning_curves_TS_value_subj, width = 10, height = 4)
-  ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_obj.png"), gg_learning_curves_item_value_obj, width = 10, height = 4)
-  ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_subj.png"), gg_learning_curves_item_value_subj, width = 10, height = 4)
+  ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_obj.png"), gg_learning_curves_TS_value_obj, width = 10, height = 10)
+  ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_subj.png"), gg_learning_curves_TS_value_subj, width = 10, height = 10)
+  ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_obj.png"), gg_learning_curves_item_value_obj, width = 10, height = 10)
+  ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_subj.png"), gg_learning_curves_item_value_subj, width = 10, height = 10)
   
   ggsave(file.path(plot_dir, "/2gg_learning_curves_rep.png"), gg_learning_curves_rep, width = 10, height = 10)
   ggsave(file.path(plot_dir, "/2gg_learning_curves_wide.png"), gg_learning_curves_wide, width = 10, height = 5)
@@ -703,7 +710,7 @@ if (gg_save) {
 # Regression data: regr_dat
 ## Bring in the right order for regression: each line must be the predictor of the immediate next line!
 feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$phase, feed_aliens$sad_alien, feed_aliens$TS, feed_aliens$alien_trial),]
-regr_dat = subset(feed_aliens, phase != "0Training", select = c("subjID", "phase", "sad_alien", "TS", "reward", "TS_value_subj", "TS_value_obj", "item_value_subj", "item_value_obj", "alien_trial_sum", "alien_trial", "repetition", "ACC", "learning_style"))#, "trial"
+regr_dat = subset(feed_aliens, phase != "0Training", select = c("subjID", "phase", "sad_alien", "TS", "reward", "TS_value_subj", "TS_value_obj", "item_value_subj", "item_value_obj", "alien_trial_sum", "alien_trial", "repetition", "ACC", "model_name"))#, "trial"
 
 ACC_1back_self = c(NA, regr_dat$ACC[1:length(regr_dat$ACC)-1])
 ACC_1back_self[regr_dat$alien_trial_sum == 1] = NA
@@ -754,10 +761,10 @@ gg_value_guess = ggplot(dat, aes(cum_ACC, 100 * ACC)) +  # , color = cum_ACC_1ba
   geom_hline(yintercept = 100/3, linetype = "dotted") +
   coord_cartesian(ylim = c(0, 100)) +
   labs(x = "# of previous correct trials", y = "% correct", color = "TS") +
-  facet_grid(learning_style ~ phase)
+  facet_grid(model_name ~ phase)
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "/2gg_value_guess.png"), gg_value_guess, width = 10, height = 3)
+  ggsave(file.path(plot_dir, "/2gg_value_guess.png"), gg_value_guess, width = 10, height = 9)
 }
 ```
 ```{r Create perseverance data}
@@ -890,7 +897,7 @@ grand_av = ddply(subj_av, .(), summarize,
 
 gg_otherTS_ACC2 = gg_otherTS_ACC
 gg_otherTS_ACC2$data = dat_l
-gg_otherTS_ACC2 = gg_otherTS_ACC2 + facet_grid(phase ~ learning_style)  # learning_style does not show up for some reason..
+gg_otherTS_ACC2 = gg_otherTS_ACC2 + facet_grid(phase ~ model_name)  # model_name does not show up for some reason..
 gg_otherTS_ACC_value2 = gg_otherTS_ACC_value
 gg_otherTS_ACC_value2$data = dat_l
 gg_otherTS_ACC_alien2 = gg_otherTS_ACC_alien
@@ -900,12 +907,13 @@ gg_prevTS_ACC2$data = dat_l2
 
 gg_otherTS_ACC3 = gg_otherTS_ACC2 + aes(x = alien_trial_sum, color = ACC_TS, shape = factor(current_TS, labels = c("Other TS", "Current TS"))) +
   labs(x = "", color = "", shape = "") +
-  facet_grid(phase ~ learning_style)
+  facet_grid(phase ~ model_name)
 gg_otherTS_ACC3$data = dat_l
 gg_otherTS_ACC4 = gg_otherTS_ACC3 + aes(x = "") + theme(legend.position = "none")
 
 # Run models
-  if (run_regression) {
+if (run_regression) {
+  # for (model_name in unique(dat_l$model_name))
   for (phas in unique(dat_l$phase)) {  # I could also just run one single regression model and include phase as a predictor
     others = subset(dat_l, current_TS == F & ACC_TS != "None" & phase == phas)
     others$ACC_TS = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = 0:2)
@@ -929,8 +937,8 @@ if (gg_save) {
   # ggsave(paste(plot_dir, "/2gg_prevTS_ACC_", phas, ".png", sep = ""), gg_prevTS_ACC, width = 9, height = 7)
   
   # ggsave(paste(plot_dir, "/2gg_otherTS_ACC2_", phas, ".png", sep = ""), gg_otherTS_ACC2, width = 9, height = 3)
-  ggsave(file.path(plot_dir, "/2gg_otherTS_ACC3.png"), gg_otherTS_ACC3, width = 4, height = 10)
-  ggsave(file.path(plot_dir, "/2gg_otherTS_ACC4.png"), gg_otherTS_ACC4, width = 1.5, height = 10)
+  ggsave(file.path(plot_dir, "/2gg_otherTS_ACC3.png"), gg_otherTS_ACC3, width = 10, height = 10)
+  ggsave(file.path(plot_dir, "/2gg_otherTS_ACC4.png"), gg_otherTS_ACC4, width = 3, height = 10)
   # ggsave(paste(plot_dir, "/2gg_otherTS_ACC_value2_", phas, ".png", sep = ""), gg_otherTS_ACC_value2, width = 9, height = 6)
   # ggsave(paste(plot_dir, "/2gg_otherTS_ACC_alien2_", phas, ".png", sep = ""), gg_otherTS_ACC_alien2, width = 9, height = 6)
   ggsave(file.path(plot_dir, "/2gg_prevTS_ACC2.png"), gg_prevTS_ACC2, width = 4, height = 10)
@@ -942,7 +950,26 @@ regression_plot$data = regr_dat
 ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 3, height = 3)
 
 subjwise_value_effects = data.frame()
+for (subj in unique(regr_dat$subjID)) {
+  formula_obj = "ACC ~ TS_value_obj + item_value_obj + alien_trial_sum + repetition"
+  formula_subj = "ACC ~ TS_value_subj + item_value_subj + alien_trial_sum + repetition"
+  obj_value_mod = glm(as.formula(formula_obj),
+      family = binomial,
+      data = subset(regr_dat, subjID == subj))
+  subj_value_mod = glm(as.formula(formula_subj),
+      family = binomial,
+      data = subset(regr_dat, subjID == subj))
+  
+  obj_value_coefs = as.data.frame(summary(obj_value_mod)$coef)
+  subj_value_coefs = as.data.frame(summary(subj_value_mod)$coef)
+  
+  new_row = c(subj, obj_value_coefs["TS_value_obj", "Estimate"], obj_value_coefs["item_value_obj", "Estimate"], subj_value_coefs["TS_value_subj", "Estimate"], subj_value_coefs["item_value_subj", "Estimate"])
+  subjwise_value_effects = rbind(subjwise_value_effects, new_row)
+}
+colnames(subjwise_value_effects) = c("subjID", "beta_TS_value_obj", "beta_item_value_obj", "beta_TS_value_subj", "beta_item_value_subj")
+  
 if (run_regression) {
+  # for (model_name in unique(regr_dat$model_name))
   for (phas in feed_aliens_phases) {
     
     trial_value_form_obj = "ACC ~ TS_value_obj + item_value_obj + alien_trial_sum + repetition + (TS_value_obj + item_value_obj + alien_trial_sum + repetition | subjID)"
@@ -966,25 +993,6 @@ if (run_regression) {
     glmer_mod_rew_1back = update(glmer_mod_trial_value_obj, formula = as.formula(rew_1back_form))
     write.csv(as.data.frame(summary(glmer_mod_rew_1back)$coef), paste(plot_dir, "/glmer_rew_1back_summary_", phas, ".csv", sep = ""))
   }
-  
-  for (subj in unique(regr_dat$subjID)) {
-    print(subj)
-    formula_obj = "ACC ~ TS_value_obj + item_value_obj + alien_trial_sum + repetition"
-    formula_subj = "ACC ~ TS_value_subj + item_value_subj + alien_trial_sum + repetition"
-    obj_value_mod = glm(as.formula(formula_obj),
-        family = binomial,
-        data = subset(regr_dat, subjID == subj))
-    subj_value_mod = glm(as.formula(formula_subj),
-        family = binomial,
-        data = subset(regr_dat, subjID == subj))
-    
-    obj_value_coefs = as.data.frame(summary(obj_value_mod)$coef)
-    subj_value_coefs = as.data.frame(summary(subj_value_mod)$coef)
-    
-    new_row = c(subj, obj_value_coefs["TS_value_obj", "Estimate"], obj_value_coefs["item_value_obj", "Estimate"], subj_value_coefs["TS_value_subj", "Estimate"], subj_value_coefs["item_value_subj", "Estimate"])
-    subjwise_value_effects = rbind(subjwise_value_effects, new_row)
-  }
-  colnames(subjwise_value_effects) = c("subjID", "beta_TS_value_obj", "beta_item_value_obj", "beta_TS_value_subj", "beta_item_value_subj")
 }
 ```
 ```{r Create Rainbow season data rainbow_aliens and rainbow_sum_l}
@@ -1006,8 +1014,8 @@ all_ACCs$ACC.only1 = with(all_ACCs, ACC.1 * (is.na(ACC.12)))
 all_ACCs$ACC.only2 = with(all_ACCs, ACC.2 * (is.na(ACC.12)) * (is.na(ACC.02)))
 
 # Add all_ACCs columns to rainbow_data
-rainbow_aliens = merge(subset(all_files, phase == "5RainbowSeason", select = c("subjID", "sad_alien", "item_chosen")), all.x = T, all_ACCs)
-rainbow_aliens[order(rainbow_aliens$subjID, rainbow_aliens$sad_alien),]
+rainbow_aliens = merge(subset(all_files, phase == "5RainbowSeason", select = c("subjID", "sad_alien", "item_chosen", "trial_index")), all.x = T, all_ACCs)
+rainbow_aliens = rainbow_aliens[order(rainbow_aliens$subjID, rainbow_aliens$trial_index),]
 
 # Create rainbow_sum (count how many action would be correct in each TS)
 rainbow_sum = ddply(rainbow_aliens, .(subjID), summarize,
@@ -1030,10 +1038,12 @@ rainbow_sum_l$frac_chosen[rainbow_sum_l$TS == "Missed"] = NA
 
 # Add values (subj and obj) and task performance column
 all_values_perf_sub = subset(all_values_perf, assess == "season" & phase == "Refresher3", select = c("subjID", "name", "id", "value_subj", "value_obj", "av_ACC"))
+model_names = subset(parameter_dat, select = c("subjID", "model_name"))
 rainbow_sum_l = merge(rainbow_sum_l, all.x = T,
                       all_values_perf_sub,
                       by.x = c("subjID", "TS"),
                       by.y = c("subjID", "id"))
+rainbow_sum_l = merge(rainbow_sum_l, model_names, by = "subjID", all.x = T)
 colnames(rainbow_sum_l)[colnames(rainbow_sum_l) %in% c("value_subj", "value_obj")] = c("TS_value_subj", "TS_value_obj")
 # Add objective alien values
 rainbow_sum_l$alien_values_obj = NA
@@ -1047,12 +1057,14 @@ rainbow_sum_l
 gg_rainbow_avs = ggplot(rainbow_sum_l, aes(TS)) +
   stat_summary(aes(y = frac_chosen), color = "red", fun.data="mean_se", geom="pointrange") +
   stat_summary(aes(y = times_chosen), color = "blue", fun.data="mean_se", geom="pointrange") +
-  labs(y = "Fraction (red); Times chosen (blue)")
+  labs(y = "Fraction (red); Times chosen (blue)") +
+  facet_grid(model_name ~ .)
 
 # Histogram of how often the three TS are chosen
 gg_rainbow_TS = ggplot(subset(rainbow_sum_l, TS %in% c("0", "1", "2", "None")), aes(times_chosen, fill = TS)) +
   geom_histogram(stat = "density", position = "identity", alpha = 0.8) +
-  labs(x = "# TS choices")
+  labs(x = "# TS choices") +
+  facet_grid(model_name ~ .)
 
 gg_rainbow_TS_full = gg_rainbow_TS
 gg_rainbow_TS_full$data = rainbow_sum_l
@@ -1074,14 +1086,14 @@ gg_rainbow_ACC = gg_rainbow_TS + aes(fill = av_ACC_cat, group = av_ACC_cat) +
 gg_rainbow_ACC$data = subset(rainbow_sum_l, !is.na(av_ACC_cat))
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "5gg_rainbow_avs.png"), gg_rainbow_avs, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "5gg_rainbow_avs.png"), gg_rainbow_avs, width = 5, height = 8)
   
-  ggsave(file.path(plot_dir, "5gg_rainbow_TS.png"), gg_rainbow_TS, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "5gg_rainbow_TS_full.png"), gg_rainbow_TS_full, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "5gg_rainbow_TS.png"), gg_rainbow_TS, width = 5, height = 8)
+  ggsave(file.path(plot_dir, "5gg_rainbow_TS_full.png"), gg_rainbow_TS_full, width = 5, height = 8)
   
-  ggsave(file.path(plot_dir, "5gg_rainbow_value_obj.png"), gg_rainbow_value_obj, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "5gg_rainbow_value_subj.png"), gg_rainbow_value_subj, width = 5, height = 3)
-  ggsave(file.path(plot_dir, "5gg_rainbow_ACC.png"), gg_rainbow_ACC, width = 5, height = 3)
+  ggsave(file.path(plot_dir, "5gg_rainbow_value_obj.png"), gg_rainbow_value_obj, width = 5, height = 8)
+  ggsave(file.path(plot_dir, "5gg_rainbow_value_subj.png"), gg_rainbow_value_subj, width = 5, height = 8)
+  ggsave(file.path(plot_dir, "5gg_rainbow_ACC.png"), gg_rainbow_ACC, width = 5, height = 8)
 }
 ```
 ```{r Run rainbow regression models}
@@ -1301,7 +1313,7 @@ for (subj in unique(feed_aliens$subjID)) {
 ggplot(subset(feed_aliens, subjID == 500 & trial_index < 500), aes(trial_index, rolling_average_ACC, color = block %% 3)) +
   geom_point() +
   geom_hline(yintercept = 6/8, linetype = "dotted") +
-  facet_grid(learning_style ~ subjID)
+  facet_grid(model_name ~ subjID)
 
 # Create six_of_8_correct_dat, which contains the trial index in which the criterion 6/8 correct was reached in each block for each subject
 feed_aliens$reached_6_out_of_8 = feed_aliens$rolling_average_ACC >= 6/8
@@ -1316,12 +1328,12 @@ six_of_8_correct_dat = merge(parameter_dat, six_of_8_correct_dat, by = "subjID",
 gg_alpha_6_of_8 = ggplot(six_of_8_correct_dat, aes(round(alpha, 1), trial_reached)) +
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
   labs(x = "Alpha (binned)", y = "Trials to criterion after switch") +
-  facet_grid(~ learning_style)
+  facet_grid(model_name ~ .)
 gg_beta_6_of_8 = gg_alpha_6_of_8 + aes(x = round(beta)) + labs(x = "Beta (binned)")
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "/6gg_alpha_six_of_8.png"), gg_alpha_6_of_8, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "/6gg_beta_six_of_8.png"), gg_beta_6_of_8, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "/6gg_alpha_six_of_8.png"), gg_alpha_6_of_8, width = 4, height = 8)
+  ggsave(file.path(plot_dir, "/6gg_beta_six_of_8.png"), gg_beta_6_of_8, width = 4, height = 8)
 }
 ```
 ```{r Compare effects of TS and alien values (subjwise_value_effects)}
@@ -1331,12 +1343,12 @@ subjwise_value_effects_long$factor = gsub("beta_", "", subjwise_value_effects_lo
 gg_alpha_values = ggplot(subjwise_value_effects_long, aes(round(alpha, 1), regr_beta)) +
   stat_summary(fun.data = "mean_se", geom = "pointrange") +
   labs(x = "Alpha (binned)", y = "Effect of value on ACC (regr. beta)") +
-  facet_grid(learning_style ~ factor)
+  facet_grid(model_name ~ factor)
 gg_beta_values = gg_alpha_values + aes(x = round(beta)) + labs(x = "Beta (binned)")
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 10, height = 3)
-  ggsave(file.path(plot_dir, "/6gg_beta_values.png"), gg_beta_values, width = 10, height = 3)
+  ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 10, height = 10)
+  ggsave(file.path(plot_dir, "/6gg_beta_values.png"), gg_beta_values, width = 10, height = 10)
 }
 ```
 ```{r Start button}
