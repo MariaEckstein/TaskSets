@@ -24,7 +24,7 @@ n_seasons = 3
 n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
-wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "trial_type", "learning_style", "mix_probs", "fit_pars", "RT", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
+wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "learning_style", "mix_probs", "fit_pars", "RT", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
 if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
@@ -33,6 +33,7 @@ if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/"
   patt = "sim_5...csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   plot_dir = file.path(data_dir, "plots")
+  parameter_names = c("alpha", "alpha_high", "beta", "epsilon", "forget", "forget_high", "suppress_prev_TS", "create_TS_biased")
 }
 feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refresher3")
 colnames(n_trials) = paste0("X", feed_aliens_phases)
@@ -55,7 +56,17 @@ for (filename in filenames) {
 subj_file
 all_files
 ```
-```{r Get simulated data into the right forma}
+```{r Get parameter_dat}
+if (run_on %in% c("gen_rec", "simulations")) {
+  parameter_dat = ddply(all_files, c("sID", "learning_style", parameter_names), summarize,
+                       alpha = alpha[1],
+                       beta = beta[1],
+                       forget = forget[1])
+  parameter_dat
+  colnames(parameter_dat)[colnames(parameter_dat) == "sID"] = "subjID"
+}
+```
+```{r Get simulated data into the right format}
 # Rename TS-related columns
 colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
 colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
@@ -214,6 +225,7 @@ for (wanted_column in wanted_columns) {
 old_allfiles_dim = dim(all_files)
 
 # Create new columns
+all_files$block = NA
 all_files$alien_trial = NA
 all_files$repetition = NA
   
@@ -224,6 +236,7 @@ for (subjIDi in unique(all_files$subjID)) {
   subj_file = all_files[subj_phase_rows,]
   
   # Create counters for seasons and alien_season combos
+  block = 0
   season_counter = data.frame(hot = 0, cold = 0, rainy = 0, rainbow = 0)
   alien_season_counter = data.frame(hot = rep(0, n_aliens), cold = rep(0, n_aliens), rainy = rep(0, n_aliens), rainbow = rep(0, n_aliens))
 
@@ -243,10 +256,12 @@ for (subjIDi in unique(all_files$subjID)) {
     # Update season and season-alien counters
     if (new_season) {
       season_counter[season] = season_counter[season] + 1
+      block = block + 1
     }
     alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
     
     # Update repetition and alien_trial in the subj_file
+    subj_file$block[row] = block
     subj_file$repetition[row] = season_counter[season][[1]]
     subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
   }
@@ -587,7 +602,7 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "0TS_plot_subj.png"), TS_plot_subj, width = 15, height = 15)
 }
 ```
-```{r Prepare learning data for plotting (feed_aliens)}
+```{r Prepare feed_aliens}
 # Plotting data: feed_aliens
 feed_aliens = subset(all_files, trial_type == "feed-aliens" & block.type != "mixed")
 
@@ -684,7 +699,7 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_learning_curves_wide.png"), gg_learning_curves_wide, width = 10, height = 5)
 }
 ```
-```{r Prepare learning data for regressions (regr_dat)}
+```{r Prepare regr_dat (ACC_1back_self and ACC_1back_other)}
 # Regression data: regr_dat
 ## Bring in the right order for regression: each line must be the predictor of the immediate next line!
 feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$phase, feed_aliens$sad_alien, feed_aliens$TS, feed_aliens$alien_trial),]
@@ -890,7 +905,7 @@ gg_otherTS_ACC3$data = dat_l
 gg_otherTS_ACC4 = gg_otherTS_ACC3 + aes(x = "") + theme(legend.position = "none")
 
 # Run models
-if (run_regression) {
+  if (run_regression) {
   for (phas in unique(dat_l$phase)) {  # I could also just run one single regression model and include phase as a predictor
     others = subset(dat_l, current_TS == F & ACC_TS != "None" & phase == phas)
     others$ACC_TS = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = 0:2)
@@ -926,26 +941,50 @@ regression_plot = TS_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "% c
 regression_plot$data = regr_dat
 ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 3, height = 3)
 
+subjwise_value_effects = data.frame()
 if (run_regression) {
   for (phas in feed_aliens_phases) {
     
-    trial_value_form = "ACC ~ TS_value_subj + item_value_subj + alien_trial_sum + repetition + (TS_value_subj + item_value_subj + alien_trial_sum + repetition | subjID)"
+    trial_value_form_obj = "ACC ~ TS_value_obj + item_value_obj + alien_trial_sum + repetition + (TS_value_obj + item_value_obj + alien_trial_sum + repetition | subjID)"
+    trial_value_form_subj = "ACC ~ TS_value_subj + item_value_subj + alien_trial_sum + repetition + (TS_value_subj + item_value_subj + alien_trial_sum + repetition | subjID)"
     oneback_self_others_form = "ACC ~ ACC_1back_self * ACC_1back_others + repetition + (ACC_1back_self * ACC_1back_others + repetition | subjID)"
     rew_1back_form = "ACC ~ rew_1back_self + repetition + (rew_1back_self + repetition | subjID)"
     
-    glmer_mod_trial_value = glmer(as.formula(trial_value_form),
+    glmer_mod_trial_value_obj = glmer(as.formula(trial_value_form_obj),
                       family = binomial,
                       data = subset(regr_dat, phase == phas),
                       na.action = na.omit,
                       control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
-    write.csv(as.data.frame(summary(glmer_mod_trial_value)$coef), paste(plot_dir, "/glmer_trial_value_summary_", phas, ".csv", sep = ""))
+    write.csv(as.data.frame(summary(glmer_mod_trial_value_obj)$coef), paste(plot_dir, "/glmer_trial_value_obj_", phas, ".csv", sep = ""))
     
-    glmer_mod_1back_self_others = update(glmer_mod_trial_value, formula = as.formula(oneback_self_others_form))
+    glmer_mod_trial_value_subj = update(glmer_mod_trial_value_obj, formula = as.formula(trial_value_form_subj))
+    write.csv(as.data.frame(summary(glmer_mod_trial_value_subj)$coef), paste(plot_dir, "/glmer_trial_value_subj_", phas, ".csv", sep = ""))
+        
+    glmer_mod_1back_self_others = update(glmer_mod_trial_value_obj, formula = as.formula(oneback_self_others_form))
     write.csv(as.data.frame(summary(glmer_mod_1back_self_others)$coef), paste(plot_dir, "/glmer_oneback_self_others_summary_", phas, ".csv", sep = ""))
     
-    glmer_mod_rew_1back = update(glmer_mod_trial_value, formula = as.formula(rew_1back_form))
+    glmer_mod_rew_1back = update(glmer_mod_trial_value_obj, formula = as.formula(rew_1back_form))
     write.csv(as.data.frame(summary(glmer_mod_rew_1back)$coef), paste(plot_dir, "/glmer_rew_1back_summary_", phas, ".csv", sep = ""))
   }
+  
+  for (subj in unique(regr_dat$subjID)) {
+    print(subj)
+    formula_obj = "ACC ~ TS_value_obj + item_value_obj + alien_trial_sum + repetition"
+    formula_subj = "ACC ~ TS_value_subj + item_value_subj + alien_trial_sum + repetition"
+    obj_value_mod = glm(as.formula(formula_obj),
+        family = binomial,
+        data = subset(regr_dat, subjID == subj))
+    subj_value_mod = glm(as.formula(formula_subj),
+        family = binomial,
+        data = subset(regr_dat, subjID == subj))
+    
+    obj_value_coefs = as.data.frame(summary(obj_value_mod)$coef)
+    subj_value_coefs = as.data.frame(summary(subj_value_mod)$coef)
+    
+    new_row = c(subj, obj_value_coefs["TS_value_obj", "Estimate"], obj_value_coefs["item_value_obj", "Estimate"], subj_value_coefs["TS_value_subj", "Estimate"], subj_value_coefs["item_value_subj", "Estimate"])
+    subjwise_value_effects = rbind(subjwise_value_effects, new_row)
+  }
+  colnames(subjwise_value_effects) = c("subjID", "beta_TS_value_obj", "beta_item_value_obj", "beta_TS_value_subj", "beta_item_value_subj")
 }
 ```
 ```{r Create Rainbow season data rainbow_aliens and rainbow_sum_l}
@@ -1086,18 +1125,18 @@ t.test(None_choices - 2 / 12 * Valid_choices)
 # t.test(Double_TS_choices - 2 / 12 * Valid_choices)
 ```
 ```{r Same for cloudy}
-cloudy_aliens = merge(subset(feed_aliens, phase == "2CloudySeason" & trial == 1, select = c("subjID", "sad_alien", "item_chosen")), all.x = T,
-                       all_ACCs)
-cloudy_aliens[order(cloudy_aliens$subjID, cloudy_aliens$sad_alien),]
-
-cloudy_sum = ddply(cloudy_aliens, .(subjID), summarize,
-      TS0 = sum(ACC.only0, na.rm = T),
-      TS1 = sum(ACC.only1, na.rm = T),
-      TS2 = sum(ACC.only2, na.rm = T),
-      TS0and2 = sum(ACC.02, na.rm = T),
-      TS1and2 = sum(ACC.12, na.rm = T),
-      Missed = sum(ACC.Missed, na.rm = T),
-      None = sum(ACC.None, na.rm = T))
+# cloudy_aliens = merge(subset(feed_aliens, phase == "2CloudySeason" & trial == 1, select = c("subjID", "sad_alien", "item_chosen")), all.x = T,
+#                        all_ACCs)
+# cloudy_aliens[order(cloudy_aliens$subjID, cloudy_aliens$sad_alien),]
+# 
+# cloudy_sum = ddply(cloudy_aliens, .(subjID), summarize,
+#       TS0 = sum(ACC.only0, na.rm = T),
+#       TS1 = sum(ACC.only1, na.rm = T),
+#       TS2 = sum(ACC.only2, na.rm = T),
+#       TS0and2 = sum(ACC.02, na.rm = T),
+#       TS1and2 = sum(ACC.12, na.rm = T),
+#       Missed = sum(ACC.Missed, na.rm = T),
+#       None = sum(ACC.None, na.rm = T))
 ```
 ```{r Rainbow season - plot choice descriptives}
 # # Combine OPTIMAL CHOICES with subject's choices in the rainbow season
@@ -1140,6 +1179,7 @@ cloudy_sum = ddply(cloudy_aliens, .(subjID), summarize,
 # }
 ```
 ```{r Get mixed-block data and add values}
+if (run_on == "humans") {
 mixed_block = subset(all_files, block.type == "mixed")
 
 # Add season-alien values (subj. and obj.)
@@ -1188,9 +1228,10 @@ mixed_block
 subset(mixed_block, select = c("TS", "rt", "sad_alien", "ts", "alien", "both"))
 mixed_block_l
 mixed_block_l_sum_wide
+}
 ```
 ```{r Mixed-block performance and RTs}
-
+if (run_on == "humans") {
 # Performance over time, dependent on (subj and obj) item values and TS values
 gg_mixed_acc_TS_obj = ggplot(mixed_block, aes(round(trial / 12), 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +  # trial / 12 because there are 12 different trials (4 aliens x 3 seasons); note: it looks like there are just 7 blocks, but there shold be 7 * 3...
   stat_summary(fun.data = mean_se, geom = "pointrange") +
@@ -1231,7 +1272,72 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "6gg_mixed_rts_within.png"), gg_mixed_rts_within, width = 2, height = 3)
   ggsave(file.path(plot_dir, "6gg_mixed_ACCs_within.png"), gg_mixed_ACCs_within, width = 2, height = 3)
 }
+}
+```
 
+# Relationships between model parameters and behavior
+
+```{r Get time to switch and compare to parameters (six_of_8_correct_dat)}
+# Add rolling_average_ACC to feed_aliens
+feed_aliens$rolling_average_ACC = NA
+
+for (subj in unique(feed_aliens$subjID)) {
+  for (blocki in unique(feed_aliens$block[feed_aliens$phase %in% feed_aliens_phases])) {
+    sub = feed_aliens$subjID == subj & feed_aliens$block == blocki
+    if (mean(sub) > 0) { 
+      block_correct = subset(feed_aliens, sub)$ACC
+      all_blocks = data.frame()
+      for (i in 0:8) {
+        all_blocks = rbind(all_blocks, c(rep(NA, i), block_correct[1:(length(block_correct)-i)]))
+      }
+      all_blocks[,1:4] = NA  # start counting at the second presentation of each alien - makes no sense to look at accuracy before!
+      rolling_average_ACC = colMeans(all_blocks, na.rm = T)
+      feed_aliens[sub,"rolling_average_ACC"] = rolling_average_ACC
+    }
+  }
+}
+
+# Check that it looks good
+ggplot(subset(feed_aliens, subjID == 500 & trial_index < 500), aes(trial_index, rolling_average_ACC, color = block %% 3)) +
+  geom_point() +
+  geom_hline(yintercept = 6/8, linetype = "dotted") +
+  facet_grid(learning_style ~ subjID)
+
+# Create six_of_8_correct_dat, which contains the trial index in which the criterion 6/8 correct was reached in each block for each subject
+feed_aliens$reached_6_out_of_8 = feed_aliens$rolling_average_ACC >= 6/8
+six_of_8_correct_dat = ddply(subset(feed_aliens, reached_6_out_of_8), .(subjID, block), summarize,
+                                 trial_reached = min(alien_trial_sum))
+all_subj_all_blocks = expand.grid(subjID = unique(feed_aliens$subjID), block = unique(feed_aliens$block))
+six_of_8_correct_dat = merge(all_subj_all_blocks, six_of_8_correct_dat, all.x = T)
+six_of_8_correct_dat$trial_reached[is.na(six_of_8_correct_dat$trial_reached)] = max(n_trials)  # not super clean---
+six_of_8_correct_dat = merge(parameter_dat, six_of_8_correct_dat, by = "subjID", all.y = T)
+
+# Results: plot relationship between parameters and average trials to reach criterion
+gg_alpha_6_of_8 = ggplot(six_of_8_correct_dat, aes(round(alpha, 1), trial_reached)) +
+  stat_summary(fun.data = "mean_se", geom = "pointrange") +
+  labs(x = "Alpha (binned)", y = "Trials to criterion after switch") +
+  facet_grid(~ learning_style)
+gg_beta_6_of_8 = gg_alpha_6_of_8 + aes(x = round(beta)) + labs(x = "Beta (binned)")
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "/6gg_alpha_six_of_8.png"), gg_alpha_6_of_8, width = 4, height = 3)
+  ggsave(file.path(plot_dir, "/6gg_beta_six_of_8.png"), gg_beta_6_of_8, width = 4, height = 3)
+}
+```
+```{r Compare effects of TS and alien values (subjwise_value_effects)}
+subjwise_value_effects = merge(subjwise_value_effects, parameter_dat, by = "subjID", all.x = T)
+subjwise_value_effects_long = melt(subset(subjwise_value_effects), measure.vars = c("beta_TS_value_obj", "beta_TS_value_subj", "beta_item_value_obj", "beta_item_value_subj"), variable.name = "factor", value.name = "regr_beta")
+subjwise_value_effects_long$factor = gsub("beta_", "", subjwise_value_effects_long$factor)
+gg_alpha_values = ggplot(subjwise_value_effects_long, aes(round(alpha, 1), regr_beta)) +
+  stat_summary(fun.data = "mean_se", geom = "pointrange") +
+  labs(x = "Alpha (binned)", y = "Effect of value on ACC (regr. beta)") +
+  facet_grid(learning_style ~ factor)
+gg_beta_values = gg_alpha_values + aes(x = round(beta)) + labs(x = "Beta (binned)")
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 10, height = 3)
+  ggsave(file.path(plot_dir, "/6gg_beta_values.png"), gg_beta_values, width = 10, height = 3)
+}
 ```
 ```{r Start button}
 ```
