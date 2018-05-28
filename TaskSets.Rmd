@@ -8,7 +8,7 @@ output: html_document
 # Preprocessing
 
 ```{r Set parameters load packages etc.}
-library("ggplot2"); library("plyr"); library("lme4"); library("reshape2")
+library("ggplot2"); library("plyr"); library("lme4"); library("reshape2"); library("zoo")
 theme_set(theme_bw())
 
 # TDs
@@ -745,12 +745,13 @@ summary(ACC_1back_dat)
 feed_alien_trial1 = subset(feed_aliens, alien_trial_sum == 1, select = c(subjID, model_name, sad_alien, TS, trial_index, phase, ACC, block))
 feed_alien_trial1 = feed_alien_trial1[order(feed_alien_trial1$subjID, feed_alien_trial1$trial_index),]
 
-# Add n-back columns
+# Add n_seen_aliens and n-back columns (I wish there was a better way to do this, with rollmean or so, but rollmean sets everything before NA..)
 for (subj in unique(feed_alien_trial1$subjID)) {
   for (blocki in unique(feed_alien_trial1$block)) {
+    sub_subj_block = feed_alien_trial1$block == blocki & feed_alien_trial1$subjID == subj
+    feed_alien_trial1[sub_subj_block, "n_seen_aliens"] = 0:3
     for (n in 1:(n_aliens-1)) {
       col = paste0("back", n)
-      sub_subj_block = feed_alien_trial1$block == blocki & feed_alien_trial1$subjID == subj
       if (mean(sub_subj_block) > 0) {
         ACC = feed_alien_trial1[sub_subj_block, "ACC"]
         ACC_aliens_before = c(rep(NA, n), ACC[1:(length(ACC)-n)])
@@ -765,7 +766,7 @@ feed_alien_trial1$cum_ACC = rowSums(feed_alien_trial1[,paste("back", 1:(n_aliens
 feed_alien_trial1$cum_ACC_ = feed_alien_trial1$cum_ACC
 feed_alien_trial1$cum_ACC_[feed_alien_trial1$cum_ACC %in% c(2, 3)] = "2-3"
 
-gg_value_guess = ggplot(feed_alien_trial1, aes(cum_ACC_, 100 * ACC)) +  # , color = cum_ACC_1back, group = cum_ACC_1back
+gg_prev_ACC = ggplot(feed_alien_trial1, aes(cum_ACC_, 100 * ACC)) +  # , color = cum_ACC_1back, group = cum_ACC_1back
   stat_summary(fun.data = mean_se, geom = "bar") +
   stat_summary(fun.data = mean_se, aes(color = TS, group = TS), geom = "pointrange") +
   stat_summary(fun.data = mean_se, aes(color = TS, group = TS), geom = "line") +
@@ -773,12 +774,14 @@ gg_value_guess = ggplot(feed_alien_trial1, aes(cum_ACC_, 100 * ACC)) +  # , colo
   coord_cartesian(ylim = c(0, 100)) +
   labs(x = "# previous correct trials", y = "% correct", color = "TS") +
   facet_grid(model_name ~ phase)
+gg_prev_seen = gg_prev_ACC + aes(x = n_seen_aliens) + labs(x = "# other aliens seen")
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "/2gg_value_guess.png"), gg_value_guess, width = 10, height = 9)
+  ggsave(file.path(plot_dir, "/2gg_prev_ACC.png"), gg_prev_ACC, width = 10, height = 9)
+  ggsave(file.path(plot_dir, "/2gg_prev_seen.png"), gg_prev_seen, width = 10, height = 9)
 }
 ```
-```{r Create perseverance data}
+```{r Add prev_TS and prev_notTS to feed_aliens (perseverance stuff)}
 # Get data that shows which choices correspond to one of the 3 TS, and which don't
 correct_TS = ddply(subset(all_files, ACC == 1 & season %in% c("cold", "hot", "rainy")),
                       .(TS, sad_alien), summarize,
@@ -788,77 +791,64 @@ all_TS = expand.grid(TS = unique(correct_TS$TS), sad_alien = unique(correct_TS$s
 corincor_TS = merge(correct_TS, all_TS, all.y = T)
 corincor_TS$ACC[is.na(corincor_TS$ACC)] = 0
 
-# Add accuracy for each TS to each trial
+# Add columns ACC0, ACC1, ACC2 (accuracy for each TS to each trial)
 for (TSi in unique(corincor_TS$TS)) {
   feed_aliens = merge(feed_aliens, subset(corincor_TS, TS == TSi, select = -TS),
         by = c("sad_alien", "item_chosen"),
         all.x = T,
         suffixes = c("", TSi))
-  col = paste("ACC", TSi, sep = "")
 }
 feed_aliens$ACCNone = with(feed_aliens, ACC0 + ACC1 + ACC2 == 0)  # Actions that are incorrect in each of the three TS
 feed_aliens = feed_aliens[order(feed_aliens$subjID, feed_aliens$trial_index),]
 
-# Add prev_TS
+# Add columns prev_TS and prev_notTS
 feed_aliens$prev_TS = NA
-feed_aliens$prev_prev_TS = NA
 feed_aliens$prev_notTS = NA
-prev_TS = "training"
-prev_prev_TS = "training"
-prev_row = "training"
-for (row in 1:nrow(feed_aliens)) {
-  TS_row = as.character(feed_aliens$TS[row])
-  if (is.na(TS_row)) {
-    print("skip!")
-  } else if (TS_row != prev_row) {
-    prev_prev_TS = prev_TS
-    prev_TS = prev_row
+prev_TS = NA
+
+for (subj in unique(feed_aliens$subjID)) {
+  for (blocki in unique(subset(feed_aliens, subjID == subj)$block)) {
+    
+    subj_block_sub = feed_aliens$subjID == subj & feed_aliens$block == blocki
+    current_TS = feed_aliens[subj_block_sub, "TS"][1]
+    
+    if (is.na(prev_TS)) {
+      prev_notTS = NA
+    } else {
+      prev_notTS = 3 - current_TS - prev_TS  # [TS]0 + [TS]1 + [TS]2 = 3
+    }
+    
+    feed_aliens[subj_block_sub, "prev_TS"] = prev_TS
+    feed_aliens[subj_block_sub, "prev_notTS"] = prev_notTS
+    
+    prev_TS = current_TS
   }
-  if (prev_TS == 0) {
-    prev_notTS = ifelse(TS_row == 1, 2, 1)
-  } else if (prev_TS == 1) {
-    prev_notTS = ifelse(TS_row == 2, 0, 2)
-  } else if (prev_TS == 2) {
-    prev_notTS = ifelse(TS_row == 0, 1, 0)
-  } else {
-    prev_notTS = NA
-  }
-  feed_aliens$prev_TS[row] = prev_TS
-  feed_aliens$prev_prev_TS[row] = prev_prev_TS
-  feed_aliens$prev_notTS[row] = prev_notTS
-  prev_row = TS_row
 }
-feed_aliens$prev_TS[feed_aliens$prev_TS %in% c("training", "rainbow")] = NA
-feed_aliens$prev_prev_TS[feed_aliens$prev_prev_TS %in% c("training", "rainbow")] = NA
 
-subset(feed_aliens, select = c("TS", "prev_TS", "prev_prev_TS", "prev_notTS"))
-
-# Add ACC_prev_TS and ACC_prev_notTS
+# Add columns ACC_prev_TS and ACC_prev_notTS
 feed_aliens$ACC_prev_TS = NA
 feed_aliens$ACC_prev_notTS = NA
-feed_aliens$ACC_prev_prev_TS = NA
 for (TSi in 0:2) {
   rows_prev = !is.na(feed_aliens$prev_TS) & feed_aliens$prev_TS == TSi
   rows_prev_not = !is.na(feed_aliens$prev_notTS) & feed_aliens$prev_notTS == TSi
-  rows_prev_prev = !is.na(feed_aliens$prev_prev_TS) & feed_aliens$prev_prev_TS == TSi
-  col = paste("ACC", TSi, sep = "")
+  col = paste0("ACC", TSi)
   feed_aliens[rows_prev, "ACC_prev_TS"] = feed_aliens[rows_prev, col]
   feed_aliens[rows_prev_not, "ACC_prev_notTS"] = feed_aliens[rows_prev_not, col]
-  feed_aliens[rows_prev_prev, "ACC_prev_prev_TS"] = feed_aliens[rows_prev_prev, col]
 }
+
+feed_aliens[order(feed_aliens$subjID, feed_aliens$trial_index), c("subjID", "sad_alien", "TS", "ACC", "ACC0", "ACC1", "ACC2", "prev_TS", "prev_notTS", "ACC_prev_TS", "ACC_prev_notTS")]
 ```
-```{r Plot perseverance mistakes and run regression models}
-dat = subset(feed_aliens, phase != "0Training")  # subset(feed_aliens, phase == phas)
-
+```{r Create persev_dat and plot perseverance mistakes}
 # Melt feed_aliens along ACC0, ACC1, ACC2, ACCNone
-dat_l = melt(subset(dat, select = -ACC), measure.vars = c("ACC0", "ACC1", "ACC2", "ACCNone"), variable.name = "ACC_TS", value.name = "ACC")
-dat_l$current_TS = F
+persev_dat_wide = subset(feed_aliens, select = c("subjID", "trial_index", "phase", "alien_trial", "alien_trial_sum", "model_name", "sad_alien", "TS", "ACC", "ACC_prev_TS", "ACC_prev_notTS", "ACC0", "ACC1", "ACC2", "ACCNone", "TS_value_obj", "TS_value_subj", "item_value_subj", "item_value_obj", "repetition", "alien_trial_sum"))
+persev_dat = melt(subset(persev_dat_wide, select = -c(ACC, ACC_prev_TS, ACC_prev_notTS)), measure.vars = c("ACC0", "ACC1", "ACC2", "ACCNone"), variable.name = "ACC_TS", value.name = "ACC")
+persev_dat$current_TS = F
 for (TSi in 0:2) {
-  dat_l$current_TS[dat_l$TS == TSi & dat_l$ACC_TS == paste("ACC", TSi, sep = "")] = T
+  persev_dat$current_TS[persev_dat$TS == TSi & persev_dat$ACC_TS == paste0("ACC", TSi)] = T
 }
-dat_l$facet = ""
+summary(persev_dat)
 
-gg_otherTS_ACC = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(ACC_TS))) +
+gg_otherTS_ACC = ggplot(persev_dat, aes(alien_trial, 100 * ACC, color = factor(ACC_TS))) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
   geom_hline(yintercept = 100/3, linetype = "dotted") +
   geom_hline(yintercept = 200/12, linetype = "dotted", color = "purple") +
@@ -866,38 +856,42 @@ gg_otherTS_ACC = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(ACC_TS
   labs(x = "Trial", y = "% chosen", color = "") +
   facet_grid(phase ~ TS)
 
-gg_otherTS_ACC_value = ggplot(dat_l, aes(alien_trial, 100 * ACC, color = factor(TS_value_subj), group = sad_alien)) +
+gg_otherTS_ACC_value = ggplot(persev_dat, aes(alien_trial, 100 * ACC, color = factor(TS_value_obj), group = sad_alien)) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
   geom_hline(yintercept = 100/3, linetype = "dotted") +
   coord_cartesian(y = c(0, 100)) +
   labs(x = "Trial", y = "% chosen", color = "Value") +
-  facet_grid(factor(dat_l$TS, labels = c("TS0", "TS1", "TS2")) ~ ACC_TS)
+  facet_grid(factor(persev_dat$TS) ~ ACC_TS)#, labels = c("TS0", "TS1", "TS2")
 
 gg_otherTS_ACC_alien = gg_otherTS_ACC_value +
   aes(color = factor(sad_alien)) +
   labs(color = "Alien")
 
-dat_l2 = melt(dat, measure.vars = c("ACC", "ACC_prev_TS", "ACC_prev_notTS"), variable.name = "ACC_TS", value.name = "ACC")  # , "ACC_prev_prev_TS"
-dat_l2$facet = ""
+persev_dat2 = melt(subset(persev_dat_wide, select = -c(ACC0, ACC1, ACC2, ACCNone)), measure.vars = c("ACC", "ACC_prev_TS", "ACC_prev_notTS"), variable.name = "ACC_TS", value.name = "ACC")
 gg_prevTS_ACC = gg_otherTS_ACC_value +
   aes(color = factor(value_subj)) +
   facet_grid(TS ~ ACC_TS)
-gg_prevTS_ACC$data = dat_l2
+gg_prevTS_ACC$data = persev_dat2
 
 # Remove trials that count as "intrusion errors" although they are correct in the current TS
-dat_l$ACC[dat_l$sad_alien == 3 & dat_l$TS == 0 & dat_l$ACC_TS == "ACC2"] = NA
-dat_l$ACC[dat_l$sad_alien == 3 & dat_l$TS == 2 & dat_l$ACC_TS == "ACC0"] = NA
-dat_l$ACC[dat_l$sad_alien == 0 & dat_l$TS == 2 & dat_l$ACC_TS == "ACC1"] = NA
-dat_l$ACC[dat_l$sad_alien == 0 & dat_l$TS == 1 & dat_l$ACC_TS == "ACC2"] = NA
+persev_dat$ACC[persev_dat$sad_alien == 3 & persev_dat$TS == 0 & persev_dat$ACC_TS == "ACC2"] = NA
+persev_dat$ACC[persev_dat$sad_alien == 3 & persev_dat$TS == 2 & persev_dat$ACC_TS == "ACC0"] = NA
+persev_dat$ACC[persev_dat$sad_alien == 0 & persev_dat$TS == 2 & persev_dat$ACC_TS == "ACC1"] = NA
+persev_dat$ACC[persev_dat$sad_alien == 0 & persev_dat$TS == 1 & persev_dat$ACC_TS == "ACC2"] = NA
 
-dat_l2$ACC[dat_l2$sad_alien == 3 & dat_l2$TS == 0 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
-dat_l2$ACC[dat_l2$sad_alien == 3 & dat_l2$TS == 2 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
-dat_l2$ACC[dat_l2$sad_alien == 0 & dat_l2$TS == 2 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
-dat_l2$ACC[dat_l2$sad_alien == 0 & dat_l2$TS == 1 & dat_l2$ACC_TS == "ACC_prev_TS"] = NA
+persev_dat2$ACC[persev_dat2$sad_alien == 3 & persev_dat2$TS == 0 & persev_dat2$ACC_TS == "ACC_prev_TS"] = NA
+persev_dat2$ACC[persev_dat2$sad_alien == 3 & persev_dat2$TS == 2 & persev_dat2$ACC_TS == "ACC_prev_TS"] = NA
+persev_dat2$ACC[persev_dat2$sad_alien == 0 & persev_dat2$TS == 2 & persev_dat2$ACC_TS == "ACC_prev_TS"] = NA
+persev_dat2$ACC[persev_dat2$sad_alien == 0 & persev_dat2$TS == 1 & persev_dat2$ACC_TS == "ACC_prev_TS"] = NA
+
+persev_dat2$ACC[persev_dat2$sad_alien == 3 & persev_dat2$TS == 0 & persev_dat2$ACC_TS == "ACC_prev_notTS"] = NA
+persev_dat2$ACC[persev_dat2$sad_alien == 3 & persev_dat2$TS == 2 & persev_dat2$ACC_TS == "ACC_prev_notTS"] = NA
+persev_dat2$ACC[persev_dat2$sad_alien == 0 & persev_dat2$TS == 2 & persev_dat2$ACC_TS == "ACC_prev_notTS"] = NA
+persev_dat2$ACC[persev_dat2$sad_alien == 0 & persev_dat2$TS == 1 & persev_dat2$ACC_TS == "ACC_prev_notTS"] = NA
 
 # How often do intrusions occur compared to just random mistakes?  (Question: Am I counting errors twice that are correct in more than one TS??)
-dat_l$none_or_TS = ifelse(dat_l$ACC_TS == "ACCNone", "None", "TS")
-subj_av = ddply(subset(dat_l, !current_TS), .(subjID, none_or_TS), summarize,
+persev_dat$none_or_TS = ifelse(persev_dat$ACC_TS == "ACCNone", "None", "TS")
+subj_av = ddply(subset(persev_dat, !current_TS), .(subjID, none_or_TS), summarize,
       ACC = sum(ACC, na.rm = T))
 subj_av = reshape(subj_av, direction = "wide", timevar = "none_or_TS", idvar = "subjID")
 subj_av$fraction_TS_errors = with(subj_av, ACC.TS / (ACC.None + ACC.TS))
@@ -907,40 +901,20 @@ grand_av = ddply(subj_av, .(), summarize,
       fraction_TS_errors = mean(fraction_TS_errors, na.rm = T))
 
 gg_otherTS_ACC2 = gg_otherTS_ACC
-gg_otherTS_ACC2$data = dat_l
-gg_otherTS_ACC2 = gg_otherTS_ACC2 + facet_grid(phase ~ model_name)  # model_name does not show up for some reason..
+gg_otherTS_ACC2$data = persev_dat
+gg_otherTS_ACC2 = gg_otherTS_ACC2 + facet_grid(phase ~ model_name)
 gg_otherTS_ACC_value2 = gg_otherTS_ACC_value
-gg_otherTS_ACC_value2$data = dat_l
+gg_otherTS_ACC_value2$data = persev_dat
 gg_otherTS_ACC_alien2 = gg_otherTS_ACC_alien
-gg_otherTS_ACC_alien2$data = dat_l
+gg_otherTS_ACC_alien2$data = persev_dat
 gg_prevTS_ACC2 = gg_prevTS_ACC + aes(x = alien_trial_sum, color = factor(ACC_TS, labels = c("Current TS", "Previous TS", "Other TS")), group = ACC_TS) + facet_grid(model_name ~ phase) + labs(x = "Trial", color = "")
-gg_prevTS_ACC2$data = dat_l2
+gg_prevTS_ACC2$data = persev_dat2
 
 gg_otherTS_ACC3 = gg_otherTS_ACC2 + aes(x = alien_trial_sum, color = ACC_TS, shape = factor(current_TS, labels = c("Other TS", "Current TS"))) +
   labs(x = "", color = "", shape = "") +
   facet_grid(model_name ~ phase)
-gg_otherTS_ACC3$data = dat_l
+gg_otherTS_ACC3$data = persev_dat
 gg_otherTS_ACC4 = gg_otherTS_ACC3 + aes(x = "") + theme(legend.position = "none")
-
-# Run models
-if (run_regression) {
-  for (model_name in unique(dat_l$model_name)) {
-    for (phas in unique(dat_l$phase)) {  # I could also just run one single regression model and include phase as a predictor
-      others = subset(dat_l, current_TS == F & ACC_TS != "None" & phase == phas)
-      others$ACC_TS = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = 0:2)
-    
-      # Not sure what the predictors should be here?
-      intrusions_form = "ACC ~ TS_value_subj + alien_trial_sum + repetition + (TS_value_subj + alien_trial_sum + repetition | subjID)"
-      
-      glmer_mod_intrusions = glmer(as.formula(intrusions_form),
-                        family = binomial,
-                        data = others,
-                        na.action = na.omit,
-                        control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
-      write.csv(as.data.frame(summary(glmer_mod_intrusions)$coef), paste(plot_dir, "/glmer_mod_intrusions_summary_", phas, "_", model_namei, ".csv", sep = ""))
-    }
-  }
-}
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_otherTS_ACC.png"), gg_otherTS_ACC, width = 10, height = 9)
@@ -956,12 +930,60 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_prevTS_ACC2.png"), gg_prevTS_ACC2, width = 10, height = 10)
 }
 ```
+```{r Run perseverance regression models}
+
+subjwise_regr_coefs = expand.grid(subjID = unique(all_files$subjID), phase = feed_aliens_phases)
+intrusion_predictors = c("TS_value_obj", "item_value_obj", "TS_value_subj", "item_value_subj")
+for (predictor in intrusion_predictors) {
+  subjwise_regr_coefs[,predictor] = NA
+}
+
+for (subj in unique(ACC_1back_dat$subjID)) {
+  for (phas in feed_aliens_phases) {
+  
+    dat = subset(persev_dat, current_TS == F & ACC_TS != "None" & phase == phas & subjID == subj)
+    
+    predictors_no_interest = c("repetition", "alien_trial_sum")
+    intrusion_formula = paste("ACC ~", paste(intrusion_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+    
+    intrusion_mod = glm(as.formula(intrusion_formula),
+        family = binomial,
+        data = dat)
+    intrusion_coefs = as.data.frame(summary(intrusion_mod)$coef)
+    
+    for (predictor in intrusion_predictors) {
+      subjwise_regr_coefs[subjwise_regr_coefs$subjID == subj & subjwise_regr_coefs$phase == phas, paste0("intrusion", predictor)] = intrusion_coefs[predictor, "Estimate"]
+    }
+  }
+}
+
+# Run models
+if (run_regression) {
+  for (model_name in unique(persev_dat$model_name)) {
+    for (phas in unique(persev_dat$phase)) {  # I could also just run one single regression model and include phase as a predictor
+      others = subset(persev_dat, current_TS == F & ACC_TS != "None" & phase == phas)
+      others$ACC_TS = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = 0:2)
+    
+      # Not sure what the predictors should be here?
+      intrusions_form = "ACC ~ TS_value_subj + alien_trial_sum + repetition + (TS_value_subj + alien_trial_sum + repetition | subjID)"
+      
+      glmer_mod_intrusions = glmer(as.formula(intrusions_form),
+                        family = binomial,
+                        data = others,
+                        na.action = na.omit,
+                        control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
+      write.csv(as.data.frame(summary(glmer_mod_intrusions)$coef), paste(plot_dir, "/glmer_mod_intrusions_summary_", phas, "_", model_namei, ".csv", sep = ""))
+    }
+  }
+}
+
+```
 ```{r Run regressions: Participants infer complete TS rather than individual mappings}
 regression_plot = TS_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "% correct", fill = "Alien")
 regression_plot$data = ACC_1back_dat
 ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 10, height = 10)
 
-subjwise_regr_coefs = expand.grid(subjID = unique(all_files$subjID), phase = feed_aliens_phases)
+# subjwise_regr_coefs = expand.grid(subjID = unique(all_files$subjID), phase = feed_aliens_phases)
 value_predictors = c("TS_value_obj", "item_value_obj", "TS_value_subj", "item_value_subj")
 reactivation_predictors = c("ACC_1back_self", "ACC_1back_others")
 for (predictor in c(value_predictors, reactivation_predictors)) {
@@ -993,7 +1015,6 @@ for (subj in unique(ACC_1back_dat$subjID)) {
     }
   }
 }
-  
 
 if (run_regression) {
   for (model_namei in unique(ACC_1back_dat$model_name)) {
@@ -1319,37 +1340,23 @@ if (gg_save) {
 
 ```{r Get time to switch and compare to parameters (six_of_8_correct_dat)}
 # Add rolling_average_ACC to feed_aliens
-feed_aliens$rolling_average_ACC = NA
-
-for (subj in unique(feed_aliens$subjID)) {
-  for (blocki in unique(feed_aliens$block[feed_aliens$phase %in% feed_aliens_phases])) {
-    sub = feed_aliens$subjID == subj & feed_aliens$block == blocki
-    if (mean(sub) > 0) { 
-      block_correct = subset(feed_aliens, sub)$ACC
-      all_blocks = data.frame()
-      for (i in 0:8) {
-        all_blocks = rbind(all_blocks, c(rep(NA, i), block_correct[1:(length(block_correct)-i)]))
-      }
-      all_blocks[,1:4] = NA  # start counting at the second presentation of each alien - makes no sense to look at accuracy before!
-      rolling_average_ACC = colMeans(all_blocks, na.rm = T)
-      feed_aliens[sub,"rolling_average_ACC"] = rolling_average_ACC
-    }
-  }
-}
+feed_aliens$rolling_average_ACC = rollmean(feed_aliens$ACC, 8, fill = NA, align = "right")
+feed_aliens$rolling_average_ACC[feed_aliens$alien_trial_sum < 3] = NA  # the first 8 trials (2 x 4 aliens) of each block need to be NA; otherwise they carry over between blocks / between subjects
+subset(feed_aliens, select = c("subjID", "sad_alien", "trial_index", "alien_trial_sum", "TS", "ACC", "rolling_average_ACC"))
 
 # Check that it looks good
 ggplot(subset(feed_aliens, subjID == 500 & trial_index < 500), aes(trial_index, rolling_average_ACC, color = block %% 3)) +
   geom_point() +
-  geom_hline(yintercept = 6/8, linetype = "dotted") +
+  geom_hline(yintercept = 6/12, linetype = "dotted") +
   facet_grid(model_name ~ subjID)
 
 # Create six_of_8_correct_dat, which contains the trial index in which the criterion 6/8 correct was reached in each block for each subject
 feed_aliens$reached_6_out_of_8 = feed_aliens$rolling_average_ACC >= 6/8
 six_of_8_correct_dat = ddply(subset(feed_aliens, reached_6_out_of_8), .(subjID, phase, block), summarize,
                                  trial_reached = min(alien_trial_sum))
-subjID_phase_block_dat = ddply(subset(feed_aliens, phase != "5RainbowSeason"), .(subjID, phase, block), summarize, random = NA)
+subjID_phase_block_dat = ddply(subset(feed_aliens, phase != "5RainbowSeason"), .(subjID, phase, block), summarize, random = NA)  # which block was part of which season for which agent?
 six_of_8_correct_dat = merge(six_of_8_correct_dat, subset(subjID_phase_block_dat, select = -random), by = c("subjID", "phase", "block"), all.y = T)  # add blocks that are missing because agent never reached criterion
-n_trials_long = data.frame(phase = feed_aliens_phases, n_trials = as.numeric(n_trials))
+n_trials_long = data.frame(phase = feed_aliens_phases, n_trials = as.numeric(n_trials))  # how many trials are presented in each phase (per alien)?
 six_of_8_correct_dat = merge(six_of_8_correct_dat, n_trials_long, by = "phase", all.x = T)  # add number of trials for each phase
 six_of_8_correct_dat$trial_reached[is.na(six_of_8_correct_dat$trial_reached)] = six_of_8_correct_dat$n_trials[is.na(six_of_8_correct_dat$trial_reached)] + 1  # set trials_to_criterion to the maximum number of trials in this phase + 1 for blocks in which agents never reached criterion
 six_of_8_correct_dat = merge(parameter_dat, six_of_8_correct_dat, by = "subjID", all.y = T)
@@ -1383,8 +1390,8 @@ gg_alpha_values = ggplot(subjwise_regr_coefs_long, aes(round(alpha, 1), regr_bet
 gg_beta_values = gg_alpha_values + aes(x = round(beta)) + labs(x = "Beta (binned)")
 
 if (gg_save) {
-  ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 10, height = 8)
-  ggsave(file.path(plot_dir, "/6gg_beta_values.png"), gg_beta_values, width = 10, height = 8)
+  ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 20, height = 8)
+  ggsave(file.path(plot_dir, "/6gg_beta_values.png"), gg_beta_values, width = 20, height = 8)
 }
 ```
 ```{r Start button}
