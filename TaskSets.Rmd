@@ -15,7 +15,7 @@ theme_set(theme_bw())
 # Make sure everything has model_name -> every plot has facets!
 
 run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
-gg_save = F
+gg_save = T
 run_regression = F
 exclude_participants = T
 n_aliens = 4
@@ -30,7 +30,7 @@ if (run_on == "humans") {
   patt = "1...csv"
   plot_dir = file.path(data_dir, "plots")
 } else {
-  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/allFlatAgents/"
+  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/"
   patt = "sim_....csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   plot_dir = file.path(data_dir, "plots")
 }
@@ -64,9 +64,9 @@ all_files
 summary(all_files)
 ```
 ```{r Human demographics}
-
-demo_data = subset(all_files, select = "responses", trial_index == 0)
-
+if (run_on == "humans") {
+  demo_data = subset(all_files, select = "responses", trial_index == 0)
+}
 # # Get demographics
 # demos = gsub("[^A-Za-z0-9/]", "", as.character(demo_data$responses)[1])  # get rid of all funny characters
 # Q0split = strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1]
@@ -1391,11 +1391,13 @@ gg_alpha_6_of_8 = ggplot(six_of_8_correct_dat, aes(round(alpha, 1), trial_reache
   facet_grid(model_name ~ .)
 gg_beta_6_of_8 = gg_alpha_6_of_8 + aes(x = round(beta)) + labs(x = "Beta (binned)")
 gg_forget_6_of_8 = gg_alpha_6_of_8 + aes(x = 2 * round(forget / 2, 2)) + labs(x = "Forget (binned)")
+gg_TSbias_6_of_8 = gg_alpha_6_of_8 + aes(x = 2 * round(create_TS_biased / 2, 1)) + labs(x = "Biased TS (binned)")
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "/6gg_alpha_six_of_8.png"), gg_alpha_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/6gg_beta_six_of_8.png"), gg_beta_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/6gg_forget_six_of_8.png"), gg_forget_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/6gg_TSbias_6_of_8.png"), gg_TSbias_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
 }
 ```
 ```{r Compare effects of TS and alien values (subjwise_regr_coefs)}
@@ -1410,11 +1412,13 @@ gg_alpha_values = ggplot(subjwise_regr_coefs_long, aes(round(alpha, 1), regr_bet
   labs(x = "Alpha (binned)", y = "Effect on ACC (regr. beta)") +
   facet_grid(model_name ~ factor)
 gg_beta_values = gg_alpha_values + aes(x = round(beta)) + labs(x = "Beta (binned)")
+gg_TSbiased_values = gg_alpha_values + aes(x = 2 * round(create_TS_biased / 2, 1)) + labs(x = "Biased TS creation (binned)")
 
-# if (gg_save) {
+if (gg_save) {
   ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 20, height = 3 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/6gg_beta_values.png"), gg_beta_values, width = 20, height = 3 * length(unique(all_files$model_name)))
-# }
+  ggsave(file.path(plot_dir, "/6gg_TSbiased_values.png"), gg_TSbiased_values, width = 20, height = 3 * length(unique(all_files$model_name)))
+}
 ```
 ```{r Start button}
 ```
