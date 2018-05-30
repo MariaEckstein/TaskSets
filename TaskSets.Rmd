@@ -15,8 +15,8 @@ theme_set(theme_bw())
 # Make sure everything has model_name -> every plot has facets!
 
 run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
-gg_save = T
-run_regression = F
+gg_save = F
+run_regression = T
 exclude_participants = T
 n_aliens = 4
 n_seasons = 3
@@ -948,116 +948,111 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_prevTS_ACC2.png"), gg_prevTS_ACC2, width = 10, height = 3 * length(unique(all_files$model_name)))
 }
 ```
-```{r Run perseverance regression models}
+```{r Run intrusion regression models}
+subjwise_regr_coefs = data.frame()
+all_regressions = data.frame()
+value_obj_predictors = c("TS_value_obj", "item_value_obj")
+predictors_no_interest = c("repetition", "alien_trial_sum")
 
-subjwise_regr_coefs = expand.grid(subjID = unique(all_files$subjID), phase = feed_aliens_phases)
-intrusion_predictors = c("TS_value_obj", "item_value_obj")#, "TS_value_subj", "item_value_subj"
-for (predictor in intrusion_predictors) {
-  subjwise_regr_coefs[,predictor] = NA
-}
-
-for (subj in unique(ACC_1back_dat$subjID)) {
+# Subjectwise / agentwise regression coefficients
+for (subj in unique(persev_dat$subjID)) {
   for (phas in feed_aliens_phases) {
   
     dat = subset(persev_dat, current_TS == F & ACC_TS != "None" & phase == phas & subjID == subj)
     
-    predictors_no_interest = c("repetition", "alien_trial_sum")
-    intrusion_formula = paste("ACC ~", paste(intrusion_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+    intrusion_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
     
     intrusion_mod = glm(as.formula(intrusion_formula),
         family = binomial,
         data = dat)
-    intrusion_coefs = as.data.frame(summary(intrusion_mod)$coef)
-    
-    for (predictor in intrusion_predictors) {
-      subjwise_regr_coefs[subjwise_regr_coefs$subjID == subj & subjwise_regr_coefs$phase == phas, paste0("intrusion", predictor)] = intrusion_coefs[predictor, "Estimate"]
-    }
+    intrusion_coefs = summary(intrusion_mod)$coef
+    intrusion_coefs = cbind(subjID = subj, phase = phas, regr_model = "intrusions", predictor = rownames(intrusion_coefs), as.data.frame(intrusion_coefs, row.names = F))
+    subjwise_regr_coefs = rbind(subjwise_regr_coefs, intrusion_coefs)
   }
 }
 
-# Run models
+# One joint model for all agents
 if (run_regression) {
-  for (model_name in unique(persev_dat$model_name)) {
+  for (model_namei in unique(persev_dat$model_name)) {
     for (phas in unique(persev_dat$phase)) {  # I could also just run one single regression model and include phase as a predictor
-      others = subset(persev_dat, current_TS == F & ACC_TS != "None" & phase == phas)
+      
+      others = subset(persev_dat, current_TS == F & ACC_TS != "None" & phase == phas & model_name == model_namei)
       others$ACC_TS = factor(others$ACC_TS, levels = c("ACC0", "ACC1", "ACC2"), labels = 0:2)
     
       # Not sure what the predictors should be here?
-      intrusions_form = "ACC ~ TS_value_subj + alien_trial_sum + repetition + (TS_value_subj + alien_trial_sum + repetition | subjID)"
+      intrusions_form = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
+                              "+ (", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "), "| subjID)")
       
-      glmer_mod_intrusions = glmer(as.formula(intrusions_form),
+      intrusion_glmer = glmer(as.formula(intrusions_form),
                         family = binomial,
                         data = others,
                         na.action = na.omit,
                         control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
-      write.csv(as.data.frame(summary(glmer_mod_intrusions)$coef), paste(plot_dir, "/glmer_mod_intrusions_summary_", phas, "_", model_namei, ".csv", sep = ""))
+      glmer_coefs = summary(intrusion_glmer)$coef
+      glmer_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "intrusions", predictor = rownames(glmer_coefs), as.data.frame(glmer_coefs, row.names = F))
+      all_regressions = rbind(all_regressions, glmer_coefs)
     }
   }
 }
-
 ```
-```{r Run regressions: Participants infer complete TS rather than individual mappings}
+```{r Run 1back_sef 1back_other regression models}
 regression_plot = TS_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "% correct", fill = "Alien")
 regression_plot$data = ACC_1back_dat
 ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 10, height = 3 * length(unique(all_files$model_name)))
 
-# subjwise_regr_coefs = expand.grid(subjID = unique(all_files$subjID), phase = feed_aliens_phases)
-value_predictors = c("TS_value_obj", "item_value_obj")#, "TS_value_subj", "item_value_subj"
-reactivation_predictors = c("ACC_1back_self", "ACC_1back_others")
-for (predictor in c(value_predictors, reactivation_predictors)) {
-  subjwise_regr_coefs[,predictor] = NA
-}
+nback_predictors = c("ACC_1back_self", "ACC_1back_others")
 
 for (subj in unique(ACC_1back_dat$subjID)) {
   for (phas in feed_aliens_phases) {
   
     dat = subset(ACC_1back_dat, subjID == subj & phase == phas)
     
-    predictors_no_interest = c("repetition", "alien_trial_sum")
-    value_formula = paste("ACC ~", paste(value_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
-    reactivation_formula = paste("ACC ~", paste(reactivation_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+    value_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+    nback_formula = paste("ACC ~", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
     
     value_mod = glm(as.formula(value_formula),
         family = binomial,
         data = dat)
-    value_coefs = as.data.frame(summary(value_mod)$coef)
+    value_coefs = summary(value_mod)$coef
+    value_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
     
-    reactivation_mod = update(value_mod, as.formula(reactivation_formula))
-    reactivation_coefs = as.data.frame(summary(reactivation_mod)$coef)
+    nback_mod = update(value_mod, as.formula(nback_formula))
+    nback_coefs = summary(nback_mod)$coef
+    nback_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
     
-    for (predictor in value_predictors) {
-      subjwise_regr_coefs[subjwise_regr_coefs$subjID == subj & subjwise_regr_coefs$phase == phas, predictor] = value_coefs[predictor, "Estimate"]
-    }
-    for (predictor in reactivation_predictors) {
-      subjwise_regr_coefs[subjwise_regr_coefs$subjID == subj & subjwise_regr_coefs$phase == phas, predictor] = reactivation_coefs[predictor, "Estimate"]
-    }
+    subjwise_regr_coefs = rbind(subjwise_regr_coefs, value_coefs, nback_coefs)
   }
 }
+summary(subjwise_regr_coefs)
 
 if (run_regression) {
   for (model_namei in unique(ACC_1back_dat$model_name)) {
     for (phas in feed_aliens_phases) {
       
-      trial_value_form_obj = "ACC ~ TS_value_obj + item_value_obj + alien_trial_sum + repetition + (TS_value_obj + item_value_obj + alien_trial_sum + repetition | subjID)"
-      trial_value_form_subj = "ACC ~ TS_value_subj + item_value_subj + alien_trial_sum + repetition + (TS_value_subj + item_value_subj + alien_trial_sum + repetition | subjID)"
-      oneback_self_others_form = "ACC ~ ACC_1back_self * ACC_1back_others + repetition + (ACC_1back_self * ACC_1back_others + repetition | subjID)"
-      rew_1back_form = "ACC ~ rew_1back_self + repetition + (rew_1back_self + repetition | subjID)"
+      value_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
+                            "+ (", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+      nback_formula = paste("ACC ~", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
+                            "+ (", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+      rew1back_formula = paste("ACC ~ rew_1back_self +", paste(predictors_no_interest, collapse = " + "),
+                             "+ (rew_1back_self + ",  paste(predictors_no_interest, collapse = " + "), "| subjID)")
       
-      glmer_mod_trial_value_obj = glmer(as.formula(trial_value_form_obj),
+      value_glmer = glmer(as.formula(value_formula),
                         family = binomial,
                         data = subset(ACC_1back_dat, phase == phas & model_name == model_namei),
                         na.action = na.omit,
                         control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
-      write.csv(as.data.frame(summary(glmer_mod_trial_value_obj)$coef), paste(plot_dir, "/glmer_trial_value_obj_", phas, "_", model_namei, ".csv", sep = ""))
+      value_coefs = summary(value_glmer$coef)
+      value_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "intrusions", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
+
+      nback_glmer = update(value_glmer, formula = as.formula(nback_formula))
+      nback_coefs = summary(nback_glmer)$coefs
+      nback_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "intrusions", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
       
-      glmer_mod_trial_value_subj = update(glmer_mod_trial_value_obj, formula = as.formula(trial_value_form_subj))
-      write.csv(as.data.frame(summary(glmer_mod_trial_value_subj)$coef), paste(plot_dir, "/glmer_trial_value_subj_", phas, "_", model_namei, ".csv", sep = ""))
-          
-      glmer_mod_1back_self_others = update(glmer_mod_trial_value_obj, formula = as.formula(oneback_self_others_form))
-      write.csv(as.data.frame(summary(glmer_mod_1back_self_others)$coef), paste(plot_dir, "/glmer_oneback_self_others_summary_", phas, "_", model_namei, ".csv", sep = ""))
+      rew1back_glmer = update(value_glmer, formula = as.formula(rew1back_formula))
+      rew1back_coefs = summary(rew1back_glmer)$coefs
+      rew1back_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "intrusions", predictor = rownames(rew1back_coefs), as.data.frame(rew1back_coefs, row.names = F))
       
-      glmer_mod_rew_1back = update(glmer_mod_trial_value_obj, formula = as.formula(rew_1back_form))
-      write.csv(as.data.frame(summary(glmer_mod_rew_1back)$coef), paste(plot_dir, "/glmer_rew_1back_summary_", phas, "_", model_namei, ".csv", sep = ""))
+      all_regressions = rbind(all_regressions, value_coefs, nback_coefs, rew1back_coefs)
     }
   }
 }
@@ -1384,14 +1379,17 @@ six_of_8_correct_dat$trial_reached[is.na(six_of_8_correct_dat$trial_reached)] = 
 six_of_8_correct_dat = merge(parameter_dat, six_of_8_correct_dat, by = "subjID", all.y = T)
   
 # Results: plot relationship between parameters and average trials to reach criterion
-gg_alpha_6_of_8 = ggplot(six_of_8_correct_dat, aes(round(alpha, 1), trial_reached, color = phase)) +
-  stat_summary(fun.data = "mean_se", geom = "pointrange") +
-  stat_summary(fun.data = "mean_se", geom = "line") +
-  labs(x = "Alpha (binned)", y = "Trials to criterion after switch") +
+gg_alpha_6_of_8 =
+  ggplot(six_of_8_correct_dat, aes(alpha, trial_reached, color = phase)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  # stat_summary(fun.data = "mean_se", geom = "pointrange") +
+  # stat_summary(fun.data = "mean_se", geom = "line") +
+  # labs(x = "Alpha (binned)", y = "Trials to criterion after switch") +
   facet_grid(model_name ~ .)
-gg_beta_6_of_8 = gg_alpha_6_of_8 + aes(x = round(beta)) + labs(x = "Beta (binned)")
-gg_forget_6_of_8 = gg_alpha_6_of_8 + aes(x = 2 * round(forget / 2, 2)) + labs(x = "Forget (binned)")
-gg_TSbias_6_of_8 = gg_alpha_6_of_8 + aes(x = 2 * round(create_TS_biased / 2, 1)) + labs(x = "Biased TS (binned)")
+gg_beta_6_of_8 = gg_alpha_6_of_8 + aes(x = beta)
+gg_forget_6_of_8 = gg_alpha_6_of_8 + aes(x = forget)
+gg_TSbias_6_of_8 = gg_alpha_6_of_8 + aes(x = create_TS_biased)
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "/6gg_alpha_six_of_8.png"), gg_alpha_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
@@ -1402,17 +1400,17 @@ if (gg_save) {
 ```
 ```{r Compare effects of TS and alien values (subjwise_regr_coefs)}
 subjwise_regr_coefs = merge(subjwise_regr_coefs, parameter_dat, by = "subjID", all.x = T)
-subjwise_regr_coefs_long = melt(subset(subjwise_regr_coefs), id.vars = c("subjID", "model_name", "phase", parameter_names), variable.name = "factor", value.name = "regr_beta")
-beta_limits = quantile(subjwise_regr_coefs_long$regr_beta, c(.1, .9), na.rm = T)
-subjwise_regr_coefs_long = subset(subjwise_regr_coefs_long, regr_beta > beta_limits[1] & regr_beta < beta_limits[2])
+beta_limits = quantile(subjwise_regr_coefs$Estimate, c(.15, .85), na.rm = T)
+subjwise_regr_coefs = subset(subjwise_regr_coefs, Estimate > beta_limits[1] & Estimate < beta_limits[2])
 
-gg_alpha_values = ggplot(subjwise_regr_coefs_long, aes(round(alpha, 1), regr_beta, color = phase, group = phase)) +
-  stat_summary(fun.data = "mean_se", geom = "pointrange") +
+gg_alpha_values =
+  ggplot(subjwise_regr_coefs, aes(alpha, Estimate, color = phase, group = phase)) +
+  geom_point() +
+  geom_smooth() +
   geom_hline(yintercept = 0, linetype = "dotted") +
-  labs(x = "Alpha (binned)", y = "Effect on ACC (regr. beta)") +
-  facet_grid(model_name ~ factor)
-gg_beta_values = gg_alpha_values + aes(x = round(beta)) + labs(x = "Beta (binned)")
-gg_TSbiased_values = gg_alpha_values + aes(x = 2 * round(create_TS_biased / 2, 1)) + labs(x = "Biased TS creation (binned)")
+  facet_grid(model_name ~ regr_model)
+gg_beta_values = gg_alpha_values + aes(x = beta)
+gg_TSbiased_values = gg_alpha_values + aes(x = create_TS_biased)
 
 if (gg_save) {
   ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 20, height = 3 * length(unique(all_files$model_name)))
@@ -1421,4 +1419,8 @@ if (gg_save) {
 }
 ```
 ```{r Start button}
+if (run_regression) {
+  write.csv(all_regressions, paste(plot_dir, "/all_regressions.csv", sep = ""))
+  write.csv(subjwise_regr_coefs, paste(plot_dir, "/subjwise_regr_coefs.csv", sep = ""))
+}
 ```
