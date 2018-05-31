@@ -12,11 +12,10 @@ library("ggplot2"); library("plyr"); library("lme4"); library("reshape2"); libra
 theme_set(theme_bw())
 
 # TDs
-# Make sure everything has model_name -> every plot has facets!
 
 run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
-gg_save = F
-run_regression = T
+gg_save = T
+run_regression = F
 exclude_participants = T
 n_aliens = 4
 n_seasons = 3
@@ -24,7 +23,7 @@ n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
 wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "model_name", "rt", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
-parameter_names = c("alpha", "alpha_high", "beta", "epsilon", "forget", "forget_high", "suppress_prev_TS", "create_TS_biased")
+parameter_names = c("alpha", "alpha_high", "beta", "epsilon", "forget", "forget_high", "create_TS_biased")
 if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
@@ -118,7 +117,11 @@ if (run_on == "humans") {
 ```{r Get simulated data into the right format}
 if (run_on == "simulations") {
   all_files[all_files$learning_style %in% c("flat", "s-flat"), "alpha_high"] = 0
+  all_files[all_files$learning_style %in% c("flat", "s-flat"), "beta_high"] = 0
   all_files[all_files$learning_style %in% c("flat", "s-flat"), "forget_high"] = 0
+  all_files[all_files$learning_style == "hierarchical" & all_files$alpha == all_files$alpha_high, "alpha_high"] = 0
+  all_files[all_files$learning_style == "hierarchical" & all_files$beta == all_files$beta_high, "beta_high"] = 0
+  all_files[all_files$learning_style == "hierarchical" & all_files$forget == all_files$forget_high, "forget_high"] = 0
   # Rename TS-related columns
   colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
   colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
@@ -134,7 +137,8 @@ if (run_on == "simulations") {
     
     subj_rows = all_files$subjID == subjIDi
     subj_learning_style = all_files[subj_rows, "learning_style"][1]
-    subj_model_parameters = paste(parameter_names[all_files[subj_rows, parameter_names][1,] != 0], collapse="_")[1]
+    non0_parameters = parameter_names[all_files[subj_rows, parameter_names][1,] != 0]
+    subj_model_parameters = paste(non0_parameters, collapse="_")[1]
     all_files[subj_rows, "model_name"] = paste0(subj_learning_style, "_", subj_model_parameters)
     
     subj_feedaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase != "3PickAliens")
@@ -1030,9 +1034,9 @@ if (run_regression) {
     for (phas in feed_aliens_phases) {
       
       value_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
-                            "+ (", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+                            "+ (", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "), "| subjID)")
       nback_formula = paste("ACC ~", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
-                            "+ (", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+                            "+ (", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "), "| subjID)")
       rew1back_formula = paste("ACC ~ rew_1back_self +", paste(predictors_no_interest, collapse = " + "),
                              "+ (rew_1back_self + ",  paste(predictors_no_interest, collapse = " + "), "| subjID)")
       
@@ -1041,21 +1045,22 @@ if (run_regression) {
                         data = subset(ACC_1back_dat, phase == phas & model_name == model_namei),
                         na.action = na.omit,
                         control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
-      value_coefs = summary(value_glmer$coef)
-      value_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "intrusions", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
+      value_coefs = summary(value_glmer)$coef
+      value_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
 
       nback_glmer = update(value_glmer, formula = as.formula(nback_formula))
-      nback_coefs = summary(nback_glmer)$coefs
-      nback_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "intrusions", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
+      nback_coefs = summary(nback_glmer)$coef
+      nback_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
       
       rew1back_glmer = update(value_glmer, formula = as.formula(rew1back_formula))
-      rew1back_coefs = summary(rew1back_glmer)$coefs
-      rew1back_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "intrusions", predictor = rownames(rew1back_coefs), as.data.frame(rew1back_coefs, row.names = F))
+      rew1back_coefs = summary(rew1back_glmer)$coef
+      rew1back_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_rewback", predictor = rownames(rew1back_coefs), as.data.frame(rew1back_coefs, row.names = F))
       
       all_regressions = rbind(all_regressions, value_coefs, nback_coefs, rew1back_coefs)
     }
   }
 }
+summary(all_regressions)
 ```
 ```{r Create Rainbow season data rainbow_aliens and rainbow_sum_l}
 # Create data.frame that shows accuracy according to each of the 3 TS, none, and missed trials
@@ -1355,72 +1360,99 @@ if (gg_save) {
 
 # Relationships between model parameters and behavior
 
-```{r Get time to switch and compare to parameters (six_of_8_correct_dat)}
-# Add rolling_average_ACC to feed_aliens
-feed_aliens$rolling_average_ACC = rollmean(feed_aliens$ACC, 8, fill = NA, align = "right")
-feed_aliens$rolling_average_ACC[feed_aliens$alien_trial_sum < 3] = NA  # the first 8 trials (2 x 4 aliens) of each block need to be NA; otherwise they carry over between blocks / between subjects
-subset(feed_aliens, select = c("subjID", "sad_alien", "trial_index", "alien_trial_sum", "TS", "ACC", "rolling_average_ACC"))
+```{r Get time to switch and compare to parameters (ACCfirst8_correct_dat)}
+# Add roll_av_ACC to feed_aliens
+n_trials = 8
+feed_aliens$roll_av_ACC = rollmean(feed_aliens$ACC, n_trials, fill = NA, align = "right")
+feed_aliens$roll_av_ACC[feed_aliens$alien_trial_sum <= n_trials / n_aliens] = NA  # the first n_trials trials (2 x 4 aliens) of each block need to be NA; otherwise they carry over between blocks / between subjects
 
 # Check that it looks good
-ggplot(subset(feed_aliens, subjID == unique(all_files$subjID)[1] & trial_index < 500), aes(trial_index, rolling_average_ACC, color = block %% 3)) +
+subset(feed_aliens, select = c("subjID", "sad_alien", "trial_index", "alien_trial", "alien_trial_sum", "TS", "ACC", "roll_av_ACC"))
+ggplot(subset(feed_aliens, subjID == unique(all_files$subjID)[1] & trial_index < 500), aes(trial_index, roll_av_ACC, color = block %% 3)) +
   geom_point() +
-  geom_hline(yintercept = 6/12, linetype = "dotted") +
   facet_grid(model_name ~ subjID)
 
-# Create six_of_8_correct_dat, which contains the trial index in which the criterion 6/8 correct was reached in each block for each subject
-feed_aliens$reached_6_out_of_8 = feed_aliens$rolling_average_ACC >= 6/8
-six_of_8_correct_dat = ddply(subset(feed_aliens, reached_6_out_of_8), .(subjID, phase, block), summarize,
-                                 trial_reached = min(alien_trial_sum))
-subjID_phase_block_dat = ddply(subset(feed_aliens, phase != "5RainbowSeason"), .(subjID, phase, block), summarize, random = NA)  # which block was part of which season for which agent?
-six_of_8_correct_dat = merge(six_of_8_correct_dat, subset(subjID_phase_block_dat, select = -random), by = c("subjID", "phase", "block"), all.y = T)  # add blocks that are missing because agent never reached criterion
-n_trials_long = data.frame(phase = feed_aliens_phases, n_trials = as.numeric(n_trials))  # how many trials are presented in each phase (per alien)?
-six_of_8_correct_dat = merge(six_of_8_correct_dat, n_trials_long, by = "phase", all.x = T)  # add number of trials for each phase
-six_of_8_correct_dat$trial_reached[is.na(six_of_8_correct_dat$trial_reached)] = six_of_8_correct_dat$n_trials[is.na(six_of_8_correct_dat$trial_reached)] + 1  # set trials_to_criterion to the maximum number of trials in this phase + 1 for blocks in which agents never reached criterion
-six_of_8_correct_dat = merge(parameter_dat, six_of_8_correct_dat, by = "subjID", all.y = T)
+# Create ACCfirst8_correct_dat
+ACCfirst8_correct_dat = ddply(subset(feed_aliens, alien_trial_sum == (n_trials / n_aliens + 1)), .(subjID, phase, block), summarize,
+                              roll_av_ACC = roll_av_ACC[1])
+ACCfirst8_correct_dat = merge(parameter_dat, ACCfirst8_correct_dat, by = "subjID", all.y = T)
   
 # Results: plot relationship between parameters and average trials to reach criterion
-gg_alpha_6_of_8 =
-  ggplot(six_of_8_correct_dat, aes(alpha, trial_reached, color = phase)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth() +
-  # stat_summary(fun.data = "mean_se", geom = "pointrange") +
-  # stat_summary(fun.data = "mean_se", geom = "line") +
-  # labs(x = "Alpha (binned)", y = "Trials to criterion after switch") +
-  facet_grid(model_name ~ .)
-gg_beta_6_of_8 = gg_alpha_6_of_8 + aes(x = beta)
-gg_forget_6_of_8 = gg_alpha_6_of_8 + aes(x = forget)
-gg_TSbias_6_of_8 = gg_alpha_6_of_8 + aes(x = create_TS_biased)
-
-if (gg_save) {
-  ggsave(file.path(plot_dir, "/6gg_alpha_six_of_8.png"), gg_alpha_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "/6gg_beta_six_of_8.png"), gg_beta_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "/6gg_forget_six_of_8.png"), gg_forget_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "/6gg_TSbias_6_of_8.png"), gg_TSbias_6_of_8, width = 4, height = 3 * length(unique(all_files$model_name)))
+if (ACCfirst8_correct_dat$model_name[1] != "human") {
+  gg_alpha_ACCfirst8 =
+    ggplot(ACCfirst8_correct_dat, aes(alpha, roll_av_ACC, color = phase)) +
+    geom_point(alpha = 0.5) +
+    geom_smooth() +
+    labs(y = "Switch speed (ACC in first 2 alien trials)") +
+    facet_grid(model_name ~ .)
+  gg_beta_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = beta)
+  gg_forget_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = forget)
+  gg_TSbias_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = create_TS_biased)
+  
+  if (gg_save) {
+    ggsave(file.path(plot_dir, "/6gg_alpha_ACCfirst8.png"), gg_alpha_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "/6gg_beta_ACCfirst8.png"), gg_beta_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "/6gg_forget_ACCfirst8.png"), gg_forget_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "/6gg_TSbias_ACCfirst8.png"), gg_TSbias_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
+  }
 }
+gg_ACCfirst8 =
+  ggplot(ACCfirst8_correct_dat, aes(phase, roll_av_ACC, fill = phase)) +
+  geom_violin() +
+  geom_point(position = "jitter", alpha = 0.1) +
+  geom_boxplot(width = 0.1, size = 1) +
+  labs(y = "Switch speed (ACC in first 2 alien trials)") +
+  facet_grid(model_name ~ .)
+ggsave(file.path(plot_dir, "/6gg_ACCfirst8.png"), gg_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
 ```
 ```{r Compare effects of TS and alien values (subjwise_regr_coefs)}
 subjwise_regr_coefs = merge(subjwise_regr_coefs, parameter_dat, by = "subjID", all.x = T)
-beta_limits = quantile(subjwise_regr_coefs$Estimate, c(.15, .85), na.rm = T)
-subjwise_regr_coefs = subset(subjwise_regr_coefs, Estimate > beta_limits[1] & Estimate < beta_limits[2])
+beta_limits = quantile(subjwise_regr_coefs$Estimate[subjwise_regr_coefs$predictor != "(Intercept)"], c(.1, .9), na.rm = T)
+sub_dat = subset(subjwise_regr_coefs, `Pr(>|z|)` < 0.05)
+interesting_predictors =  c("item_value_obj", "TS_value_obj", "ACC_1back_self", "ACC_1back_others", "rew_1back_self")
+models = unique(subjwise_regr_coefs$regr_model)
 
-gg_alpha_values =
-  ggplot(subjwise_regr_coefs, aes(alpha, Estimate, color = phase, group = phase)) +
-  geom_point() +
-  geom_smooth() +
+gg_values =
+  ggplot(subset(subjwise_regr_coefs, predictor %in% interesting_predictors & Estimate > -1), aes(phase, Estimate, color = phase, alpha = `Pr(>|z|)` < 0.05)) +
+  # geom_violin() +
+  # geom_dotplot(binaxis = 'y', stackdir = 'center', dotsize = 0.5)
   geom_hline(yintercept = 0, linetype = "dotted") +
-  facet_grid(model_name ~ regr_model)
-gg_beta_values = gg_alpha_values + aes(x = beta)
-gg_TSbiased_values = gg_alpha_values + aes(x = create_TS_biased)
+  geom_point(position = "jitter") +
+  stat_summary(fun.data = mean_se, geom = "pointrange", color = "black") +
+  facet_grid(model_name ~ predictor)
+ggsave(file.path(plot_dir, paste0("/6gg_values.png")), gg_values, width = 10, height = 3 * length(unique(all_files$model_name)))
 
-if (gg_save) {
-  ggsave(file.path(plot_dir, "/6gg_alpha_values.png"), gg_alpha_values, width = 20, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "/6gg_beta_values.png"), gg_beta_values, width = 20, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "/6gg_TSbiased_values.png"), gg_TSbiased_values, width = 20, height = 3 * length(unique(all_files$model_name)))
+if (length(models) > 1) {
+  for (model in models) {
+    gg_alpha_values =
+      ggplot(subset(sub_dat, regr_model == model & predictor != "(Intercept)"), aes(alpha, Estimate, color = phase, group = phase)) +
+      geom_point() +
+      # geom_smooth(method = "lm") +
+      geom_hline(yintercept = 0, linetype = "dotted") +
+      facet_grid(model_name ~ predictor)
+    gg_beta_values = gg_alpha_values + aes(x = beta)
+    gg_TSbiased_values = gg_alpha_values + aes(x = create_TS_biased)
+    gg_forget_values = gg_alpha_values + aes(x = forget)
+  
+    if (gg_save) {
+      ggsave(file.path(plot_dir, paste0("/6gg_alpha_values_", model, ".png")), gg_alpha_values, width = 10, height = 3 * length(unique(all_files$model_name)))
+      ggsave(file.path(plot_dir, paste0("/6gg_beta_values_", model, ".png")), gg_beta_values, width = 10, height = 3 * length(unique(all_files$model_name)))
+      ggsave(file.path(plot_dir, paste0("/6gg_forget_values_", model, ".png")), gg_forget_values, width = 10, height = 3 * length(unique(all_files$model_name)))
+      ggsave(file.path(plot_dir, paste0("/6gg_TSbiased_values_", model, ".png")), gg_TSbiased_values, width = 10, height = 3 * length(unique(all_files$model_name)))
+    }
+  }
 }
 ```
-```{r Start button}
+```{r Plot glmer regression results}
 if (run_regression) {
+  gg_all_regr = ggplot(subset(all_regressions, predictor %in% interesting_predictors), aes(phase, Estimate, fill = predictor, alpha = `Pr(>|z|)` < 0.05)) +
+    geom_bar(stat="identity", position = position_dodge(width = 0.9)) +
+    facet_grid(model_name ~ regr_model)
+  ggsave(file.path(plot_dir, "/6gg_all_regr.png"), gg_all_regr, width = 10, height = 2 * length(unique(all_files$model_name)))
+
   write.csv(all_regressions, paste(plot_dir, "/all_regressions.csv", sep = ""))
   write.csv(subjwise_regr_coefs, paste(plot_dir, "/subjwise_regr_coefs.csv", sep = ""))
 }
+```
+```{r Start button}
 ```
