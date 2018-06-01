@@ -47,7 +47,7 @@ perf_criterion = 0.5  # participants who perform worse that that at the end of t
 filenames = list.files(data_dir, pattern = patt)
 all_files = data.frame()
 
-for (filename in filenames[1:10]) {
+for (filename in filenames) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "NaN", "-1"))
   
   if (run_on == "humans") {
@@ -1010,31 +1010,38 @@ regression_plot$data = ACC_1back_dat
 ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 10, height = 3 * length(unique(all_files$model_name)))
 
 nback_predictors = c("ACC_1back_self", "ACC_1back_others")
+value_formula = paste("ACC ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
+nback_formula = paste("ACC ~", paste(paste0(nback_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
+    
 
 for (subj in unique(ACC_1back_dat$subjID)) {
   for (phas in feed_aliens_phases) {
   
+    run_this_regr = T
     dat = subset(ACC_1back_dat, subjID == subj & phase == phas)
     
-    for (predictor in c(nback_predictors, predictors_no_interest)) {
+    for (predictor in c(value_obj_predictors, nback_predictors, predictors_no_interest)) {
       pred_dat = dat[,predictor]
-      dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+      zscored_pred = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+      dat[,paste0(predictor, "_zscored")] = zscored_pred
+      if (mean(is.na(zscored_pred)) == 1) {
+        run_this_regr = F
+      }
     }
     
-    value_formula = paste("ACC ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
-    nback_formula = paste("ACC ~", paste(paste0(nback_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
-    
-    value_mod = glm(as.formula(value_formula),
-        family = binomial,
-        data = dat)
-    value_coefs = summary(value_mod)$coef
-    value_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
-    
-    nback_mod = update(value_mod, as.formula(nback_formula))
-    nback_coefs = summary(nback_mod)$coef
-    nback_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
-    
-    subjwise_regr_coefs = rbind(subjwise_regr_coefs, value_coefs, nback_coefs)
+    if (run_this_regr) {
+      value_mod = glm(as.formula(value_formula),
+          family = binomial,
+          data = dat)
+      value_coefs = summary(value_mod)$coef
+      value_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
+      
+      nback_mod = update(value_mod, as.formula(nback_formula))
+      nback_coefs = summary(nback_mod)$coef
+      nback_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
+      
+      subjwise_regr_coefs = rbind(subjwise_regr_coefs, value_coefs, nback_coefs)
+    }
   }
 }
 summary(subjwise_regr_coefs)
@@ -1127,10 +1134,10 @@ if (run_on == "humans") {
   rainbow_sum_l = merge(rainbow_sum_l, model_names, by = "subjID", all.x = T)
 }
 # Add objective alien values
-rainbow_sum_l$alien_values_obj = NA
-rainbow_sum_l$alien_values_obj[rainbow_sum_l$TS == 0] = mean(c(6, 5, 4))
-rainbow_sum_l$alien_values_obj[rainbow_sum_l$TS == 1] = mean(c(3, 7, 8))
-rainbow_sum_l$alien_values_obj[rainbow_sum_l$TS == 2] = mean(c(3, 3))
+rainbow_sum_l$item_value_obj = NA
+rainbow_sum_l$item_value_obj[rainbow_sum_l$TS == 0] = mean(c(6, 5, 4))
+rainbow_sum_l$item_value_obj[rainbow_sum_l$TS == 1] = mean(c(3, 7, 8))
+rainbow_sum_l$item_value_obj[rainbow_sum_l$TS == 2] = mean(c(3, 3))
 rainbow_sum_l
 ```
 ```{r Plot rainbow season data}
@@ -1179,7 +1186,7 @@ if (gg_save) {
 ```
 ```{r Run rainbow regression models}
 subjwise_regr_coefs
-# Model: frac_chosen ~ TS_value_obj + alien_values_obj + TS_ACC
+# Model: frac_chosen ~ TS_value_obj + item_value_obj + TS_ACC
 ACC_1back_dat = subset(rainbow_sum_l, TS %in% c("0", "1", "2"))
 ACC_1back_dat$TS = factor(ACC_1back_dat$TS)
 contrasts(ACC_1back_dat$TS) = -contr.poly(3)
@@ -1412,13 +1419,17 @@ if (ACCfirst8_correct_dat$model_name[1] != "human") {
     geom_smooth() +
     labs(y = "Switch speed (ACC in first 2 alien trials)") +
     facet_grid(model_name ~ .)
+  gg_alphahigh_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = alpha_high)
   gg_beta_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = beta)
+  gg_betahigh_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = beta_high)
   gg_forget_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = forget)
   gg_TSbias_ACCfirst8 = gg_alpha_ACCfirst8 + aes(x = create_TS_biased)
   
   if (gg_save) {
     ggsave(file.path(plot_dir, "/6gg_alpha_ACCfirst8.png"), gg_alpha_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "/6gg_alphahigh_ACCfirst8.png"), gg_alphahigh_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
     ggsave(file.path(plot_dir, "/6gg_beta_ACCfirst8.png"), gg_beta_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "/6gg_betahigh_ACCfirst8.png"), gg_betahigh_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
     ggsave(file.path(plot_dir, "/6gg_forget_ACCfirst8.png"), gg_forget_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
     ggsave(file.path(plot_dir, "/6gg_TSbias_ACCfirst8.png"), gg_TSbias_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
   }
@@ -1442,49 +1453,65 @@ gg_alpha_pickaliens = ggplot(pick_aliens_avs_long, aes(alpha, value, color = mea
   geom_point() +
   geom_smooth() +
   facet_grid(model_name ~ assess)
+gg_alphahigh_pickaliens = gg_alpha_pickaliens + aes(x = alpha_high)
 gg_beta_pickaliens = gg_alpha_pickaliens + aes(x = beta)
+gg_betahigh_pickaliens = gg_alpha_pickaliens + aes(x = beta_high)
 gg_forget_pickaliens = gg_alpha_pickaliens + aes(x = forget)
 gg_biasedTS_pickaliens = gg_alpha_pickaliens + aes(x = create_TS_biased)
+gg_alpha_min_alphahigh_pickaliens = gg_alpha_pickaliens + aes(x = alpha - alpha_high)
+gg_beta_min_betahigh_pickaliens = gg_alpha_pickaliens + aes(x = beta - beta_high)
 
 if (gg_save) {
+  ggsave(file.path(plot_dir, "/6gg_alphahigh_pickaliens.png"), gg_alphahigh_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/6gg_alpha_pickaliens.png"), gg_alpha_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/6gg_beta_pickaliens.png"), gg_beta_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/6gg_betahigh_pickaliens.png"), gg_betahigh_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/6gg_forget_pickaliens.png"), gg_forget_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/6gg_biasedTS_pickaliens.png"), gg_biasedTS_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/6gg_alpha_min_alphahigh_pickaliens.png"), gg_alpha_min_alphahigh_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/6gg_beta_min_betahigh_pickaliens.png"), gg_beta_min_betahigh_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
 }
 ```
 ```{r Compare effects of TS and alien values (subjwise_regr_coefs)}
 subjwise_regr_coefs = merge(subjwise_regr_coefs, parameter_dat, by = "subjID", all.x = T)
-beta_limits = quantile(subjwise_regr_coefs$Estimate[subjwise_regr_coefs$predictor != "(Intercept)"], c(.1, .9), na.rm = T)
-# sub_dat = subset(subjwise_regr_coefs, `Pr(>|z|)` < 0.05 | regr_model == "rainbow")
-interesting_predictors =  c("item_value_obj", "TS_value_obj", "ACC_1back_self", "ACC_1back_others", "rew_1back_self")
+interesting_predictors =  paste0(c("item_value_obj", "TS_value_obj", "ACC_1back_self", "ACC_1back_others", "rew_1back_self"), "_zscored")
 models = unique(subjwise_regr_coefs$regr_model)
 
 gg_values =
-  ggplot(subset(subjwise_regr_coefs, predictor %in% interesting_predictors & Estimate > -1), aes(phase, Estimate, color = phase, alpha = `Pr(>|z|)` < 0.05)) +
+  ggplot(subset(subjwise_regr_coefs, predictor %in% interesting_predictors), aes(phase, Estimate, color = phase, alpha = `Pr(>|z|)` < 0.05)) +
   # geom_violin() +
   # geom_dotplot(binaxis = 'y', stackdir = 'center', dotsize = 0.5)
   geom_hline(yintercept = 0, linetype = "dotted") +
   geom_point(position = "jitter") +
   stat_summary(fun.data = mean_se, geom = "pointrange", color = "black") +
+  ylim(-4, 4) +
   facet_grid(model_name ~ predictor)
 ggsave(file.path(plot_dir, paste0("/6gg_values.png")), gg_values, width = 10, height = 3 * length(unique(all_files$model_name)))
 
 if (length(models) > 1) {
   for (model in models) {
     gg_alpha_values =
-      ggplot(subset(sub_dat, regr_model == model & predictor != "(Intercept)"), aes(alpha, Estimate, color = phase, group = phase)) +
+      ggplot(subset(subjwise_regr_coefs, regr_model == model & predictor != "(Intercept)"), aes(alpha, Estimate, color = phase, group = phase)) +
       geom_point() +
-      # geom_smooth(method = "lm") +
+      geom_smooth() +
       geom_hline(yintercept = 0, linetype = "dotted") +
+      ylim(-4, 4) +
       facet_grid(model_name ~ predictor)
+    gg_alphahigh_values = gg_alpha_values + aes(x = alpha_high)
     gg_beta_values = gg_alpha_values + aes(x = beta)
+    gg_betahigh_values = gg_alpha_values + aes(x = beta_high)
     gg_TSbiased_values = gg_alpha_values + aes(x = create_TS_biased)
     gg_forget_values = gg_alpha_values + aes(x = forget)
+    gg_alpha_min_alphahigh = gg_alpha_values + aes(x = (alpha - alpha_high))
+    gg_beta_min_betahigh = gg_alpha_values + aes(x = (beta - beta_high))
   
     if (gg_save) {
       ggsave(file.path(plot_dir, paste0("/6gg_alpha_values_", model, ".png")), gg_alpha_values, width = 10, height = 3 * length(unique(all_files$model_name)))
+      ggsave(file.path(plot_dir, paste0("/6gg_alphahigh_values_", model, ".png")), gg_alphahigh_values, width = 10, height = 3 * length(unique(all_files$model_name)))
+      ggsave(file.path(plot_dir, paste0("/6gg_alpha_min_alphahigh_values_", model, ".png")), gg_alpha_min_alphahigh, width = 10, height = 3 * length(unique(all_files$model_name)))
+      ggsave(file.path(plot_dir, paste0("/6gg_beta_min_betahigh_values_", model, ".png")), gg_beta_min_betahigh, width = 10, height = 3 * length(unique(all_files$model_name)))
       ggsave(file.path(plot_dir, paste0("/6gg_beta_values_", model, ".png")), gg_beta_values, width = 10, height = 3 * length(unique(all_files$model_name)))
+      ggsave(file.path(plot_dir, paste0("/6gg_betahigh_values_", model, ".png")), gg_betahigh_values, width = 10, height = 3 * length(unique(all_files$model_name)))
       ggsave(file.path(plot_dir, paste0("/6gg_forget_values_", model, ".png")), gg_forget_values, width = 10, height = 3 * length(unique(all_files$model_name)))
       ggsave(file.path(plot_dir, paste0("/6gg_TSbiased_values_", model, ".png")), gg_TSbiased_values, width = 10, height = 3 * length(unique(all_files$model_name)))
     }
