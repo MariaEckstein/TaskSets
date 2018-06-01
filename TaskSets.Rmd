@@ -23,7 +23,7 @@ n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
 wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "model_name", "rt", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
-parameter_names = c("alpha", "alpha_high", "beta", "epsilon", "forget", "forget_high", "create_TS_biased")
+parameter_names = c("alpha", "alpha_high", "beta", "beta_high", "epsilon", "forget", "forget_high", "create_TS_biased")
 if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
@@ -47,7 +47,7 @@ perf_criterion = 0.5  # participants who perform worse that that at the end of t
 filenames = list.files(data_dir, pattern = patt)
 all_files = data.frame()
 
-for (filename in filenames) {
+for (filename in filenames[1:10]) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "NaN", "-1"))
   
   if (run_on == "humans") {
@@ -964,7 +964,12 @@ for (subj in unique(persev_dat$subjID)) {
   
     dat = subset(persev_dat, current_TS == F & ACC_TS != "None" & phase == phas & subjID == subj)
     
-    intrusion_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+    for (predictor in c(value_obj_predictors, predictors_no_interest)) {
+      pred_dat = dat[,predictor]
+      dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+    }
+    
+    intrusion_formula = paste("ACC ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
     
     intrusion_mod = glm(as.formula(intrusion_formula),
         family = binomial,
@@ -1011,8 +1016,13 @@ for (subj in unique(ACC_1back_dat$subjID)) {
   
     dat = subset(ACC_1back_dat, subjID == subj & phase == phas)
     
-    value_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
-    nback_formula = paste("ACC ~", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "))
+    for (predictor in c(nback_predictors, predictors_no_interest)) {
+      pred_dat = dat[,predictor]
+      dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+    }
+    
+    value_formula = paste("ACC ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
+    nback_formula = paste("ACC ~", paste(paste0(nback_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
     
     value_mod = glm(as.formula(value_formula),
         family = binomial,
@@ -1168,14 +1178,31 @@ if (gg_save) {
 }
 ```
 ```{r Run rainbow regression models}
+subjwise_regr_coefs
 # Model: frac_chosen ~ TS_value_obj + alien_values_obj + TS_ACC
 ACC_1back_dat = subset(rainbow_sum_l, TS %in% c("0", "1", "2"))
 ACC_1back_dat$TS = factor(ACC_1back_dat$TS)
 contrasts(ACC_1back_dat$TS) = -contr.poly(3)
-mod = lm(frac_chosen ~ TS_value_obj + alien_values_obj + av_ACC,
-         ACC_1back_dat,
-         na.action=na.omit)
-summary(mod)
+
+for (subj in unique(ACC_1back_dat$subjID)) {
+  
+  dat = subset(ACC_1back_dat, subjID == subj)
+  
+  for (predictor in value_obj_predictors) {
+    pred_dat = dat[,predictor]
+    dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+  }
+  
+  rainbow_formula = paste("frac_chosen ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "))
+    
+  rainbow_mod = lm(as.formula(rainbow_formula),
+                   dat,
+                   na.action=na.omit)
+  rainbow_coefs = summary(rainbow_mod)$coef
+  rainbow_coefs = cbind(subjID = subj, phase = "5RainbowSeason", regr_model = "rainbow", predictor = rownames(rainbow_coefs), as.data.frame(rainbow_coefs, row.names = F))
+  colnames(rainbow_coefs) = colnames(subjwise_regr_coefs)
+  subjwise_regr_coefs = rbind(subjwise_regr_coefs, rainbow_coefs)
+}
 
 # Were more TS-related items selected than expected based on chance?
 TS_choices = 12 - rainbow_sum$Missed - rainbow_sum$None
@@ -1405,10 +1432,31 @@ gg_ACCfirst8 =
   facet_grid(model_name ~ .)
 ggsave(file.path(plot_dir, "/6gg_ACCfirst8.png"), gg_ACCfirst8, width = 4, height = 3 * length(unique(all_files$model_name)))
 ```
+```{r Model parameters and pick aliens}
+pick_aliens_avs_sub = subset(pick_aliens_avs, select = c("subjID", "model_name", "assess", "value_obj_diff", "av_ACC_diff", "selected_better_obj"), assess %in% c("alien-same-season", "season"))
+pick_aliens_avs_long =
+  melt(pick_aliens_avs_sub, id.vars = c("subjID", "model_name", "assess"), variable.name = "measure")
+pick_aliens_avs_long = merge(pick_aliens_avs_long, parameter_dat, all.x = T)
+
+gg_alpha_pickaliens = ggplot(pick_aliens_avs_long, aes(alpha, value, color = measure)) +
+  geom_point() +
+  geom_smooth() +
+  facet_grid(model_name ~ assess)
+gg_beta_pickaliens = gg_alpha_pickaliens + aes(x = beta)
+gg_forget_pickaliens = gg_alpha_pickaliens + aes(x = forget)
+gg_biasedTS_pickaliens = gg_alpha_pickaliens + aes(x = create_TS_biased)
+
+if (gg_save) {
+  ggsave(file.path(plot_dir, "/6gg_alpha_pickaliens.png"), gg_alpha_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/6gg_beta_pickaliens.png"), gg_beta_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/6gg_forget_pickaliens.png"), gg_forget_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/6gg_biasedTS_pickaliens.png"), gg_biasedTS_pickaliens, width = 10, height = 2 * length(unique(all_files$model_name)))
+}
+```
 ```{r Compare effects of TS and alien values (subjwise_regr_coefs)}
 subjwise_regr_coefs = merge(subjwise_regr_coefs, parameter_dat, by = "subjID", all.x = T)
 beta_limits = quantile(subjwise_regr_coefs$Estimate[subjwise_regr_coefs$predictor != "(Intercept)"], c(.1, .9), na.rm = T)
-sub_dat = subset(subjwise_regr_coefs, `Pr(>|z|)` < 0.05)
+# sub_dat = subset(subjwise_regr_coefs, `Pr(>|z|)` < 0.05 | regr_model == "rainbow")
 interesting_predictors =  c("item_value_obj", "TS_value_obj", "ACC_1back_self", "ACC_1back_others", "rew_1back_self")
 models = unique(subjwise_regr_coefs$regr_model)
 
