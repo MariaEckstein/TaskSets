@@ -160,11 +160,14 @@ jsPsych.plugins["feed-aliens"] = (function() {
       display_element.html('');  // clears display before feedback screen
 
       var timeout = info.rt == -1;
-      doFeedback(key, correct, timeout);
+      setTimeout(function() {
+          doFeedback(key, correct, timeout);
+      }, 1500);
     }
 
+
     // take care of button presses: mimic key presses
-    jsPsych.pluginAPI.getKeyboardResponse({
+      jsPsych.pluginAPI.getKeyboardResponse({
       callback_function: after_response,
       valid_responses: trial.choices,
       rt_method: 'date',

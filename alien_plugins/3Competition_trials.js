@@ -50,5 +50,6 @@ phase3_pick_aliens = {
     intro_alien_same_seasonn, alien_same_season, alien_same_season,
     intro_alien, alien, alien, alien, alien,
     intro_item, item, item, item, item,
+    intro_season, season, season, season, season,
   )
 }
