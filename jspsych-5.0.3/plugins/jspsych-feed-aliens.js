@@ -90,6 +90,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
     // display everyting
     display_element.html("");
     display_element.append(background, alien_buttons);
+    //stimuli trigger
 
     var trial_data = {};
 
@@ -124,6 +125,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
         unchosen_item2 = m_item_name
       } else {
         chosen_item_name = NaN
+          unchosen_item1 = NaN
+          unchosen_item2 = NaN
       }
 
       var correct = false;
@@ -159,10 +162,25 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       display_element.html('');  // clears display before feedback screen
 
+        alien_buttons =                                       //beginning of added
+            "<center><div class='alien_box'>" +
+            sad_alien +
+            //ruler +
+            response_buttons +
+            "</div></center>"
+
+        display_element.append(background, alien_buttons);
+
+        // remove non-clicked buttons
+        $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
+        $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');       //end of added
+
+        //insert ISI trigger here
+
       var timeout = info.rt == -1;
       setTimeout(function() {
           doFeedback(key, correct, timeout);
-      }, 1500);
+      }, trial.isi);   //creates a delay
     }
 
 
@@ -187,7 +205,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
     function doFeedback(key, correct, timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
+          display_element.html('');
         display_element.append(trial.timeout_message);
+        //timeout trigger if we need one
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
 
@@ -202,20 +222,23 @@ jsPsych.plugins["feed-aliens"] = (function() {
         ruler = ""
       }
 
+      display_element.html('');
+
       alien_buttons =
-        "<center><div class='alien_box'>" +
+          "<center><div class='alien_box'>" +
           sad_alien +
           ruler +
           response_buttons +
-        "</div></center>"
+          "</div></center>"
+          display_element.append(background, alien_buttons);
 
-      display_element.append(background, alien_buttons);
-
-      // remove non-clicked buttons
-      $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
-      $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
+          // remove non-clicked buttons
+          $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
+          $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
       }
+
+      //insert feedback trigger here-ish?
       setTimeout(function() {
         endTrial();
       }, trial.timing_feedback_duration);

@@ -10,11 +10,11 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700);
 html {
   font-family: 'Open Sans', 'Arial', sans-serif;
-  font-size: 18px;
+  font-size: 25px;                 /*changed for EEG to make font bigger */
   line-height: 1.6em;
 }
 body {
-  margin: 0;
+  margin: -100px;
   padding: 0;
 }
 p {

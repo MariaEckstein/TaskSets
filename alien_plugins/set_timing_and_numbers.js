@@ -5,7 +5,8 @@ max_RT_competition = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
 max_RT_rainbow = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
 max_RT_mixed = 2 * max_RT_initial_learn  // v3.0: 2 * max_RT
 feedback_duration = 500  // v1.0: 500; v2.0: 400; v3.0: 500
-ITI_duration = 250  // v1.0: 250; v2.0: 200; v3.0: 250
+ITI_duration = 250  // v1.0: 250; v2.0: 200; v3.0: 250  jsPsych.randomization.shuffle([.7, .75, .8, .85, .9, .95, .1, 1.05, 1.1, 1.15, 1.2])
+ISI_duration = 1000 //jsPsych.randomization.shuffle([.4, .45, .5, .55, .6, .65, .7, .75, .8])
 // Training block
 max_RT_train = 2 * max_RT_initial_learn
 feedback_duration_train = 1.5 * feedback_duration
