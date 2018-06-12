@@ -44,7 +44,7 @@ phase3_pick_aliens = {
   timing_feedback_duration: feedback_duration,
   timing_response: max_RT_competition,
   timeout_message: timeout_message_comp,
-  timing_post_trial: ITI_duration,
+  //timing_post_trial: ITI_duration,
   timeline: [].concat(
     intro_season, season, season, season, season,  // comes first because that's what I'm interested in - shouldn't be influenced by the other things
     intro_alien_same_seasonn, alien_same_season, alien_same_season,

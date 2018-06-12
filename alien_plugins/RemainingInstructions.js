@@ -12,7 +12,7 @@ var phase3_post = {
   type: 'instructions',
   pages: [phase3_text],
   show_clickable_nav: true,
-  timing_post_trial: ITI_duration
+  //timing_post_trial: ITI_duration
 }
 
 var phase6_mixed_instructions = {
@@ -23,7 +23,7 @@ var phase6_mixed_instructions = {
     "It can be rainy one day, and then then sunny the next.</p></center>"
   ],
   show_clickable_nav: true,
-  timing_post_trial: ITI_duration,
+  //timing_post_trial: ITI_duration,
 }
 
 // Goodbye block
@@ -34,5 +34,5 @@ var goodbye = {
     "<p>Please click 'Next' and let the experimenter know that you are done!</p></center>"
   ],
   show_clickable_nav: true,
-  timing_post_trial: ITI_duration,
+  //timing_post_trial: ITI_duration,
 }

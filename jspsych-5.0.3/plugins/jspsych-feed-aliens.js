@@ -165,7 +165,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
         alien_buttons =                                       //beginning of added
             "<center><div class='alien_box'>" +
             sad_alien +
-            //ruler +
             response_buttons +
             "</div></center>"
 
@@ -182,7 +181,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
           doFeedback(key, correct, timeout);
       }, trial.isi);   //creates a delay
     }
-
 
     // take care of button presses: mimic key presses
       jsPsych.pluginAPI.getKeyboardResponse({

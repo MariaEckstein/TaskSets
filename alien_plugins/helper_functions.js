@@ -98,6 +98,10 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
     section = []
     section_target_length = n_trials_per_alien * alien_names.length
     last_alien_old_chunk = "none"
+
+    //console.log(shuffle_ITIs(ITI_durations, n_trials_total));        //TAKE OUT??
+
+
     //// Create a block of 4 aliens
     while (section.length < section_target_length) {  // add trials until I have the right number
       four_trials = []
@@ -110,6 +114,9 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
               reward: alien_trial["reward"],
               TS: alien_trial["TS"],
               block_type: block_type,
+              timing_post_trial: all_trials[section.length+alien],
+              isi: all_ISI_trials[section.length+alien],
+
           }
           four_trials.push(trial);
       }
@@ -136,4 +143,22 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
     }
 
     return section
+}
+
+function shuffle_ITIs(ITI_durations, n_trials_total){
+    all_trials = [];
+    for (section_i = 0; section_i < n_trials_total/11; section_i++) {
+        eleven_trials = jsPsych.randomization.shuffle(ITI_durations);   //problem: actually 11, not 8
+        all_trials = all_trials.concat(eleven_trials);
+    }
+    return all_trials
+}
+
+function shuffle_ISIs(ISI_durations, n_trials_total){
+    all_ISI_trials = [];
+    for (section_i = 0; section_i < n_trials_total/9; section_i++) {
+        eight_trials = jsPsych.randomization.shuffle(ISI_durations);
+        all_ISI_trials = all_ISI_trials.concat(eight_trials);
+    }
+    return all_ISI_trials
 }
