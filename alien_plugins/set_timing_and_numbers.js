@@ -5,9 +5,9 @@ max_RT_competition = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
 max_RT_rainbow = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
 max_RT_mixed = 2 * max_RT_initial_learn  // v3.0: 2 * max_RT
 feedback_duration = 500  // v1.0: 500; v2.0: 400; v3.0: 500
-ITI_durations = [.7, .75, .8, .85, .9, .95, .1, 1.05, 1.1, 1.15, 1.2]; // v1.0: 250; v2.0: 200; v3.0: 250  jsPsych.randomization.shuffle([.7, .75, .8, .85, .9, .95, .1, 1.05, 1.1, 1.15, 1.2])
+ITI_durations = [700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200]; // v1.0: 250; v2.0: 200; v3.0: 250  jsPsych.randomization.shuffle([.7, .75, .8, .85, .9, .95, .1, 1.05, 1.1, 1.15, 1.2])
 
-ISI_durations = [.4, .45, .5, .55, .6, .65, .7, .75, .8]; //jsPsych.randomization.shuffle([.4, .45, .5, .55, .6, .65, .7, .75, .8])
+ISI_durations = [400, 450, 500, 550, 600, 650, 700, 750, 800]; //jsPsych.randomization.shuffle([.4, .45, .5, .55, .6, .65, .7, .75, .8])
 //ISI_duration = 1000;
 // Training block
 max_RT_train = 2 * max_RT_initial_learn
@@ -51,11 +51,10 @@ n_blocks_mixed = 3; // v3.0: 3
 n_trials_total = (n_blocks_training+(n_trials_per_alien_phase1*n_blocks_phase1)+(n_trials_per_alien_cloudy*n_blocks_cloudy)+
     (n_trials_per_alien_refreshers*n_blocks_refreshers*2)+n_blocks_rainbow+(n_trials_per_season_alien_mixed*n_blocks_mixed))*4,
 
-console.log(n_trials_total),
-
-    ITI_duration_shuffled = shuffle_ITIs(ITI_durations, n_trials_total);
+console.log(n_trials_total);
+ITI_duration_shuffled = shuffle(ITI_durations, n_trials_total);
 console.log(ITI_duration_shuffled);
-ISI_duration_shuffled = shuffle_ISIs(ISI_durations, n_trials_total);
+ISI_duration_shuffled = shuffle(ISI_durations, n_trials_total);
 console.log(ISI_duration_shuffled);
 
 // TS orders

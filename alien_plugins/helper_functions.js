@@ -114,12 +114,14 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
               reward: alien_trial["reward"],
               TS: alien_trial["TS"],
               block_type: block_type,
-              timing_post_trial: all_trials[section.length+alien],
-              isi: all_ISI_trials[section.length+alien],
-
+              timing_post_trial: ITI_duration_shuffled[section.length+alien],
+              isi: ISI_duration_shuffled[section.length+alien],
           }
           four_trials.push(trial);
       }
+      console.log(trial.isi);
+      console.log(trial.timing_post_trial);
+
       //// Add the 4-alien block to section (if this does not create an alien repetition)
       four_trials = jsPsych.randomization.shuffle(four_trials);  // randomize order within each chunk of 4 trials
       first_alien_new_chunk = four_trials[0].sad_alien
@@ -127,6 +129,7 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
         section = section.concat(four_trials)
         last_alien_old_chunk = four_trials[four_trials.length-1].sad_alien
       }
+
     }
 
     // Create start_new_season (non-mixed blocks) and put at the beginning of `section`
@@ -145,20 +148,11 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
     return section
 }
 
-function shuffle_ITIs(ITI_durations, n_trials_total){
-    all_trials = [];
-    for (section_i = 0; section_i < n_trials_total/11; section_i++) {
-        eleven_trials = jsPsych.randomization.shuffle(ITI_durations);   //problem: actually 11, not 8
-        all_trials = all_trials.concat(eleven_trials);
+function shuffle(durations, n_trials_total){
+    sections = [];
+    for (section_i = 0; section_i < n_trials_total / durations.length; section_i++) {
+        section = jsPsych.randomization.shuffle(durations);   //problem: actually 11, not 8
+        sections = sections.concat(section);
     }
-    return all_trials
-}
-
-function shuffle_ISIs(ISI_durations, n_trials_total){
-    all_ISI_trials = [];
-    for (section_i = 0; section_i < n_trials_total/9; section_i++) {
-        eight_trials = jsPsych.randomization.shuffle(ISI_durations);
-        all_ISI_trials = all_ISI_trials.concat(eight_trials);
-    }
-    return all_ISI_trials
+    return sections
 }
