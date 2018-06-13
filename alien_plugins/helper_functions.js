@@ -10,13 +10,13 @@ function randn_bm() {
 function create_pick_aliens_timeline(names, buttons, alien_season) {
 
   // Loop through buttons and select two for each trial to present
-  timeline = []
+  timeline = [];
   for (x1 = 0; x1 < buttons.length; x1 ++) {  // button1 can be any
     for (x2 = 0; x2 < buttons.length; x2 ++) {  // button2 can be any
       if (x1 < x2) {  // but they cannot be the same, and each pair is only allowed once
 
         // Check if this pair will be added
-        add_this_pair = false
+        add_this_pair = false;
         if (alien_season == undefined) {  // default: all pairs are added
           add_this_pair = true
         } else {  // it depends for alien-same-season and alien-different-season
@@ -47,14 +47,14 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='n
 
   if (block_type != 'mixed') {
     // Create timeline for Initial Learn: n_blocks_phase1 non-mixed blocks
-    n_sections = n_blocks * TS_names.length
-    random_number = Math.floor(Math.random() * TS_orders.length)
-    TS_order = TS_orders[random_number].slice(0, n_sections)
+    n_sections = n_blocks * TS_names.length;
+    random_number = Math.floor(Math.random() * TS_orders.length);
+    TS_order = TS_orders[random_number].slice(0, n_sections);
 
     // Concate all the TS sections for the block (one section per TS in TS_order)
-    all_sections = []
+    all_sections = [];
     for (section_i = 0; section_i < n_sections; section_i ++) {
-      section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type)
+      section = create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type);
       all_sections = all_sections.concat(section)
     }
 
@@ -62,12 +62,12 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='n
     // Create a block that consists of multiple sections of 12 trials; order is randomized within each section
     all_sections = []
     for (i = 0; i < n_trials_per_alien; i ++) {
-      section = []
+      section = [];
       for (section_i = 0; section_i < season_names.length; section_i ++) {  // loop over seasons to get each item once in each season
         section = section.concat(
           create_feed_aliens_section(section_i, [0, 1, 2], 1, block_type))  // create 1 trial per alien per season -> 12 trials total
       }
-      section = jsPsych.randomization.shuffle(section)
+      section = jsPsych.randomization.shuffle(section);
       all_sections = all_sections.concat(section)
     }
 
@@ -87,26 +87,24 @@ function create_feed_aliens_timeline(n_blocks, n_trials_per_alien, block_type='n
 function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, block_type) {
 
     // Get TS and season for this section
-    TS_name = TS_order[section_i]  // 0, 1, or 2
-    TS = TSs[TS_name]  // as defined in define_TS.js
-    season_name = season_names[TS_name]  // season_names = shuffle(["hot", "cold", "rainy"])
+    TS_name = TS_order[section_i] ; // 0, 1, or 2
+    TS = TSs[TS_name] ; // as defined in define_TS.js
+    season_name = season_names[TS_name];  // season_names = shuffle(["hot", "cold", "rainy"])
     if (block_type == "cloudy") {
         season_name = season_name.concat("_cloudy")
     }
 
     // Add n_trials_per_alien trials per alien to `section`
-    section = []
-    section_target_length = n_trials_per_alien * alien_names.length
-    last_alien_old_chunk = "none"
-
-    //console.log(shuffle_ITIs(ITI_durations, n_trials_total));        //TAKE OUT??
+    section = [];
+    section_target_length = n_trials_per_alien * alien_names.length;
+    last_alien_old_chunk = "none";
 
 
     //// Create a block of 4 aliens
     while (section.length < section_target_length) {  // add trials until I have the right number
-      four_trials = []
+      four_trials = [];
       for (alien = 0; alien < alien_names.length; alien ++) {
-          alien_trial = TS[alien]
+          alien_trial = TS[alien];
           trial = {
               season: season_name,
               sad_alien: alien_trial["sad_alien"],
@@ -114,17 +112,16 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
               reward: alien_trial["reward"],
               TS: alien_trial["TS"],
               block_type: block_type,
-              timing_post_trial: ITI_duration_shuffled[section.length+alien],
-              isi: ISI_duration_shuffled[section.length+alien],
+              timing_post_trial: ITI_duration_shuffled[section.length+alien+total_trials_so_far],
+              isi: ISI_duration_shuffled[section.length+alien+total_trials_so_far],
           }
           four_trials.push(trial);
       }
-      console.log(trial.isi);
-      console.log(trial.timing_post_trial);
+
 
       //// Add the 4-alien block to section (if this does not create an alien repetition)
       four_trials = jsPsych.randomization.shuffle(four_trials);  // randomize order within each chunk of 4 trials
-      first_alien_new_chunk = four_trials[0].sad_alien
+      first_alien_new_chunk = four_trials[0].sad_alien;
       if (first_alien_new_chunk != last_alien_old_chunk) {  // make sure that the same alien does not come up twice in a row (has no effect on mixed blocks because they'll be randomized independently after)
         section = section.concat(four_trials)
         last_alien_old_chunk = four_trials[four_trials.length-1].sad_alien
@@ -144,14 +141,15 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
         }
         section.unshift(start_new_season)
     }
+    total_trials_so_far += section_target_length;
 
     return section
 }
 
-function shuffle(durations, n_trials_total){
+function shuffle(durations, n_trials_total_minus_training_rainbow){
     sections = [];
-    for (section_i = 0; section_i < n_trials_total / durations.length; section_i++) {
-        section = jsPsych.randomization.shuffle(durations);   //problem: actually 11, not 8
+    for (section_i = 0; section_i < n_trials_total_minus_training_rainbow / durations.length; section_i++) {
+        section = jsPsych.randomization.shuffle(durations);
         sections = sections.concat(section);
     }
     return sections

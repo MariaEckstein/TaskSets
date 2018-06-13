@@ -57,6 +57,11 @@ jsPsych.plugins["feed-aliens"] = (function() {
     trial.timing_response = trial.timing_response || -1; // default is no max response time
     trial.timing_feedback_duration = trial.timing_feedback_duration || 2000;
 
+    console.log(trial.isi);
+    console.log(trial.timing_post_trial);
+    console.log(trial.timing_feedback_duration);
+    console.log(trial.season);
+
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
@@ -158,6 +163,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
         "block-type": trial.block_type,
         "season": trial.season,
         "phase": trial.phase,
+          "ISI": trial.isi,
+        "ITI": trial.timing_post_trial,
       };
 
       display_element.html('');  // clears display before feedback screen
