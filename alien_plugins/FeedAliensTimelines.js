@@ -11,6 +11,7 @@ training_block = {
   aliens: pr_alien_names,
   show_stim_with_feedback: true,
   timing_feedback_duration: feedback_duration_train,
+    timing_post_trial: ITI,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
   timeline: training_timeline
@@ -96,7 +97,7 @@ rainbow_trials = [
     {sad_alien: 2},
     {sad_alien: 3},
 ]
-rainbow_timeline = []
+rainbow_timeline = [];
 for (i = 0; i < n_blocks_rainbow; i ++) {
   rainbow_timeline = rainbow_timeline.concat(
     {timeline: rainbow_trials, randomize_order: true}
@@ -111,6 +112,7 @@ var rainbow_season_phase5 = {
     show_stim_with_feedback: false,
     timing_response: max_RT_rainbow,
     timing_feedback_duration: feedback_duration,
+    timing_post_trial: ITI,
     timeout_message: timeout_message,
     timeline: rainbow_timeline
 }

@@ -111,26 +111,26 @@ jsPsych.plugins["feed-aliens"] = (function() {
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
       var key = info.key;
-      chosen_item_name = NaN
-      chosen_item_id = NaN
+      chosen_item_name = NaN;
+      chosen_item_id = NaN;
       if (key == left_key) {
-        chosen_item_name = l_item_name
-        chosen_item_id = 0
-        unchosen_item1 = m_item_name
-        unchosen_item2 = r_item_name
+        chosen_item_name = l_item_name;
+        chosen_item_id = 0;
+        unchosen_item1 = m_item_name;
+        unchosen_item2 = r_item_name;
       } else if (key == middle_key) {
-        chosen_item_name = m_item_name
-        chosen_item_id = 1
-        unchosen_item1 = l_item_name
+        chosen_item_name = m_item_name;
+        chosen_item_id = 1;
+        unchosen_item1 = l_item_name;
         unchosen_item2 = r_item_name
       } else if (key == right_key) {
-        chosen_item_name = r_item_name
-        chosen_item_id = 2
-        unchosen_item1 = l_item_name
+        chosen_item_name = r_item_name;
+        chosen_item_id = 2;
+        unchosen_item1 = l_item_name;
         unchosen_item2 = m_item_name
       } else {
-        chosen_item_name = NaN
-          unchosen_item1 = NaN
+        chosen_item_name = NaN;
+          unchosen_item1 = NaN;
           unchosen_item2 = NaN
       }
 
@@ -145,9 +145,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
       } else {  // correct response
         reward = trial.reward
       }
-      noised_amount = reward + 0.5 * randn_bm()
-      rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
-      feedback_amount = Math.max(0, rounded_amount)
+      noised_amount = reward + 0.5 * randn_bm();
+      rounded_amount = Math.round(noised_amount * 10) / 10; // round doesn't round with decimals
+      feedback_amount = Math.max(0, rounded_amount);
 
       // save data
       trial_data = {

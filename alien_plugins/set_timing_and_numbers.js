@@ -5,7 +5,8 @@ max_RT_competition = 2 * max_RT_initial_learn;  // v1.0: max_RT; v2.0: 2 * max_R
 max_RT_rainbow = 2 * max_RT_initial_learn;  // v1.0: max_RT; v2.0: 2 * max_RT
 max_RT_mixed = 2 * max_RT_initial_learn;  // v3.0: 2 * max_RT
 feedback_duration = 500;  // v1.0: 500; v2.0: 400; v3.0: 500
-ITI_durations = [700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200]; // v1.0: 250; v2.0: 200; v3.0: 250
+ITI_durations = [500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000]; // v1.0: 250; v2.0: 200; v3.0: 250
+ITI = 250;
 
 ISI_durations = [400, 450, 500, 550, 600, 650, 700, 750, 800];
 //ISI_duration = 1000;
@@ -50,15 +51,16 @@ n_blocks_mixed = 3; // v3.0: 3
 
 n_trials_total_minus_training_rainbow = (((((n_trials_per_alien_phase1*n_blocks_phase1)+(n_trials_per_alien_cloudy*n_blocks_cloudy)+
     (n_trials_per_alien_refreshers*n_blocks_refreshers*2))*3) +(n_trials_per_season_alien_mixed*n_blocks_mixed))*4);
+console.log(n_trials_total_minus_training_rainbow);
 
 
 
 total_trials_so_far = 0;
 
 
-ITI_duration_shuffled = shuffle(ITI_durations, n_trials_total);
+ITI_duration_shuffled = shuffle(ITI_durations, n_trials_total_minus_training_rainbow);
 
-ISI_duration_shuffled = shuffle(ISI_durations, n_trials_total);
+ISI_duration_shuffled = shuffle(ISI_durations, n_trials_total_minus_training_rainbow);
 
 
 // TS orders
