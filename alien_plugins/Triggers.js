@@ -184,354 +184,354 @@ var initialCold4 = new CustomEvent('jspsych', {
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var initialHot1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 201
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var initialHot2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 202
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var intialHot3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 203
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var intialHot4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 204
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyRainy1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 11
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyRainy2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 12
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyRainy3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 13
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyRainy4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 14
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyCold1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 111
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyCold2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 112
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyCold3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 113
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyCold4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 114
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyHot1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 211
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyHot2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 212
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyHot3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 213
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var cloudyHot4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 214
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherRainy1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 21
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherRainy2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 22
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherRainy3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 23
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherRainy4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 24
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherCold1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 121
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherCold2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 122
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherCold3= new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 123
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherCold4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 124
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherHot1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 221
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherHot2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 222
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherHot3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 223
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var refresherHot4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 224
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticRainy1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 31
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticRainy2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 32
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticRainy3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 33
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticRainy4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 34
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticCold1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 131
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticCold2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 132
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticCold3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 133
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticCold4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 134
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticHot1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 231
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticHot2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 232
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticHot3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 233
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var chaoticHot4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 234
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var rainbow1 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 41
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var rainbow2 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 42
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var rainbow3 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 43
     }
 });
 
-var startEvent = new CustomEvent('jspsych', {
+var rainbow4 = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 44
     }
 });
