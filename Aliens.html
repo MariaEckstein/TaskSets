@@ -13,6 +13,7 @@
     <script src="jspsych-5.0.3/plugins/jspsych-feed-aliens.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-pick-aliens.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
+    <script src="alien_plugins/Triggers.js"></script>
     <script src="alien_plugins/helper_functions.js"></script>
     <script src="alien_plugins/set_timing_and_numbers.js"></script>
     <script src="alien_plugins/names_and_competition_images.js"></script>
@@ -67,11 +68,15 @@
         'img/training.png', 'img/umbrella.png'];
 
         jsPsych.init({
+            on_start: function(){
+                document.dispatchEvent(startEvent)
+            },
             timeline: timeline,
             //show_preload_progress_bar: false, // hide preload progress bar
             fullscreen: true,
             preload_images: images,
             on_finish: function () {
+                document.dispatchEvent(endEvent);
                 jsPsych.data.localSave('test.csv', 'csv')
             }
         });
