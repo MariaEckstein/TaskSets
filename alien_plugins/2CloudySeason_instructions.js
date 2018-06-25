@@ -9,11 +9,17 @@ instructions =
   "<p><i>Hint: You will still be notified when seasons change!</i></p></center>"
 
 var phase2_instructions = {
+    on_start: function(){
+        document.dispatchEvent(startInstructions)
+    },
   type: 'instructions',
   pages: [instructions],
   show_clickable_nav: true,
-  timing_post_trial: 200
-}
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+    }
+};
 
 instructions =
   "<center><p>As suddenly as it came, the cloud cover lifts and the sky is visible again!</p>" +
@@ -24,8 +30,15 @@ instructions =
   "<i>Make sure to get your aliens up to speed for it, by helping them grow as much as you can!</i></p>"
 
 var phase2_instructions_post = {
+    on_start: function(){
+        document.dispatchEvent(startInstructions)
+    },
   type: 'instructions',
   pages: [instructions],
   show_clickable_nav: true,
-  timing_post_trial: 200
-}
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+    }
+};
+

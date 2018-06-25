@@ -1,6 +1,9 @@
 // Instructions and preliminaries
 // Get demographics
 var get_subj_data = {
+    on_start: function(){
+        document.dispatchEvent(startEvent)
+    },
   type: "survey-text",
   questions: [
     "SubjID:",
@@ -9,8 +12,8 @@ var get_subj_data = {
     "Sex:",
     // "Occupation:",
     // "Highest degree (obtained or currently obtaining):"
-  ]
-}
+  ],
+};
 
 // Put pics together
 response_buttons =
@@ -72,7 +75,7 @@ instructions1 = "<center><p>In the following game, you will be taking care of fo
   "whereas another might need to catch cosmic rays with its big umbrella.</p>" +
   "<p>Over time, <i>you will learn what each alien needs in order to grow</i>.</p></center>" +
   aliens +
-  move_on
+  move_on;
 
 instructions2 = "<center><p>The aliens' planet goes through different seasons, " +
   "and <i>aliens need different things depending on these seasons</i>.</p>" +
@@ -87,13 +90,13 @@ instructions2 = "<center><p>The aliens' planet goes through different seasons, "
   "<p>Seasons change unpredictably. " +
   "This means that there is <i>no fixed order to seasons</i>, like on our planet. " +
   "Seasons might even differ in length!</p></center>" +
-  move_on
+  move_on;
 
 instructions3 = "<center><p>Before the actual game starts, let's practice with these four aliens:</p>" +
   aliens +
   "<p><i>Your job will be to make each one of them grow as much as you can, by learning what each one needs!</i> " +
   "(In the practice round, seasons will not change yet.)</center>" +
-  move_on
+  move_on;
 
 instructions4 =
   "<center><p>Whenever an alien needs something, it will pop up on the screen, like the alien below:</p>" +
@@ -106,17 +109,17 @@ instructions4 =
     "<p>Let's pretend you pressed 'k' and selected the middle option - click 'Next' to see what happens.</p>" +
   "</div>" +
   response_buttons +
-  "</center>"
+  "</center>";
 
 bed_button =
   "<center><div class='response_buttons'>" +
     item_buttons[1] +
-  "</div></center>"
+  "</div></center>";
 
 instructions5 = "<center><p> The alien liked the umbrella a lot! It grew by 5 centimeters and is very happy! </p>" +
   happy_alien +
   bed_button +
-  "</center>"
+  "</center>";
 
 instructions6 =
   "<center><p>Here's a hint before you start the practice round: " +
@@ -129,10 +132,13 @@ instructions6 =
   "Remember, you'll use the keys <i>'j', 'k', and 'l'</i> to select items.</p>" +
   aliens +
   "<p>Press 'Previous' if you'd like to review the instructions before you start.</p>" +
-  "</center>"
+  "</center>";
 
 // Put instruction slides together
 var phase1_instructions = {
+    on_start: function(){
+        document.dispatchEvent(startInstructions)
+    },
   type: 'instructions',
   pages: [
       welcome_block,
@@ -144,8 +150,11 @@ var phase1_instructions = {
       instructions6
   ],
   show_clickable_nav: true,
-  timing_post_trial: 200
-}
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+    }
+};
 
 // More instructions
 instructions7 =
@@ -161,10 +170,18 @@ instructions7 =
   "</center>"
 
 var training_instructions_post = {
+    on_start: function(){
+        document.dispatchEvent(startInstructions),
+        console.log(startInstructions)
+    },
   type: 'instructions',
   pages: [instructions7],
   show_clickable_nav: true,
-  timing_post_trial: 200
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+        console.log(endInstructions)
+    }
 }
 
 happy_aliens =
@@ -189,11 +206,17 @@ instructions1 =
   "</center>"
 
 var phase1_instructions_post = {
+    on_start: function(){
+        document.dispatchEvent(startInstructions)
+    },
   type: 'instructions',
   pages: [instructions1],
   show_clickable_nav: true,
-  timing_post_trial: 200
-}
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+    }
+};
 
 instructions_chaos =
     "<center><p> Great job! You helped these aliens grow a lot! </p>" +

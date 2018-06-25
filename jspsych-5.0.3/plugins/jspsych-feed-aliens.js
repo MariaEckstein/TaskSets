@@ -57,10 +57,10 @@ jsPsych.plugins["feed-aliens"] = (function() {
     trial.timing_response = trial.timing_response || -1; // default is no max response time
     trial.timing_feedback_duration = trial.timing_feedback_duration || 2000;
 
-    console.log(trial.isi);
-    console.log(trial.timing_post_trial);
-    console.log(trial.timing_feedback_duration);
-    console.log(trial.season);
+    //console.log(trial.isi);
+    //console.log(trial.timing_post_trial);
+    //console.log(trial.timing_feedback_duration);
+    //console.log(trial.season);
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -95,7 +95,17 @@ jsPsych.plugins["feed-aliens"] = (function() {
     // display everyting
     display_element.html("");
     display_element.append(background, alien_buttons);
-    //stimuli trigger
+
+    //***********STIMULI TRIGGER************
+     var variable = String(trial.season).concat(String(trial.phase), String(trial.aliens[trial.sad_alien]));
+      console.log(variable);
+
+      console.log(window[variable]);
+      document.dispatchEvent(window[variable]);
+      //console.log(initialHot1);
+
+
+
 
     var trial_data = {};
 
@@ -182,6 +192,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
         $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');       //end of added
 
         //insert ISI trigger here
+        document.dispatchEvent(startISI);        //TEMPORARY until we figure out triggers on choice
 
       var timeout = info.rt == -1;
       setTimeout(function() {
@@ -212,7 +223,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
       if (timeout && !trial.show_feedback_on_timeout) {
           display_element.html('');
         display_element.append(trial.timeout_message);
-        //timeout trigger if we need one
+        //**********TIMEOUT TRIGGER*******
+          document.dispatchEvent(missedTrial);
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
 
@@ -242,8 +254,10 @@ jsPsych.plugins["feed-aliens"] = (function() {
           $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
       }
+     //var feedback_trigger = 'feedback'.concat(String(trial.correct));
+      document.dispatchEvent(startFeedback);
+      //console.log('feedback');
 
-      //insert feedback trigger here-ish?
       setTimeout(function() {
         endTrial();
       }, trial.timing_feedback_duration);
