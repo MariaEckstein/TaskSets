@@ -12,6 +12,7 @@ library("ggplot2"); library("plyr"); library("lme4"); library("reshape2"); libra
 theme_set(theme_bw())
 
 # TDs
+# change colnames(all_files)[colnames(all_files) == "create_TS_biased_prefer_new"] = "create_TS_biased"
 
 run_on = "gen_rec"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
 gg_save = T
@@ -23,16 +24,16 @@ n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
 wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "model_name", "rt", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
-parameter_names = c("alpha", "alpha_high", "beta", "beta_high", "epsilon", "forget", "create_TS_biased")
+parameter_names = c("alpha", "alpha_high", "beta", "beta_high", "epsilon", "forget", 'create_TS_biased_prefer_new', 'create_TS_biased_copy_old')# , "create_TS_biased")  #
 if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
 } else if (run_on == "simulations") {
-  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/"
-  patt = "sim_....csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
+  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/MaxInsteadOfSoftmax/"
+  patt = "sim_2...csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
 } else if (run_on == "gen_rec") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/fit_par/"
-  patt = "sim_rec_....csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
+  patt = "sim_....csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   # parameter_names = c(parameter_names, paste0(parameter_names, "_rec"))
 }
 plot_dir = file.path(data_dir, "plots")
@@ -123,10 +124,8 @@ if (run_on == "humans") {
 if (run_on %in% c("simulations", "gen_rec")) {
   all_files[all_files$learning_style %in% c("flat", "s-flat"), "alpha_high"] = 0
   all_files[all_files$learning_style %in% c("flat", "s-flat"), "beta_high"] = 0
-  all_files[all_files$learning_style %in% c("flat", "s-flat"), "forget_high"] = 0
   all_files[all_files$learning_style == "hierarchical" & all_files$alpha == all_files$alpha_high, "alpha_high"] = 0
   all_files[all_files$learning_style == "hierarchical" & all_files$beta == all_files$beta_high, "beta_high"] = 0
-  all_files[all_files$learning_style == "hierarchical" & all_files$forget == all_files$forget_high, "forget_high"] = 0
   # Rename TS-related columns
   colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
   colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
@@ -145,25 +144,25 @@ if (run_on %in% c("simulations", "gen_rec")) {
     non0_parameters = parameter_names[all_files[subj_rows, parameter_names][1,] != 0]
     subj_model_parameters = paste(non0_parameters, collapse="_")[1]
     all_files[subj_rows, "model_name"] = paste0(subj_learning_style, "_", subj_model_parameters)
-    
+  
     subj_feedaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase != "3PickAliens")
     subj_pickaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase == "3PickAliens")
     subj_file_feed = all_files[subj_feedaliens_rows,]
     subj_file_pick = all_files[subj_pickaliens_rows,]
-    
-    TS_seasons = data.frame(TS = c(0, 1, 2, 4), season = c(sample(c("hot", "cold", "rainy")), "rainbow"))
-    alien_ids_names = data.frame(sad_alien = 0:3, sad_alien_name = sample(paste0("alien", 0:3)))
-    item_ids_names = data.frame(item = 0:2, item_name = sample(c("bed", "plant", "umbrella")))
-    
-    # Add season and xyz_name columns (feed-aliens phases)
-    subj_file_feed = merge(subj_file_feed, TS_seasons, all.x = T)
-    subj_file_feed = merge(subj_file_feed, alien_ids_names, all.x = T)
-    for (item in c("item_left", "item_right", "item_chosen")) {
-      subj_file_feed = merge(subj_file_feed, item_ids_names, by.x = item, by.y = "item", all.x = T)
-      colnames(subj_file_feed)[colnames(subj_file_feed) == "item_name"] = paste0(item, "_name")
-    }
-    
+      
     if (run_on == "simulations") {
+      TS_seasons = data.frame(TS = c(0, 1, 2, 4), season = c(sample(c("hot", "cold", "rainy")), "rainbow"))
+      alien_ids_names = data.frame(sad_alien = 0:3, sad_alien_name = sample(paste0("alien", 0:3)))
+      item_ids_names = data.frame(item = 0:2, item_name = sample(c("bed", "plant", "umbrella")))
+      
+      # Add season and xyz_name columns (feed-aliens phases)
+      subj_file_feed = merge(subj_file_feed, TS_seasons, all.x = T)
+      subj_file_feed = merge(subj_file_feed, alien_ids_names, all.x = T)
+      
+      for (item in c("item_left", "item_right", "item_chosen")) {
+        subj_file_feed = merge(subj_file_feed, item_ids_names, by.x = item, by.y = "item", all.x = T)
+        colnames(subj_file_feed)[colnames(subj_file_feed) == "item_name"] = paste0(item, "_name")
+      }
       # Add xyz_name columns (pick-aliens phase)
       subj_file_pick_items = subset(subj_file_pick, assess == "item")
       subj_file_pick_aliens = subset(subj_file_pick, assess == "alien")
@@ -217,6 +216,14 @@ if (run_on %in% c("simulations", "gen_rec")) {
 if (run_on == "gen_rec") {
   parameter_dat = ddply(all_files, c("subjID", "model_name", "NLL_rec", parameter_names, paste0(parameter_names, "_rec")), summarize,
                         NLL = -LL[trial_index == max(trial_index)])  # NLL in the last trial of InitialLearning
+  parameter_long_gen = melt(subset(parameter_dat, select = c(parameter_names, "NLL", "subjID", "model_name")),
+                            measure.vars = c(parameter_names, "NLL"), variable.name = "parameter", value.name = "gen_par")
+  parameter_long_rec = melt(subset(parameter_dat, select = c(paste0(parameter_names, "_rec"), "NLL_rec", "subjID", "model_name")),
+                            measure.vars = c(paste0(parameter_names, "_rec"), "NLL_rec"), variable.name = "parameter", value.name = "rec_par")
+  parameter_long_rec$parameter = gsub("_rec", "", parameter_long_rec$parameter)
+  
+  parameter_long = merge(parameter_long_gen, parameter_long_rec, by = c("subjID", "model_name", "parameter"))
+  assertthat::assert_that(dim(parameter_long)[1] == (length(parameter_names) + 1) * dim(parameter_dat)[1])
 } else if (run_on == "simulations") {
   parameter_dat = ddply(all_files, c("subjID", "model_name", parameter_names), summarize, bla=NA)
 } else {
@@ -225,16 +232,47 @@ if (run_on == "gen_rec") {
     parameter_dat[,par_name] = 999
   }
 }
-
-parameter_long_gen = melt(subset(parameter_dat, select = c(parameter_names, "NLL", "subjID", "model_name")),
-                          measure.vars = c(parameter_names, "NLL"), variable.name = "parameter", value.name = "gen_par")
-parameter_long_rec = melt(subset(parameter_dat, select = c(paste0(parameter_names, "_rec"), "NLL_rec", "subjID", "model_name")),
-                          measure.vars = c(paste0(parameter_names, "_rec"), "NLL_rec"), variable.name = "parameter", value.name = "rec_par")
-parameter_long_rec$parameter = gsub("_rec", "", parameter_long_rec$parameter)
-
-parameter_long = merge(parameter_long_gen, parameter_long_rec)
-assertthat::assert_that(dim(parameter_long)[1] == (length(parameter_names) + 1) * dim(parameter_dat)[1])
 ```
+# Generate & recover
+
+```{r plot generated against recovered parameters & NLL}
+if (run_on == "gen_rec") {
+
+  # Find outliers
+  outliers = list()
+  parameter_long$gen_minus_rec = with(parameter_long, gen_par - rec_par)
+  for (par_name in unique(parameter_long$parameter)) {
+    par_rows = parameter_long$parameter == par_name
+    cutoff = quantile(abs(parameter_long[par_rows, "gen_minus_rec"]), .99)
+    outliers = c(outliers, subset(parameter_long, par_rows & (abs(gen_minus_rec) > cutoff))$subjID)
+  }
+  parameter_long$outlier = parameter_long$subjID %in% outliers
+  
+  # Plot
+  gg_gr =
+    ggplot(subset(parameter_long, gen_par != 0), aes(gen_par, rec_par - gen_par, color = outlier)) +
+    geom_point() +
+    geom_text(aes(label = ifelse(outlier, subjID, ""), hjust = 0)) +
+    theme(legend.position = "none") +
+    facet_wrap(model_name ~ parameter, scale = "free", ncol = length(unique(parameter_long$parameter)))
+  gg_gen_rec = gg_gen_rec + geom_abline(slope = 0, linetype = "dotted")
+  gg_gen_rec2 = gg_gen_rec + aes(y = rec_par) + geom_abline(slope = 1, linetype = "dotted")
+  
+  gg_gen_rec_lim = gg_gen_rec
+  gg_gen_rec_lim$data = subset(gg_gen_rec_lim$data, abs(gen_minus_rec) < 5)
+  gg_gen_rec2_lim = gg_gen_rec2
+  gg_gen_rec2_lim$data = subset(gg_gen_rec2_lim$data, abs(gen_minus_rec) < 5)
+  
+  # Save plots
+  if (gg_save) {
+    ggsave(file.path(plot_dir, "gg_gen_rec.png"), gg_gen_rec, width = 6, height = 3 * length(unique(parameter_dat$model_name)))
+    ggsave(file.path(plot_dir, "gg_gen_rec2.png"), gg_gen_rec2, width = 6, height = 3 * length(unique(parameter_dat$model_name)))
+    ggsave(file.path(plot_dir, "gg_gen_rec_lim.png"), gg_gen_rec_lim, width = 6, height = 3 * length(unique(parameter_dat$model_name)))
+    ggsave(file.path(plot_dir, "gg_gen_rec2_lim.png"), gg_gen_rec2_lim, width = 6, height = 3 * length(unique(parameter_dat$model_name)))
+  }
+}
+```
+
 ```{r For all_files form all sources: remove excess columns and rows}
 # Add NAs for all other wanted_columns
 for (wanted_column in wanted_columns) {
@@ -1426,21 +1464,6 @@ if (gg_save) {
 }
 ```
 
-# Generate & recover
-
-```{r plot generated against recovered parameters& NLL}
-parameter_long
-gg_gen_rec = ggplot(subset(parameter_long, gen_par != 0), aes(gen_par, rec_par, color = subjID)) +
-  geom_point() +
-  geom_abline(slope = 1, linetype = "dotted") +
-  theme(legend.position = "none") +
-  facet_wrap(model_name ~ parameter, scale = "free")
-
-if (gg_save) {
-  ggsave(file.path(plot_dir, "7gg_gen_rec.png"), gg_gen_rec, width = 6, height = 3 * length(unique(parameter_dat$model_name)))
-}
-```
-
 # Relationships between model parameters and behavior
 
 ```{r Get time to switch and compare to parameters (ACCfirst8_correct_dat)}
@@ -1581,6 +1604,27 @@ if (run_regression) {
   write.csv(all_regressions, paste(plot_dir, "/all_regressions.csv", sep = ""))
   write.csv(subjwise_regr_coefs, paste(plot_dir, "/subjwise_regr_coefs.csv", sep = ""))
 }
+```
+```{r Grant plots}
+gg_grant_item_values = gg_learning_curves_item_value_obj
+gg_grant_item_values$data = subset(gg_grant_item_values$data, phase == "1InitialLearning")
+
+gg_grant_TS_values = gg_learning_curves_TS_value_obj
+gg_grant_TS_values$data = subset(gg_grant_TS_values$data, phase == "1InitialLearning")
+
+gg_grant_competition = gg_pick_aliens_value_subj + labs(y = "Preference") + theme(legend.position = "none") + coord_cartesian(ylim = c(-1.1, 2.3))
+gg_grant_competition$data$assess = factor(gg_grant_competition$data$assess, levels = c("alien-same-season", "season", "alien", "item"), labels = c("C-S", "C", "S", "R"))
+
+gg_grant_rainbow = gg_rainbow_avs + labs(x = "")
+gg_grant_rainbow$data = subset(gg_grant_rainbow$data, TS %in% c("0", "1", "2", "None"))
+gg_grant_rainbow$data$TS = factor(gg_grant_rainbow$data$TS, levels = c("0", "1", "2", "None"), labels = c("High", "Med", "Low", "None"))
+
+width_and_height = 2
+
+ggsave(file.path(plot_dir, "/11gg_grant_item_values.png"), gg_grant_item_values, width = width_and_height, height = width_and_height)
+ggsave(file.path(plot_dir, "/11gg_grant_TS_values.png"), gg_grant_TS_values, width = width_and_height, height = width_and_height)
+ggsave(file.path(plot_dir, "/11gg_grant_competition.png"), gg_grant_competition, width = width_and_height, height = width_and_height)
+ggsave(file.path(plot_dir, "/11gg_grant_rainbow.png"), gg_grant_rainbow, width = width_and_height, height = width_and_height)
 ```
 ```{r Start button}
 ```
