@@ -57,6 +57,11 @@ jsPsych.plugins["feed-aliens"] = (function() {
     trial.timing_response = trial.timing_response || -1; // default is no max response time
     trial.timing_feedback_duration = trial.timing_feedback_duration || 2000;
 
+    console.log(trial.isi);
+    console.log(trial.timing_post_trial);
+    console.log(trial.timing_feedback_duration);
+    console.log(trial.season);
+
     // if any trial variables are functions
     // this evaluates the function and replaces
     // it with the output of the function
@@ -90,6 +95,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
     // display everyting
     display_element.html("");
     display_element.append(background, alien_buttons);
+    //stimuli trigger
 
     var trial_data = {};
 
@@ -105,25 +111,27 @@ jsPsych.plugins["feed-aliens"] = (function() {
       jsPsych.pluginAPI.cancelAllKeyboardResponses();
 
       var key = info.key;
-      chosen_item_name = NaN
-      chosen_item_id = NaN
+      chosen_item_name = NaN;
+      chosen_item_id = NaN;
       if (key == left_key) {
-        chosen_item_name = l_item_name
-        chosen_item_id = 0
-        unchosen_item1 = m_item_name
-        unchosen_item2 = r_item_name
+        chosen_item_name = l_item_name;
+        chosen_item_id = 0;
+        unchosen_item1 = m_item_name;
+        unchosen_item2 = r_item_name;
       } else if (key == middle_key) {
-        chosen_item_name = m_item_name
-        chosen_item_id = 1
-        unchosen_item1 = l_item_name
+        chosen_item_name = m_item_name;
+        chosen_item_id = 1;
+        unchosen_item1 = l_item_name;
         unchosen_item2 = r_item_name
       } else if (key == right_key) {
-        chosen_item_name = r_item_name
-        chosen_item_id = 2
-        unchosen_item1 = l_item_name
+        chosen_item_name = r_item_name;
+        chosen_item_id = 2;
+        unchosen_item1 = l_item_name;
         unchosen_item2 = m_item_name
       } else {
-        chosen_item_name = NaN
+        chosen_item_name = NaN;
+          unchosen_item1 = NaN;
+          unchosen_item2 = NaN
       }
 
       var correct = false;
@@ -137,9 +145,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
       } else {  // correct response
         reward = trial.reward
       }
-      noised_amount = reward + 0.5 * randn_bm()
-      rounded_amount = Math.round(noised_amount * 10) / 10  // round doesn't round with decimals
-      feedback_amount = Math.max(0, rounded_amount)
+      noised_amount = reward + 0.5 * randn_bm();
+      rounded_amount = Math.round(noised_amount * 10) / 10; // round doesn't round with decimals
+      feedback_amount = Math.max(0, rounded_amount);
 
       // save data
       trial_data = {
@@ -155,16 +163,34 @@ jsPsych.plugins["feed-aliens"] = (function() {
         "block-type": trial.block_type,
         "season": trial.season,
         "phase": trial.phase,
+          "ISI": trial.isi,
+        "ITI": trial.timing_post_trial,
       };
 
       display_element.html('');  // clears display before feedback screen
 
+        alien_buttons =                                       //beginning of added
+            "<center><div class='alien_box'>" +
+            sad_alien +
+            response_buttons +
+            "</div></center>"
+
+        display_element.append(background, alien_buttons);
+
+        // remove non-clicked buttons
+        $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
+        $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');       //end of added
+
+        //insert ISI trigger here
+
       var timeout = info.rt == -1;
-      doFeedback(key, correct, timeout);
+      setTimeout(function() {
+          doFeedback(key, correct, timeout);
+      }, trial.isi);   //creates a delay
     }
 
     // take care of button presses: mimic key presses
-    jsPsych.pluginAPI.getKeyboardResponse({
+      jsPsych.pluginAPI.getKeyboardResponse({
       callback_function: after_response,
       valid_responses: trial.choices,
       rt_method: 'date',
@@ -184,7 +210,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
     function doFeedback(key, correct, timeout) {
 
       if (timeout && !trial.show_feedback_on_timeout) {
+          display_element.html('');
         display_element.append(trial.timeout_message);
+        //timeout trigger if we need one
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
 
@@ -199,20 +227,23 @@ jsPsych.plugins["feed-aliens"] = (function() {
         ruler = ""
       }
 
+      display_element.html('');
+
       alien_buttons =
-        "<center><div class='alien_box'>" +
+          "<center><div class='alien_box'>" +
           sad_alien +
           ruler +
           response_buttons +
-        "</div></center>"
+          "</div></center>"
+          display_element.append(background, alien_buttons);
 
-      display_element.append(background, alien_buttons);
-
-      // remove non-clicked buttons
-      $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
-      $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
+          // remove non-clicked buttons
+          $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
+          $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
       }
+
+      //insert feedback trigger here-ish?
       setTimeout(function() {
         endTrial();
       }, trial.timing_feedback_duration);

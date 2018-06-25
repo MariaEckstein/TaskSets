@@ -80,7 +80,7 @@ instructions2 = "<center><p>The aliens' planet goes through different seasons, "
   "but it might need to chew on a green plant during the rainy season.</p>" +
   "There are three seasons on the aliens' planet: <i>hot, cold, and rainy</i>:" +
   "<div class='alien_box'>" +
-    "<img class='season' src='img/hot.png'>" +
+    "<img class='season' src='img/hot.png'>"+
     "<img class='season' src='img/cold.png'>" +
     "<img class='season' src='img/rainy.png'>" +
   "</div>" +

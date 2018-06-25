@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html jspsych = "present">
   <head>
     <title>Aliens</title>
     <script>
@@ -13,6 +13,7 @@
     <script src="jspsych-5.0.3/plugins/jspsych-feed-aliens.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-pick-aliens.js"></script>
     <script src="jspsych-5.0.3/plugins/jspsych-start_new_season.js"></script>
+    <script src="alien_plugins/Triggers.js"></script>
     <script src="alien_plugins/helper_functions.js"></script>
     <script src="alien_plugins/set_timing_and_numbers.js"></script>
     <script src="alien_plugins/names_and_competition_images.js"></script>
@@ -35,8 +36,8 @@
 
     /* create experiment timeline array */
     var timeline = [
-      get_subj_data,
-      phase1_instructions,
+        get_subj_data,
+        phase1_instructions,
       training_block,  // v1.0: 10 blocks; v2.0: 8 blocks; v3.0: ??? blocks
       training_instructions_post,
       phase1_initial_learn,  // all v: 3 blocks per season, 13 trials per alien per block
@@ -54,7 +55,7 @@
       phase6_mixed_instructions,
       phase6_mixed_block, // new mixed_block
       phase5_after,  // to get rid of rainbow background
-      strategy_questionnaire,
+      //strategy_questionnaire,
       goodbye
     ]
 
@@ -67,11 +68,15 @@
         'img/training.png', 'img/umbrella.png'];
 
         jsPsych.init({
+            on_start: function(){
+                document.dispatchEvent(startEvent)
+            },
             timeline: timeline,
             //show_preload_progress_bar: false, // hide preload progress bar
             fullscreen: true,
             preload_images: images,
             on_finish: function () {
+                document.dispatchEvent(endEvent);
                 jsPsych.data.localSave('test.csv', 'csv')
             }
         });

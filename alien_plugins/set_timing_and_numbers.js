@@ -1,32 +1,36 @@
 // Timing variables
 // Main experiment
-max_RT_initial_learn = 1500  // v1.0: 1500; v2.0: 1800; v3.0: 1500
-max_RT_competition = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
-max_RT_rainbow = 2 * max_RT_initial_learn  // v1.0: max_RT; v2.0: 2 * max_RT
-max_RT_mixed = 2 * max_RT_initial_learn  // v3.0: 2 * max_RT
-feedback_duration = 500  // v1.0: 500; v2.0: 400; v3.0: 500
-ITI_duration = 250  // v1.0: 250; v2.0: 200; v3.0: 250
+max_RT_initial_learn = 1500;  // v1.0: 1500; v2.0: 1800; v3.0: 1500
+max_RT_competition = 2 * max_RT_initial_learn;  // v1.0: max_RT; v2.0: 2 * max_RT
+max_RT_rainbow = 2 * max_RT_initial_learn;  // v1.0: max_RT; v2.0: 2 * max_RT
+max_RT_mixed = 2 * max_RT_initial_learn;  // v3.0: 2 * max_RT
+feedback_duration = 500;  // v1.0: 500; v2.0: 400; v3.0: 500
+ITI_durations = [500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000]; // v1.0: 250; v2.0: 200; v3.0: 250
+ITI = 250;
+
+ISI_durations = [400, 450, 500, 550, 600, 650, 700, 750, 800];
+//ISI_duration = 1000;
 // Training block
-max_RT_train = 2 * max_RT_initial_learn
-feedback_duration_train = 1.5 * feedback_duration
-ITI_duration_train = 1.5 * ITI_duration
+max_RT_train = 2 * max_RT_initial_learn;
+feedback_duration_train = 1.5 * feedback_duration;
+//ITI_duration_train = 1.5 * ITI_duration
 
 // Positions on the screen
-sad_lefts = [0, 280, 520]
-sad_left = 260
-points = [0, 0, 0, 0]
+sad_lefts = [0, 280, 520];
+sad_left = 260;
+points = [0, 0, 0, 0];
 
 // point counters
-c_alien_tops = [20, 80, 140, 200, 260]
-point_tops = [0, 60, 120, 180, 240]
+c_alien_tops = [20, 80, 140, 200, 260];
+point_tops = [0, 60, 120, 180, 240];
 
 // key ids
 left_key = 74;
 middle_key = 75;
 right_key = 76;
 
-timeout_message = "<p class='start_new_season'>Please respond using <i>j, k</i>, or <i>l</i>.</p>"
-timeout_message_comp = "<p class='start_new_season'>Please respond using <i>j</i> or <i>l</i>.</p>"
+timeout_message = "<p class='start_new_season'>Please respond using <i>j, k</i>, or <i>l</i>.</p>";
+timeout_message_comp = "<p class='start_new_season'>Please respond using <i>j</i> or <i>l</i>.</p>";
 
 // numbers of trials
 n_blocks_training = 10;  // v1.0: 10; v2.0: 8; v3.0: 10
@@ -44,6 +48,20 @@ n_blocks_rainbow = 3;  // v1.0: 3; v2.0: 6; v3.0: 3
 
 n_trials_per_season_alien_mixed = 7;  // v3.0: 7
 n_blocks_mixed = 3; // v3.0: 3
+
+n_trials_total_minus_training_rainbow = (((((n_trials_per_alien_phase1*n_blocks_phase1)+(n_trials_per_alien_cloudy*n_blocks_cloudy)+
+    (n_trials_per_alien_refreshers*n_blocks_refreshers*2))*3) +(n_trials_per_season_alien_mixed*n_blocks_mixed))*4);
+console.log(n_trials_total_minus_training_rainbow);
+
+
+
+total_trials_so_far = 0;
+
+
+ITI_duration_shuffled = shuffle(ITI_durations, n_trials_total_minus_training_rainbow);
+
+ISI_duration_shuffled = shuffle(ISI_durations, n_trials_total_minus_training_rainbow);
+
 
 // TS orders
 TS_orders = [
