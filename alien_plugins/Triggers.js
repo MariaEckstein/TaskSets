@@ -25,13 +25,6 @@ var missedTrial = new CustomEvent('jspsych', {
     }
 });
 
-var startISI = new CustomEvent('jspsych', {
-    detail:{
-        target : 'parallel',
-        action : 'trigger',
-        payload: 65
-    }
-});
 
 var startITI = new CustomEvent('jspsych', {
     detail:{
@@ -65,13 +58,7 @@ var feedbacktrue = new CustomEvent('jspsych', {
     }
 
 });
-var startFeedback = new CustomEvent('jspsych', {
-    detail:{
-        target : 'parallel',
-        action : 'trigger',
-        payload: 150
-    }
-});
+
 
 var feedbackfalse = new CustomEvent('jspsych', {
     detail:{
@@ -521,20 +508,6 @@ var hotrefresher3alien4 = new CustomEvent('jspsych', {
         payload: 234
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 var rainyMixedalien1 = new CustomEvent('jspsych', {
