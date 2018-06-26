@@ -1,8 +1,8 @@
 
 // Create timeline for training block
-training_timeline = []
+training_timeline = [];
 for (i = 0; i < n_blocks_training; i ++) {
-  training_timeline.push({timeline: TS_train, randomize_order: true,})
+  training_timeline.push({timeline: TS_train, randomize_order: true})
 }
 training_block = {
   type: "feed-aliens",
