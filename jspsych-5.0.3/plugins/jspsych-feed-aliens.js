@@ -194,9 +194,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
         $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
         $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');       //end of added
 
-        //insert ISI trigger here
-        //document.dispatchEvent(startISI);        //TEMPORARY until we figure out triggers on choice
-        //console.log(startISI);
 
       var timeout = info.rt == -1;
 
@@ -262,7 +259,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
           $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
       }
-     //var feedback_trigger = 'feedback'.concat(String(trial.correct));
         var feedback = 'feedback'.concat(String(correct));
         console.log(window[feedback]);
         document.dispatchEvent(window[feedback]);
@@ -276,6 +272,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
       display_element.html("");
       display_element.append(background);
       jsPsych.finishTrial(trial_data);
+      document.dispatchEvent(startITI);
+      console.log(startITI)
     }
 
   };
