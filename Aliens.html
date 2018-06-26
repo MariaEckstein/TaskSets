@@ -52,8 +52,8 @@
       refresher_block_3,  // all v: 2 blocks, 7 trials per alien per block
       phase5_instructions,
       rainbow_season_phase5,  // v1.0: 3 blocks; v3.0: 6 blocks; v3.0: ??? blocks
-      phase6_mixed_instructions,
-      phase6_mixed_block, // new mixed_block
+      //phase6_mixed_instructions,
+      //phase6_mixed_block, // new mixed_block
       phase5_after,  // to get rid of rainbow background
       //strategy_questionnaire,
       goodbye
@@ -68,14 +68,12 @@
         'img/training.png', 'img/umbrella.png'];
 
         jsPsych.init({
-            on_start: function(){
-                document.dispatchEvent(startEvent)
-            },
             timeline: timeline,
             //show_preload_progress_bar: false, // hide preload progress bar
             fullscreen: true,
             preload_images: images,
             on_finish: function () {
+                console.log(endEvent);
                 document.dispatchEvent(endEvent);
                 jsPsych.data.localSave('test.csv', 'csv')
             }
