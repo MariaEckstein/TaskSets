@@ -1,3 +1,4 @@
+
 // Create timeline for training block
 training_timeline = []
 for (i = 0; i < n_blocks_training; i ++) {
@@ -15,7 +16,7 @@ training_block = {
   timing_response: max_RT_train,
   timeout_message: timeout_message,
   timeline: training_timeline
-}
+};
 
 
 // Create timeline for InitialLearn: n_blocks_phase1 blocks
@@ -29,7 +30,7 @@ var phase1_initial_learn = {
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_phase1,
                                           n_trials_per_alien=n_trials_per_alien_phase1)
-}
+};
 
 // Create timeline for Cloudy Season: n_blocks_cloudy cloudy blocks
 var phase2_cloudy = {
@@ -43,7 +44,7 @@ var phase2_cloudy = {
   timeline: create_feed_aliens_timeline(n_blocks=n_blocks_cloudy,
                                         n_trials_per_alien=n_trials_per_alien_cloudy,
                                         block_type="cloudy")
-}
+};
 
 // Create timeline for mixed block at the end: n_trial_mixed trials
 mixed_timeline = []
@@ -63,7 +64,7 @@ var phase6_mixed_block = {
     timing_feedback_duration: feedback_duration,
     timeout_message: timeout_message,
     timeline: mixed_timeline,
-}
+};
 
 // Create timeline for Refershers: n_blocks_refreshers blocks
 var refresher_block_2 = {
@@ -76,7 +77,7 @@ var refresher_block_2 = {
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_refreshers,
                                           n_trials_per_alien=n_trials_per_alien_refreshers)
-}
+};
 
 var refresher_block_3 = {
     type: "feed-aliens",
@@ -88,7 +89,7 @@ var refresher_block_3 = {
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_refreshers,
                                           n_trials_per_alien=n_trials_per_alien_refreshers)
-}
+};
 
 // Create timeline for Rainbow Season: x rainbow blocks, without feedback
 rainbow_trials = [
@@ -96,7 +97,7 @@ rainbow_trials = [
     {sad_alien: 1},
     {sad_alien: 2},
     {sad_alien: 3},
-]
+];
 rainbow_timeline = [];
 for (i = 0; i < n_blocks_rainbow; i ++) {
   rainbow_timeline = rainbow_timeline.concat(
@@ -115,4 +116,4 @@ var rainbow_season_phase5 = {
     timing_post_trial: ITI,
     timeout_message: timeout_message,
     timeline: rainbow_timeline
-}
+};

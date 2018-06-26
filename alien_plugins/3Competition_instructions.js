@@ -104,10 +104,16 @@ show_clickable_nav: true,
 }
 
 var phase3_instructions = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions)
+    },
   type: 'instructions',
   pages: [
       instructions1,
   ],
   show_clickable_nav: true,
-  timing_post_trial: 200
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+    }
 }

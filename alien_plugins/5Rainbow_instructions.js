@@ -31,6 +31,9 @@ after_phase5 =
   //"Please take a few minutes to fill out the questionnaire on the following screen.</p>"
 
 var phase5_instructions = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions)
+    },
   type: 'instructions',
   pages: [
       instructions0,
@@ -38,14 +41,23 @@ var phase5_instructions = {
       instructions2,
   ],
   show_clickable_nav: true,
-  timing_post_trial: 200
-}
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+    }
+};
 
 var phase5_after = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions)
+    },
   type: 'instructions',
   pages: [
       after_phase5,
   ],
   show_clickable_nav: true,
-  timing_post_trial: 200
-}
+  timing_post_trial: 200,
+    on_finish: function(){
+        document.dispatchEvent(endInstructions)
+    }
+};

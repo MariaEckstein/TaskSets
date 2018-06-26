@@ -137,8 +137,9 @@ instructions6 =
 
 // Put instruction slides together
 var phase1_instructions = {
-    on_start: function(){
-        document.dispatchEvent(startInstructions)
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        console.log(startInstructions)
     },
   type: 'instructions',
   pages: [
@@ -153,7 +154,8 @@ var phase1_instructions = {
   show_clickable_nav: true,
   timing_post_trial: 200,
     on_finish: function(){
-        document.dispatchEvent(endInstructions)
+        document.dispatchEvent(endInstructions);
+        console.log(endInstructions)
     }
 };
 
@@ -171,8 +173,8 @@ instructions7 =
   "</center>"
 
 var training_instructions_post = {
-    on_start: function(){
-        document.dispatchEvent(startInstructions),
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
         console.log(startInstructions)
     },
   type: 'instructions',
@@ -180,7 +182,7 @@ var training_instructions_post = {
   show_clickable_nav: true,
   timing_post_trial: 200,
     on_finish: function(){
-        document.dispatchEvent(endInstructions)
+        document.dispatchEvent(endInstructions);
         console.log(endInstructions)
     }
 }
@@ -207,7 +209,7 @@ instructions1 =
   "</center>"
 
 var phase1_instructions_post = {
-    on_start: function(){
+    on_trial_start: function(){
         document.dispatchEvent(startInstructions)
     },
   type: 'instructions',
