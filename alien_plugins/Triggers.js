@@ -57,7 +57,7 @@ var endInstructions = new CustomEvent('jspsych', {
     }
 });
 
-var correctFeedback = new CustomEvent('jspsych', {
+var feedbacktrue = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
@@ -73,7 +73,7 @@ var startFeedback = new CustomEvent('jspsych', {
     }
 });
 
-var incorrectFeedback = new CustomEvent('jspsych', {
+var feedbackfalse = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
@@ -81,7 +81,7 @@ var incorrectFeedback = new CustomEvent('jspsych', {
     }
 });
 
-var jKey = new CustomEvent('jspsych', {
+var responseJ = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
@@ -89,7 +89,7 @@ var jKey = new CustomEvent('jspsych', {
     }
 });
 
-var kKey = new CustomEvent('jspsych', {
+var responseK = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
@@ -97,7 +97,7 @@ var kKey = new CustomEvent('jspsych', {
     }
 });
 
-var lKey = new CustomEvent('jspsych', {
+var responseL = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',

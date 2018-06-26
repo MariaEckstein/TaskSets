@@ -99,10 +99,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
     //***********STIMULI TRIGGER************
      var variable = String(trial.season).concat(String(trial.phase), String(trial.aliens[trial.sad_alien]));
       console.log(variable);
-
       console.log(window[variable]);
       document.dispatchEvent(window[variable]);
-      //console.log(initialHot1);
 
 
 
@@ -111,6 +109,11 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
     // create response function
     var after_response = function(info) {
+      //***************RESPONSE TRIGGER??????****************
+        if (info.rt != -1) {
+            var response = 'response'.concat(String.fromCharCode(event.keyCode));
+            console.log(window[response]);
+        }
 
       // kill any remaining setTimeout handlers
       for (var i = 0; i < setTimeoutHandlers.length; i++) {
@@ -192,9 +195,13 @@ jsPsych.plugins["feed-aliens"] = (function() {
         $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');       //end of added
 
         //insert ISI trigger here
-        document.dispatchEvent(startISI);        //TEMPORARY until we figure out triggers on choice
+        //document.dispatchEvent(startISI);        //TEMPORARY until we figure out triggers on choice
+        //console.log(startISI);
 
       var timeout = info.rt == -1;
+
+      //*************ITI TRIGGER********************
+      //console.log(startITI);
       setTimeout(function() {
           doFeedback(key, correct, timeout);
       }, trial.isi);   //creates a delay
@@ -225,6 +232,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
         display_element.append(trial.timeout_message);
         //**********TIMEOUT TRIGGER*******
           document.dispatchEvent(missedTrial);
+          console.log(missedTrial);
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
 
@@ -255,8 +263,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       }
      //var feedback_trigger = 'feedback'.concat(String(trial.correct));
-      document.dispatchEvent(startFeedback);
-      //console.log('feedback');
+        var feedback = 'feedback'.concat(String(correct));
+        console.log(window[feedback]);
+        document.dispatchEvent(window[feedback]);
 
       setTimeout(function() {
         endTrial();

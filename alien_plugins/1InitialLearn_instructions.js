@@ -1,7 +1,8 @@
 // Instructions and preliminaries
 // Get demographics
 var get_subj_data = {
-    on_start: function(){
+    on_trial_start: function(){
+        console.log(startEvent);
         document.dispatchEvent(startEvent)
     },
   type: "survey-text",
