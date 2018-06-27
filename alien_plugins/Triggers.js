@@ -5,7 +5,7 @@ var startEvent = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 255
+        payload: 254
     }
 });
 
@@ -13,7 +13,7 @@ var endEvent = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 254
+        payload: 255
     }
 });
 
