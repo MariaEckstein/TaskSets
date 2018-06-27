@@ -32,7 +32,8 @@ after_phase5 =
 
 var phase5_instructions = {
     on_trial_start: function(){
-        document.dispatchEvent(startInstructions)
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
     },
   type: 'instructions',
   pages: [
@@ -43,13 +44,15 @@ var phase5_instructions = {
   show_clickable_nav: true,
   timing_post_trial: 200,
     on_finish: function(){
+        document.dispatchEvent(startEvent);
         document.dispatchEvent(endInstructions)
     }
 };
 
 var phase5_after = {
     on_trial_start: function(){
-        document.dispatchEvent(startInstructions)
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
     },
   type: 'instructions',
   pages: [
@@ -58,6 +61,7 @@ var phase5_after = {
   show_clickable_nav: true,
   timing_post_trial: 200,
     on_finish: function(){
+        document.dispatchEvent(startEvent);
         document.dispatchEvent(endInstructions)
     }
 };

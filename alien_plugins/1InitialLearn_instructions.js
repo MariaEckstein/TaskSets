@@ -139,7 +139,7 @@ instructions6 =
 var phase1_instructions = {
     on_trial_start: function(){
         document.dispatchEvent(startInstructions);
-        console.log(startInstructions)
+        document.dispatchEvent(endEvent);
     },
   type: 'instructions',
   pages: [
@@ -154,8 +154,8 @@ var phase1_instructions = {
   show_clickable_nav: true,
   timing_post_trial: 200,
     on_finish: function(){
+        document.dispatchEvent(startEvent);
         document.dispatchEvent(endInstructions);
-        console.log(endInstructions)
     }
 };
 
@@ -175,6 +175,7 @@ instructions7 =
 var training_instructions_post = {
     on_trial_start: function(){
         document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent);
         console.log(startInstructions)
     },
   type: 'instructions',
@@ -182,6 +183,7 @@ var training_instructions_post = {
   show_clickable_nav: true,
   timing_post_trial: 200,
     on_finish: function(){
+        document.dispatchEvent(startEvent);
         document.dispatchEvent(endInstructions);
         console.log(endInstructions)
     }
@@ -210,13 +212,15 @@ instructions1 =
 
 var phase1_instructions_post = {
     on_trial_start: function(){
-        document.dispatchEvent(startInstructions)
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent);
     },
   type: 'instructions',
   pages: [instructions1],
   show_clickable_nav: true,
   timing_post_trial: 200,
     on_finish: function(){
+        document.dispatchEvent(startEvent);
         document.dispatchEvent(endInstructions)
     }
 };
