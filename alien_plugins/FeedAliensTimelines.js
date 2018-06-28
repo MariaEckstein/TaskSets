@@ -2,7 +2,12 @@
 // Create timeline for training block
 training_timeline = [];
 for (i = 0; i < n_blocks_training; i ++) {
-  training_timeline.push({timeline: TS_train, randomize_order: true})
+  training_timeline.push({timeline: [
+          {key_answer: item_names[0], sad_alien: 0, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
+          {key_answer: item_names[1], sad_alien: 1, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
+          {key_answer: item_names[2], sad_alien: 2, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
+          {key_answer: item_names[2], sad_alien: 3, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},],
+          randomize_order: true}); //timing_post_trial
 }
 training_block = {
   type: "feed-aliens",
@@ -12,7 +17,7 @@ training_block = {
   aliens: pr_alien_names,
   show_stim_with_feedback: true,
   timing_feedback_duration: feedback_duration_train,
-    timing_post_trial: ITI,
+  //  timing_post_trial: ITI,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
   timeline: training_timeline
