@@ -57,8 +57,8 @@ jsPsych.plugins["pick-aliens"] = (function() {
     button_order = jsPsych.randomization.shuffle([0, 1])
     l_button_html = trial.buttons[button_order[0]]
     r_button_html = trial.buttons[button_order[1]]
-    l_button_name = trial.button_names[button_order[0]]
-    r_button_name = trial.button_names[button_order[1]]
+    l_button_name = trial.button_names[button_order[0]];
+    r_button_name = trial.button_names[button_order[1]];
 
     response_buttons =
       "<center><div class='response_buttons'>" +
@@ -69,6 +69,15 @@ jsPsych.plugins["pick-aliens"] = (function() {
     display_element.html("");
     display_element.append(response_buttons);
     trial.start_time = (new Date()).getTime();
+    if (trial.assess == 'season'){
+      var seasonvar = String(trial.button_names[button_order[0]]).concat(String(trial.button_names[button_order[1]]))
+      document.dispatchEvent(window[seasonvar]);
+      console.log(window[seasonvar])
+    }
+    else{
+      document.dispatchEvent(compOther);
+      console.log(compOther)
+    }
 
     // create response function
     var after_response = function(info) {

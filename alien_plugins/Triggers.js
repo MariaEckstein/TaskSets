@@ -54,7 +54,7 @@ var feedbacktrue = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 100
+        payload: 110
     }
 
 });
@@ -64,7 +64,7 @@ var feedbackfalse = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
         action : 'trigger',
-        payload: 200
+        payload: 220
     }
 });
 
@@ -635,6 +635,63 @@ var rainbow5RainbowSeasonalien4 = new CustomEvent('jspsych', {
         target : 'parallel',
         action : 'trigger',
         payload: 54
+    }
+});
+
+var hotcold = new CustomEvent('jspsych', {
+    detail:{
+        target: 'parallel',
+        action: 'trigger',
+        payload: 120
+    }
+});
+
+var hotrainy = new CustomEvent('jspsych', {
+    detail:{
+        target: 'parallel',
+        action: 'trigger',
+        payload: 100
+    }
+});
+
+var coldhot = new CustomEvent('jspsych', {
+    detail:{
+        target: 'parallel',
+        action: 'trigger',
+        payload: 210
+    }
+});
+
+var coldrainy = new CustomEvent('jspsych', {
+    detail:{
+        target: 'parallel',
+        action: 'trigger',
+        payload: 200
+    }
+});
+
+var rainyhot = new CustomEvent('jspsych', {
+    detail:{
+        target: 'parallel',
+        action: 'trigger',
+        payload: 10
+    }
+});
+
+var rainycold = new CustomEvent('jspsych', {
+    detail:{
+        target: 'parallel',
+        action: 'trigger',
+        payload: 20
+    }
+});
+
+
+var compOther = new CustomEvent('jspsych', {
+    detail:{
+        target: 'parallel',
+        action: 'trigger',
+        payload: 30
     }
 });
 
