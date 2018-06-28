@@ -7,7 +7,7 @@ for (i = 0; i < n_blocks_training; i ++) {
           {key_answer: item_names[1], sad_alien: 1, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
           {key_answer: item_names[2], sad_alien: 2, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
           {key_answer: item_names[2], sad_alien: 3, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},],
-          randomize_order: true}); //timing_post_trial
+          randomize_order: true});
 }
 training_block = {
   type: "feed-aliens",
@@ -17,7 +17,6 @@ training_block = {
   aliens: pr_alien_names,
   show_stim_with_feedback: true,
   timing_feedback_duration: feedback_duration_train,
-  //  timing_post_trial: ITI,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
   timeline: training_timeline
@@ -98,10 +97,10 @@ var refresher_block_3 = {
 
 // Create timeline for Rainbow Season: x rainbow blocks, without feedback
 rainbow_trials = [
-    {sad_alien: 0},
-    {sad_alien: 1},
-    {sad_alien: 2},
-    {sad_alien: 3},
+    {sad_alien: 0, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+    {sad_alien: 1, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+    {sad_alien: 2, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+    {sad_alien: 3, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
 ];
 rainbow_timeline = [];
 for (i = 0; i < n_blocks_rainbow; i ++) {
