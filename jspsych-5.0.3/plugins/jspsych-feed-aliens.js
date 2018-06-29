@@ -197,8 +197,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       var timeout = info.rt == -1;
 
-      //*************ITI TRIGGER********************
-      //console.log(startITI);
       setTimeout(function() {
           doFeedback(key, correct, timeout);
       }, trial.isi);   //creates a delay
@@ -272,6 +270,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
       display_element.html("");
       display_element.append(background);
       jsPsych.finishTrial(trial_data);
+      //*****ITI TRIGGER******
       document.dispatchEvent(startITI);
       console.log(startITI)
     }

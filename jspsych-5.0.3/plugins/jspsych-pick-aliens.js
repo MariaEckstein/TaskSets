@@ -164,6 +164,9 @@ jsPsych.plugins["pick-aliens"] = (function() {
     function endTrial() {
       display_element.html("");
       jsPsych.finishTrial(trial_data);
+      ///*******ITI TRIGGER******
+        document.dispatchEvent(startITI);
+        console.log(startITI)
     }
 
   };
