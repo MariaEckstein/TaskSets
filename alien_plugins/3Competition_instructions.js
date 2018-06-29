@@ -22,6 +22,13 @@ intro_slide_season =
   "<p>Click 'Next' to pick your seasons!</p></center>" +
   exmpl_season_buttons
 
+second_slide_season =
+    "<center><p>You will now select which <i>seasons</i> you want for the competition. " +
+    "For example, you might see the two seasons below. <i>Pick the better one!</i></p>" +
+    "<p>In the competititon, you will press 'j' for the season on top and 'l' for the season on the bottom.</p>" +
+    "<p>Click 'Next' to pick your seasons!</p></center>" +
+    exmpl_season_buttons
+
 exmpl_alien_season_buttons =
   "<center><div class='response_buttons'>" +
     alien_season_buttons[0] +
@@ -77,30 +84,88 @@ intro_slide_alien_rest_season =
   exmpl_alien_season_buttons_rest
 
 // Put instruction slides together
-intro_alien_same_seasonn = {
+intro_alien_same_season = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
 type: "instructions",
 pages: [intro_slide_alien_same_season],
 show_clickable_nav: true,
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
 }
+
 intro_season = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
 type: "instructions",
 pages: [intro_slide_season],
 show_clickable_nav: true,
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
 }
+
+second_season = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
+    type: "instructions",
+    pages: [second_slide_season],
+    show_clickable_nav: true,
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
+}
+
 intro_alien = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
 type: "instructions",
 pages: [intro_slide_alien],
 show_clickable_nav: true,
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
 }
+
 intro_item = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
 type: "instructions",
 pages: [intro_slide_item],
 show_clickable_nav: true,
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
 }
+
 intro_alien_rest_season = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
 type: "instructions",
 pages: [intro_slide_alien_rest_season],
 show_clickable_nav: true,
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
 }
 
 var phase3_instructions = {

@@ -33,9 +33,12 @@ function create_pick_aliens_timeline(names, buttons, alien_season) {
 
         // Add the selected pair to the timeline
         if (add_this_pair) {
-          timeline.push(  // presentation order is not shuffled here because it will be shuffled inside pick-aliens
-            {buttons: [buttons[x1], buttons[x2]],
-            button_names: [names[x1], names[x2]]})
+            timeline.push(  // presentation order is not shuffled here because it will be shuffled inside pick-aliens
+                {
+                    buttons: [buttons[x1], buttons[x2]],
+                    button_names: [names[x1], names[x2]],
+                    timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]
+                })            //adding jittered ITI
         }
       }
     }
