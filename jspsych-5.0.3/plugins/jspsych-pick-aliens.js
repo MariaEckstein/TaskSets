@@ -117,6 +117,7 @@ jsPsych.plugins["pick-aliens"] = (function() {
         "item_right_name": r_button_name,
         "item_chosen_name": chosen_button_name,
         "phase": trial.phase,
+          "ITI": trial.timing_post_trial,
       };
 
       var timeout = info.rt == -1;
