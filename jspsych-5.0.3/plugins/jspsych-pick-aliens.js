@@ -54,9 +54,9 @@ jsPsych.plugins["pick-aliens"] = (function() {
     var setTimeoutHandlers = [];
 
     // prepare the two buttons that will be shown
-    button_order = jsPsych.randomization.shuffle([0, 1])
-    l_button_html = trial.buttons[button_order[0]]
-    r_button_html = trial.buttons[button_order[1]]
+    button_order = jsPsych.randomization.shuffle([0, 1]);
+    l_button_html = trial.buttons[button_order[0]];
+    r_button_html = trial.buttons[button_order[1]];
     l_button_name = trial.button_names[button_order[0]];
     r_button_name = trial.button_names[button_order[1]];
 
@@ -72,7 +72,7 @@ jsPsych.plugins["pick-aliens"] = (function() {
 
     //*******STIMULI TRIGGER**********
     if (trial.assess == 'season'){
-      var seasonvar = String(trial.button_names[button_order[0]]).concat(String(trial.button_names[button_order[1]]))
+      var seasonvar = String(trial.button_names[button_order[0]]).concat(String(trial.button_names[button_order[1]]));
       document.dispatchEvent(window[seasonvar]);
       console.log(window[seasonvar])
     }
@@ -118,6 +118,7 @@ jsPsych.plugins["pick-aliens"] = (function() {
         "item_chosen_name": chosen_button_name,
         "phase": trial.phase,
           "ITI": trial.timing_post_trial,
+          "time": Date(),
       };
 
       var timeout = info.rt == -1;

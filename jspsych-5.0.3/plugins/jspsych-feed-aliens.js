@@ -57,10 +57,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
     trial.timing_response = trial.timing_response || -1; // default is no max response time
     trial.timing_feedback_duration = trial.timing_feedback_duration || 2000;
 
-    //console.log(trial.isi);
-    //console.log(trial.timing_post_trial);
-    //console.log(trial.timing_feedback_duration);
-    //console.log(trial.season);
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -98,8 +94,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
     //***********STIMULI TRIGGER************
      var variable = String(trial.season).concat(String(trial.phase), String(trial.aliens[trial.sad_alien]));
-      console.log(variable);
-      console.log(window[variable]);
+      //console.log(variable);
+      //console.log(window[variable]);
       document.dispatchEvent(window[variable]);
 
 
@@ -112,7 +108,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
       //***************RESPONSE TRIGGER??????****************
         if (info.rt != -1) {
             var response = 'response'.concat(String.fromCharCode(event.keyCode));
-            console.log(window[response]);
+            document.dispatchEvent(window[response]);
         }
 
       // kill any remaining setTimeout handlers
@@ -178,6 +174,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
         "phase": trial.phase,
           "ISI": trial.isi,
         "ITI": trial.timing_post_trial,
+          "time": new Date(),
       };
 
       display_element.html('');  // clears display before feedback screen
@@ -227,7 +224,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
         display_element.append(trial.timeout_message);
         //**********TIMEOUT TRIGGER*******
           document.dispatchEvent(missedTrial);
-          console.log(missedTrial);
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
 
@@ -258,7 +254,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       }
         var feedback = 'feedback'.concat(String(correct));
-        console.log(window[feedback]);
         document.dispatchEvent(window[feedback]);
 
       setTimeout(function() {
@@ -272,7 +267,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
       jsPsych.finishTrial(trial_data);
       //*****ITI TRIGGER******
       document.dispatchEvent(startITI);
-      console.log(startITI)
     }
 
   };
