@@ -94,8 +94,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
     //***********STIMULI TRIGGER************
      var variable = String(trial.season).concat(String(trial.phase), String(trial.aliens[trial.sad_alien]));
-      //console.log(variable);
-      //console.log(window[variable]);
       document.dispatchEvent(window[variable]);
 
 
@@ -105,7 +103,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
     // create response function
     var after_response = function(info) {
-      //***************RESPONSE TRIGGER??????****************
+      //***************RESPONSE TRIGGER****************
         if (info.rt != -1) {
             var response = 'response'.concat(String.fromCharCode(event.keyCode));
             document.dispatchEvent(window[response]);
@@ -150,13 +148,14 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       // get feedback amount
       if (!correct) {  // incorrect response
-        reward = 1
+        reward = 1;
       } else {  // correct response
         reward = trial.reward
       }
       noised_amount = reward + 0.5 * randn_bm();
       rounded_amount = Math.round(noised_amount * 10) / 10; // round doesn't round with decimals
       feedback_amount = Math.max(0, rounded_amount);
+      console.log(trial.reward);
 
       // save data
       trial_data = {
@@ -253,7 +252,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
           $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
       }
-        var feedback = 'feedback'.concat(String(correct));
+        var feedback = 'feedback'.concat(String(correct));   //var feedback = 'feedback'.concat(trial.reward)
         document.dispatchEvent(window[feedback]);
 
       setTimeout(function() {

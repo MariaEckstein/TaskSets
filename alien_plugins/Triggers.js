@@ -50,6 +50,87 @@ var endInstructions = new CustomEvent('jspsych', {
     }
 });
 
+var feedback1 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 61
+    }
+
+});
+
+var feedback2 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 62
+    }
+
+});
+
+var feedback3 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 63
+    }
+
+});
+
+var feedback4 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 64
+    }
+
+});
+
+var feedback5 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 65
+    }
+
+});
+
+var feedback6 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 66
+    }
+
+});
+
+var feedback7 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 67
+    }
+
+});
+
+var feedback8 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 68
+    }
+
+});
+
+var feedback10 = new CustomEvent('jspsych', {
+    detail:{
+        target : 'parallel',
+        action : 'trigger',
+        payload: 69
+    }
+
+});
+
 var feedbacktrue = new CustomEvent('jspsych', {
     detail:{
         target : 'parallel',
