@@ -24,7 +24,7 @@ n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
 wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "model_name", "rt", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
-parameter_names = c("alpha", "alpha_high", "beta", "beta_high", "epsilon", "forget", 'create_TS_biased_prefer_new', 'create_TS_biased_copy_old')# , "create_TS_biased")  #
+parameter_names = c("alpha", "alpha_high", "beta", "beta_high", "epsilon", "forget", 'TS_bias')
 if (run_on == "humans") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
   patt = "1...csv"
@@ -140,10 +140,9 @@ if (run_on %in% c("simulations", "gen_rec")) {
   for (subjIDi in unique(all_files$subjID)) {
     
     subj_rows = all_files$subjID == subjIDi
-    subj_learning_style = all_files[subj_rows, "learning_style"][1]
+    # subj_learning_style = all_files[subj_rows, "learning_style"][1]
     non0_parameters = parameter_names[all_files[subj_rows, parameter_names][1,] != 0]
-    subj_model_parameters = paste(non0_parameters, collapse="_")[1]
-    all_files[subj_rows, "model_name"] = paste0(subj_learning_style, "_", subj_model_parameters)
+    all_files[subj_rows, "model_name"] = paste(non0_parameters, collapse="_")[1]
   
     subj_feedaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase != "3PickAliens")
     subj_pickaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase == "3PickAliens")
@@ -254,9 +253,9 @@ if (run_on == "gen_rec") {
     geom_point() +
     geom_text(aes(label = ifelse(outlier, subjID, ""), hjust = 0)) +
     theme(legend.position = "none") +
-    facet_wrap(model_name ~ parameter, scale = "free", ncol = length(unique(parameter_long$parameter)))
-  gg_gen_rec = gg_gen_rec + geom_abline(slope = 0, linetype = "dotted")
-  gg_gen_rec2 = gg_gen_rec + aes(y = rec_par) + geom_abline(slope = 1, linetype = "dotted")
+    facet_wrap(model_name ~ parameter, scale = "free", ncol = 3)
+  gg_gen_rec = gg_gr + geom_abline(slope = 0, linetype = "dotted")
+  gg_gen_rec2 = gg_gr + aes(y = rec_par) + geom_abline(slope = 1, linetype = "dotted")
   
   gg_gen_rec_lim = gg_gen_rec
   gg_gen_rec_lim$data = subset(gg_gen_rec_lim$data, abs(gen_minus_rec) < 5)
