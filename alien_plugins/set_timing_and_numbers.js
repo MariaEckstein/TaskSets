@@ -53,12 +53,16 @@ n_trials_total_minus_training_rainbow = (((((n_trials_per_alien_phase1*n_blocks_
     (n_trials_per_alien_refreshers*n_blocks_refreshers*2))*3) +(n_trials_per_season_alien_mixed*n_blocks_mixed))*4);
 console.log(n_trials_total_minus_training_rainbow);
 
+n_trials_comp = 96;
+
 
 
 total_trials_so_far = 0;
 
 
 ITI_duration_shuffled = shuffle(ITI_durations, n_trials_total_minus_training_rainbow);
+
+//ITI_duration_shuffled_comp = shuffle(ITI_durations, n_trials_comp);
 
 ISI_duration_shuffled = shuffle(ISI_durations, n_trials_total_minus_training_rainbow);
 

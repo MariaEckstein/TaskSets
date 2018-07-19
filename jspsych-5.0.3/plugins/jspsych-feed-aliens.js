@@ -57,10 +57,6 @@ jsPsych.plugins["feed-aliens"] = (function() {
     trial.timing_response = trial.timing_response || -1; // default is no max response time
     trial.timing_feedback_duration = trial.timing_feedback_duration || 2000;
 
-    console.log(trial.isi);
-    console.log(trial.timing_post_trial);
-    console.log(trial.timing_feedback_duration);
-    console.log(trial.season);
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -95,12 +91,23 @@ jsPsych.plugins["feed-aliens"] = (function() {
     // display everyting
     display_element.html("");
     display_element.append(background, alien_buttons);
-    //stimuli trigger
+
+    //***********STIMULI TRIGGER************
+     var variable = String(trial.season).concat(String(trial.phase), String(trial.aliens[trial.sad_alien]));
+      document.dispatchEvent(window[variable]);
+
+
+
 
     var trial_data = {};
 
     // create response function
     var after_response = function(info) {
+      //***************RESPONSE TRIGGER****************
+        if (info.rt != -1) {
+            var response = 'response'.concat(String.fromCharCode(event.keyCode));
+            document.dispatchEvent(window[response]);
+        }
 
       // kill any remaining setTimeout handlers
       for (var i = 0; i < setTimeoutHandlers.length; i++) {
@@ -141,13 +148,14 @@ jsPsych.plugins["feed-aliens"] = (function() {
 
       // get feedback amount
       if (!correct) {  // incorrect response
-        reward = 1
+        reward = 1;
       } else {  // correct response
         reward = trial.reward
       }
       noised_amount = reward + 0.5 * randn_bm();
       rounded_amount = Math.round(noised_amount * 10) / 10; // round doesn't round with decimals
       feedback_amount = Math.max(0, rounded_amount);
+      console.log(trial.reward);
 
       // save data
       trial_data = {
@@ -165,6 +173,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
         "phase": trial.phase,
           "ISI": trial.isi,
         "ITI": trial.timing_post_trial,
+          "time": new Date(),
       };
 
       display_element.html('');  // clears display before feedback screen
@@ -181,9 +190,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
         $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
         $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');       //end of added
 
-        //insert ISI trigger here
 
       var timeout = info.rt == -1;
+
       setTimeout(function() {
           doFeedback(key, correct, timeout);
       }, trial.isi);   //creates a delay
@@ -212,7 +221,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
       if (timeout && !trial.show_feedback_on_timeout) {
           display_element.html('');
         display_element.append(trial.timeout_message);
-        //timeout trigger if we need one
+        //**********TIMEOUT TRIGGER*******
+          document.dispatchEvent(missedTrial);
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
 
@@ -242,8 +252,9 @@ jsPsych.plugins["feed-aliens"] = (function() {
           $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
       }
+        var feedback = 'feedback'.concat(String(correct));   //var feedback = 'feedback'.concat(trial.reward)
+        document.dispatchEvent(window[feedback]);
 
-      //insert feedback trigger here-ish?
       setTimeout(function() {
         endTrial();
       }, trial.timing_feedback_duration);
@@ -253,6 +264,8 @@ jsPsych.plugins["feed-aliens"] = (function() {
       display_element.html("");
       display_element.append(background);
       jsPsych.finishTrial(trial_data);
+      //*****ITI TRIGGER******
+      document.dispatchEvent(startITI);
     }
 
   };

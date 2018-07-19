@@ -37,15 +37,15 @@
     /* create experiment timeline array */
     var timeline = [
         get_subj_data,
-        phase1_instructions,
-      training_block,  // v1.0: 10 blocks; v2.0: 8 blocks; v3.0: ??? blocks
-      training_instructions_post,
-      phase1_initial_learn,  // all v: 3 blocks per season, 13 trials per alien per block
-      phase1_instructions_post,
-      phase2_instructions,
-      phase2_cloudy,  // v1.0: 2 blocks per season, v2.0: 3 blocks per season; both: 10 trials per alien per block
-      phase2_instructions_post,
-      refresher_block_2,  // all v: 2 blocks, 7 trials per alien per block
+         phase1_instructions,
+       training_block,  // v1.0: 10 blocks; v2.0: 8 blocks; v3.0: ??? blocks
+       training_instructions_post,
+       phase1_initial_learn,  // all v: 3 blocks per season, 13 trials per alien per block
+       phase1_instructions_post,
+       phase2_instructions,
+       phase2_cloudy,  // v1.0: 2 blocks per season, v2.0: 3 blocks per season; both: 10 trials per alien per block
+       phase2_instructions_post,
+       refresher_block_2,  // all v: 2 blocks, 7 trials per alien per block
       phase3_instructions,
       phase3_pick_aliens,  // v1.0: 2 trials per pair (4 trials per image for aliens [because I missed alien3], seasons, and items; 6 trials for alien-same-season); v2.0: 4 trials per season, alien, and item pairs, 2 trials per alien-same-season (8 trials per season and item images, 12 trials per alien image, 6 trials per alien-same-season)
       phase3_post,
@@ -68,14 +68,12 @@
         'img/training.png', 'img/umbrella.png'];
 
         jsPsych.init({
-            on_start: function(){
-                document.dispatchEvent(startEvent)
-            },
             timeline: timeline,
             //show_preload_progress_bar: false, // hide preload progress bar
             fullscreen: true,
             preload_images: images,
             on_finish: function () {
+                console.log(endEvent);
                 document.dispatchEvent(endEvent);
                 jsPsych.data.localSave('test.csv', 'csv')
             }

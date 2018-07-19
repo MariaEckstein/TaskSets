@@ -1,7 +1,13 @@
+
 // Create timeline for training block
-training_timeline = []
+training_timeline = [];
 for (i = 0; i < n_blocks_training; i ++) {
-  training_timeline.push({timeline: TS_train, randomize_order: true,})
+  training_timeline.push({timeline: [
+          {key_answer: item_names[0], sad_alien: 0, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
+          {key_answer: item_names[1], sad_alien: 1, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
+          {key_answer: item_names[2], sad_alien: 2, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},
+          {key_answer: item_names[2], sad_alien: 3, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0], isi: ISI_durations[(Math.random() * ISI_durations.length) | 0]},],
+          randomize_order: true});
 }
 training_block = {
   type: "feed-aliens",
@@ -11,11 +17,10 @@ training_block = {
   aliens: pr_alien_names,
   show_stim_with_feedback: true,
   timing_feedback_duration: feedback_duration_train,
-    timing_post_trial: ITI,
   timing_response: max_RT_train,
   timeout_message: timeout_message,
   timeline: training_timeline
-}
+};
 
 
 // Create timeline for InitialLearn: n_blocks_phase1 blocks
@@ -29,7 +34,7 @@ var phase1_initial_learn = {
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_phase1,
                                           n_trials_per_alien=n_trials_per_alien_phase1)
-}
+};
 
 // Create timeline for Cloudy Season: n_blocks_cloudy cloudy blocks
 var phase2_cloudy = {
@@ -43,7 +48,7 @@ var phase2_cloudy = {
   timeline: create_feed_aliens_timeline(n_blocks=n_blocks_cloudy,
                                         n_trials_per_alien=n_trials_per_alien_cloudy,
                                         block_type="cloudy")
-}
+};
 
 // Create timeline for mixed block at the end: n_trial_mixed trials
 mixed_timeline = []
@@ -63,7 +68,7 @@ var phase6_mixed_block = {
     timing_feedback_duration: feedback_duration,
     timeout_message: timeout_message,
     timeline: mixed_timeline,
-}
+};
 
 // Create timeline for Refershers: n_blocks_refreshers blocks
 var refresher_block_2 = {
@@ -76,7 +81,7 @@ var refresher_block_2 = {
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_refreshers,
                                           n_trials_per_alien=n_trials_per_alien_refreshers)
-}
+};
 
 var refresher_block_3 = {
     type: "feed-aliens",
@@ -88,15 +93,15 @@ var refresher_block_3 = {
     timeout_message: timeout_message,
     timeline: create_feed_aliens_timeline(n_blocks=n_blocks_refreshers,
                                           n_trials_per_alien=n_trials_per_alien_refreshers)
-}
+};
 
 // Create timeline for Rainbow Season: x rainbow blocks, without feedback
 rainbow_trials = [
-    {sad_alien: 0},
-    {sad_alien: 1},
-    {sad_alien: 2},
-    {sad_alien: 3},
-]
+    {sad_alien: 0, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+    {sad_alien: 1, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+    {sad_alien: 2, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+    {sad_alien: 3, timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+];
 rainbow_timeline = [];
 for (i = 0; i < n_blocks_rainbow; i ++) {
   rainbow_timeline = rainbow_timeline.concat(
@@ -115,4 +120,4 @@ var rainbow_season_phase5 = {
     timing_post_trial: ITI,
     timeout_message: timeout_message,
     timeline: rainbow_timeline
-}
+};

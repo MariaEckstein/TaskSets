@@ -1,11 +1,14 @@
 
 // Training task sets
+/*
 TS_train = [
-  {key_answer: item_names[0], sad_alien: 0, reward: 5, TS: "train"},
-  {key_answer: item_names[1], sad_alien: 1, reward: 5, TS: "train"},
-  {key_answer: item_names[2], sad_alien: 2, reward: 5, TS: "train"},
-  {key_answer: item_names[2], sad_alien: 3, reward: 5, TS: "train"},
+  {key_answer: item_names[0], sad_alien: 0, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+  {key_answer: item_names[1], sad_alien: 1, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+  {key_answer: item_names[2], sad_alien: 2, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]},
+  {key_answer: item_names[2], sad_alien: 3, reward: 5, TS: "train", timing_post_trial: ITI_durations[(Math.random() * ITI_durations.length) | 0]}
 ]
+*/
+
 
 // Phase-1 task sets
 TS0 = [  // sum: 25

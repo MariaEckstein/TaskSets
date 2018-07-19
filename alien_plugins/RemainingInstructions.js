@@ -9,13 +9,24 @@ phase3_text =
   "<p>Press 'Next' when you are ready.</p></center>"
 
 var phase3_post = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
   type: 'instructions',
   pages: [phase3_text],
   show_clickable_nav: true,
-  //timing_post_trial: ITI_duration
-}
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
+};
 
 var phase6_mixed_instructions = {
+    on_trial_start: function(){
+        document.dispatchEvent(startInstructions);
+        document.dispatchEvent(endEvent)
+    },
   type: 'instructions',
   pages: [
     "<center><p>You will next encounter the <i>chaotic season</i>.</p>"+
@@ -23,7 +34,10 @@ var phase6_mixed_instructions = {
     "It can be rainy one day, and then then sunny the next.</p></center>"
   ],
   show_clickable_nav: true,
-  //timing_post_trial: ITI_duration,
+    on_finish: function(){
+        document.dispatchEvent(startEvent);
+        document.dispatchEvent(endInstructions)
+    }
 }
 
 // Goodbye block

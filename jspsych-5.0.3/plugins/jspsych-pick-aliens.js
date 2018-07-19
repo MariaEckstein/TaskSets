@@ -54,11 +54,11 @@ jsPsych.plugins["pick-aliens"] = (function() {
     var setTimeoutHandlers = [];
 
     // prepare the two buttons that will be shown
-    button_order = jsPsych.randomization.shuffle([0, 1])
-    l_button_html = trial.buttons[button_order[0]]
-    r_button_html = trial.buttons[button_order[1]]
-    l_button_name = trial.button_names[button_order[0]]
-    r_button_name = trial.button_names[button_order[1]]
+    button_order = jsPsych.randomization.shuffle([0, 1]);
+    l_button_html = trial.buttons[button_order[0]];
+    r_button_html = trial.buttons[button_order[1]];
+    l_button_name = trial.button_names[button_order[0]];
+    r_button_name = trial.button_names[button_order[1]];
 
     response_buttons =
       "<center><div class='response_buttons'>" +
@@ -70,8 +70,24 @@ jsPsych.plugins["pick-aliens"] = (function() {
     display_element.append(response_buttons);
     trial.start_time = (new Date()).getTime();
 
+    //*******STIMULI TRIGGER**********
+    if (trial.assess == 'season'){
+      var seasonvar = String(trial.button_names[button_order[0]]).concat(String(trial.button_names[button_order[1]]));
+      document.dispatchEvent(window[seasonvar]);
+      console.log(window[seasonvar])
+    }
+    else{
+      document.dispatchEvent(compOther);
+      console.log(compOther)
+    }
+
     // create response function
     var after_response = function(info) {
+        //*****RESPONSE TRIGGER*****
+        if (info.rt != -1) {
+            var response = 'response'.concat(String.fromCharCode(event.keyCode));
+            console.log(window[response]);
+        }
 
       // kill any remaining setTimeout handlers
       for (var i = 0; i < setTimeoutHandlers.length; i++) {
@@ -101,6 +117,8 @@ jsPsych.plugins["pick-aliens"] = (function() {
         "item_right_name": r_button_name,
         "item_chosen_name": chosen_button_name,
         "phase": trial.phase,
+          "ITI": trial.timing_post_trial,
+          "time": Date(),
       };
 
       var timeout = info.rt == -1;
@@ -132,6 +150,9 @@ jsPsych.plugins["pick-aliens"] = (function() {
       if (timeout && !trial.show_feedback_on_timeout) {
         display_element.html("");
         display_element.append(trial.timeout_message);
+          //**********TIMEOUT TRIGGER*******
+          document.dispatchEvent(missedTrial);
+          console.log(missedTrial);
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
         // hide non-selected stimulus
@@ -145,6 +166,9 @@ jsPsych.plugins["pick-aliens"] = (function() {
     function endTrial() {
       display_element.html("");
       jsPsych.finishTrial(trial_data);
+      ///*******ITI TRIGGER******
+        document.dispatchEvent(startITI);
+        console.log(startITI)
     }
 
   };
