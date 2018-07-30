@@ -88,7 +88,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
         response_buttons +
       "</div></center>"
 
-    // display everyting
+    // display everything
     display_element.html("");
     display_element.append(background, alien_buttons);
 
@@ -155,7 +155,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
       noised_amount = reward + 0.5 * randn_bm();
       rounded_amount = Math.round(noised_amount * 10) / 10; // round doesn't round with decimals
       feedback_amount = Math.max(0, rounded_amount);
-      console.log(trial.reward);
+
 
       // save data
       trial_data = {
@@ -222,6 +222,7 @@ jsPsych.plugins["feed-aliens"] = (function() {
           display_element.html('');
         display_element.append(trial.timeout_message);
         //**********TIMEOUT TRIGGER*******
+          console.log(missedTrial);
           document.dispatchEvent(missedTrial);
         trial.timing_feedback_duration = 4 * trial.timing_feedback_duration;  // message stays on longer if there was no button press
       } else {
@@ -251,9 +252,18 @@ jsPsych.plugins["feed-aliens"] = (function() {
           $("#" + unchosen_item1 + "-button").css('visibility', 'hidden');
           $("#" + unchosen_item2 + "-button").css('visibility', 'hidden');
 
+
+          if (!correct) {  // incorrect response
+              document.dispatchEvent(feedback1);
+              console.log(feedback1)
+          } else {  // correct response
+              var feedback = 'feedback'.concat(trial.reward);   //var feedback = 'feedback'.concat(trial.reward)
+              console.log(window[feedback]);
+              document.dispatchEvent(window[feedback]);
+          }
+
       }
-        var feedback = 'feedback'.concat(String(correct));   //var feedback = 'feedback'.concat(trial.reward)
-        document.dispatchEvent(window[feedback]);
+
 
       setTimeout(function() {
         endTrial();
