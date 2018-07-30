@@ -1,6 +1,7 @@
 // Instruction slides
 instructions1 =
-  "<center><p>The time for the competition has finally come!</p>" +
+  "<center><p>YOU MAY TAKE A BREAK BEFORE BEGINNING THE NEXT SECTION</p>" +
+    "<p>The time for the competition has finally come!</p>" +
   "<p>In the competition, your goal is to <i>make your aliens grow as much as you can</i>." +
   "<center><p>Before the competition starts, " +
   "you are allowed to pick the aliens and seasons that you want to use in the competition. " +

@@ -1,7 +1,8 @@
 
 // Instruction slides
 instructions0 =
-  "<center><p>Congratulations! <i>You won</i> the competition!</p>" +
+  "<center><p>YOU MAY NOW TAKE A BREAK BEFORE THE NEXT SECTION</p>" +
+    "<p>Congratulations! <i>You won</i> the competition!</p>" +
   //"[cheering?]" +
   "<p>The aliens reward you with all kinds of beautiful prizes. " +
   "You feel honored.</p>"
