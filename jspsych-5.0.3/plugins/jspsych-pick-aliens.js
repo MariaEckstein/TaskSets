@@ -87,6 +87,7 @@ jsPsych.plugins["pick-aliens"] = (function() {
         if (info.rt != -1) {
             var response = 'response'.concat(String.fromCharCode(event.keyCode));
             console.log(window[response]);
+            document.dispatchEvent(window[response])
         }
 
       // kill any remaining setTimeout handlers

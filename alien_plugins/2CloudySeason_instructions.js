@@ -1,6 +1,7 @@
 instructions =
   "<img class=background src='img/hot_cloudy.png'>" +
-  "<center><p>Suddenly, a massive layer of clouds appears. " +
+  "<center><p>YOU MAY NOW TAKE A BREAK BEFORE THE NEXT SECTION</p>" +
+    "<p>Suddenly, a massive layer of clouds appears. " +
   "The clouds are so thick that you are unable to recognize anything around you, " +
   "not even what season it is currently (hot, cold, or rainy).</p>" +
   "<p>Your alien friends quickly assure you that this is a common phenomenon, and not dangerous. " +
