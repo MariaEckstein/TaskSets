@@ -14,34 +14,37 @@ theme_set(theme_bw())
 # TDs
 # change colnames(all_files)[colnames(all_files) == "create_TS_biased_prefer_new"] = "create_TS_biased"
 
-run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
-gg_save = T
+run_on = "humans"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
+gg_save = F
 run_regression = F
+max_n_subj = 31  # versions1.0and3.1 -> 82; version3.1 -> 31
+parameter_names = c("alpha", "beta", "forget", "alpha_high", "beta_high", "forget_high")  # , "beta_high", 'TS_bias', "epsilon"
 exclude_participants = F
 n_aliens = 4
 n_seasons = 3
 n_trials = data.frame(a = 13, b = 10, x = 7, d = 7)
 n_blocks = data.frame(a =  3, b =  3, x = 2, d = 2)
 subj_value_phase = "Refresher2"
-wanted_columns = c("subjID", "trial_index", "phase", "TS", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "model_name", "rt", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
-parameter_names = c("alpha", "beta", "forget")  # , "alpha_high", "beta_high", 'TS_bias', "epsilon"
+wanted_columns = c("subjID", "trial_index", "phase", "TS", "TS_chosen", "season", "sad_alien", "sad_alien_name", "item_left", "item_right", "item_chosen", "item_left_name", "item_right_name", "item_chosen_name", "assess", "reward", "correct", "block.type", "block", "trial_type", "model_name", "rt", "Q_TS", "Q_action", "p_TS", "p_action", "LL")
+feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refresher3")
+colnames(n_trials) = paste0("X", feed_aliens_phases)
+colnames(n_blocks) = paste0("X", feed_aliens_phases)
 if (run_on == "humans") {
-  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"
-  patt = "1...csv"
+  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"  # version3.1  # versions1.0and3.1
+  patt = "aliens.*csv"
 } else if (run_on == "simulations") {
   data_dir = "C:/Users/maria/MEGAsync/SLCN/PSsimulations/"   # "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/MaxInsteadOfSoftmax/"
-  patt = "alien"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
+  patt = "aliens_hier.*csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
+  feed_aliens_phases = feed_aliens_phases[feed_aliens_phases != "2CloudySeason"]
 } else if (run_on == "gen_rec") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/fit_par/"
   patt = "sim_....csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   # parameter_names = c(parameter_names, paste0(parameter_names, "_rec"))
 }
-plot_dir = file.path(data_dir, "plots")
-feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refresher3")
-colnames(n_trials) = paste0("X", feed_aliens_phases)
-colnames(n_blocks) = paste0("X", feed_aliens_phases)
+plot_dir = file.path(data_dir, "alien_plots_cloudy")
 n_trials
 n_blocks
+
 if (!dir.exists(plot_dir)) {
   dir.create(plot_dir)
 }
@@ -49,30 +52,39 @@ perf_criterion = 0.5  # participants who perform worse that that at the end of t
 ```
 ```{r Read in all data}
 filenames = list.files(data_dir, pattern = patt)
+filenames[1:max_n_subj]
 all_files = data.frame()
 
-for (filename in filenames) {
+for (filename in filenames[1:max_n_subj]) {
   subj_file = read.csv(file = file.path(data_dir, filename), header = T, na.strings = c("", "NA", "NaN", "-1"))
+  subj_file$X = NULL
   subj_file$correct = factor(subj_file$correct)  # necessary because otherwise correct == NA everywhere for subject 163
   
   if (run_on == "humans") {
     # Get subjID
     demos = gsub("[^A-Za-z0-9/]", "", as.character(subj_file$responses)[1])  # get rid of all funny characters
     subj_file$subjID = as.numeric(strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1])
-  }
   
+    for (wanted_column in wanted_columns) {
+      if (! wanted_column %in% colnames(subj_file)) {
+        subj_file[wanted_column] = NA
+      }
+    }
+    subj_file = subset(subj_file, select = c(wanted_columns, "key"))  # necessary to read in version1.0 and version 3.1 human data together
+  }
+
   all_files = rbind(all_files, subj_file)
 }
 subj_file
 all_files
 # unique(all_files$correct)
-# summary(all_files)
+summary(all_files)
 ```
 ```{r Human demographics and training trials}
-if (run_on == "humans") {
-  train_dat = subset(all_files, phase == "0Training")
-  demo_data = subset(all_files, select = "responses", trial_index == 0)
-}
+# if (run_on == "humans") {
+#   train_dat = subset(all_files, phase == "0Training")
+#   demo_data = subset(all_files, select = "responses", trial_index == 0)
+# }
 # # Get demographics
 # demos = gsub("[^A-Za-z0-9/]", "", as.character(demo_data$responses)[1])  # get rid of all funny characters
 # Q0split = strsplit(strsplit(demos, "Q0")[[1]][2], "Q1")[[1]][1]
@@ -119,7 +131,7 @@ if (run_on == "humans") {
   
 }
 summary(all_files)
-head(all_files)
+all_files
 ```
 ```{r Get simulated data into the right format}
 if (run_on %in% c("simulations", "gen_rec")) {
@@ -129,8 +141,8 @@ if (run_on %in% c("simulations", "gen_rec")) {
   all_files[all_files$learning_style == "hierarchical" & all_files$beta == all_files$beta_high, "beta_high"] = 0
   # Rename TS-related columns
   colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
-  colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
   colnames(all_files)[colnames(all_files) == "context"] = "TS"
+  # colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
   
   # Remove unwanted rows
   all_files = subset(all_files, phase != 0)
@@ -143,7 +155,7 @@ if (run_on %in% c("simulations", "gen_rec")) {
     subj_rows = all_files$subjID == subjIDi
     # subj_learning_style = all_files[subj_rows, "learning_style"][1]
     non0_parameters = parameter_names[all_files[subj_rows, parameter_names][1,] != 0]
-    all_files[subj_rows, "model_name"] = paste(non0_parameters, collapse="_")[1]
+    # all_files[subj_rows, "model_name"] = paste(non0_parameters, collapse="_")[1]
   
     subj_feedaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase != "3PickAliens")
     subj_pickaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase == "3PickAliens")
@@ -156,6 +168,7 @@ if (run_on %in% c("simulations", "gen_rec")) {
       item_ids_names = data.frame(item = 0:2, item_name = sample(c("bed", "plant", "umbrella")))
       
       # Add season and xyz_name columns (feed-aliens phases)
+      subj_file_feed$TS = as.numeric(as.character(subj_file_feed$TS))
       subj_file_feed = merge(subj_file_feed, TS_seasons, all.x = T)
       subj_file_feed = merge(subj_file_feed, alien_ids_names, all.x = T)
       
@@ -210,6 +223,7 @@ if (run_on %in% c("simulations", "gen_rec")) {
   # assertthat::assert_that(dim(new_all_files)[1] == dim(all_files)[1])
   all_files = new_all_files
 }
+all_files
 ```
 ```{r Get parameter_dat}
 if (run_on == "gen_rec") {
@@ -225,12 +239,14 @@ if (run_on == "gen_rec") {
   assertthat::assert_that(dim(parameter_long)[1] == (length(parameter_names) + 1) * dim(parameter_dat)[1])
 } else if (run_on == "simulations") {
   parameter_dat = ddply(all_files, c("subjID", "model_name", parameter_names), summarize, bla=NA)
+  parameter_dat$bla = NULL
 } else {
   parameter_dat = data.frame(subjID = unique(all_files$subjID), model_name = "human")
   for (par_name in parameter_names) {
     parameter_dat[,par_name] = 999
   }
 }
+parameter_dat
 ```
 
 # Generate & recover
@@ -273,6 +289,8 @@ if (run_on == "gen_rec") {
 }
 ```
 
+# Finish all_files preprocessing
+
 ```{r For all_files form all sources: remove excess columns and rows}
 # Add NAs for all other wanted_columns
 for (wanted_column in wanted_columns) {
@@ -289,13 +307,13 @@ all_files$trial_type = factor(all_files$trial_type)
 all_files$model_name = factor(all_files$model_name)
 all_files$TS = factor(all_files$TS)
 all_files = all_files[order(all_files$subjID, all_files$trial_index, all_files$phase, all_files$sad_alien, all_files$TS),]
-summary(all_files)
-head(all_files)
+all_files
+subset(all_files, select = c("subjID", "TS", "TS_chosen", "correct", "sad_alien", "reward", "item_chosen"))
 ```
 ```{r Make sure all_files looks good}
-correct_nrows = assertthat::are_equal(nrow(subj_file) * length(filenames), nrow(all_files))
+correct_nrows = assertthat::are_equal(nrow(subj_file) * length(filenames[1:max_n_subj]), nrow(all_files))
 if (!correct_nrows) {
-  warning(paste("all_files does not have the expected number of rows. Expected: nrow(subj_file) * length(filenames) =", nrow(subj_file), "*", length(filenames), "=", nrow(subj_file) * length(filenames), "- Actual:", nrow(all_files)))
+  warning(paste("all_files does not have the expected number of rows. Expected: nrow(subj_file) * length(filenames[1:max_n_subj]) =", nrow(subj_file), "*", length(filenames[1:max_n_subj]), "=", nrow(subj_file) * length(filenames[1:max_n_subj]), "- Actual:", nrow(all_files)))
 }
 
 for (wanted_column in wanted_columns) {
@@ -332,21 +350,25 @@ for (subjIDi in unique(all_files$subjID)) {
     # Figure out whether season changed
     if (row == 1) {
       new_season = T
+      new_phase = T
     } else {
       new_season = subj_file$season[row] != subj_file$season[row-1]
+      new_phase = subj_file$phase[row] != subj_file$phase[row-1]
     }
     
-    # Update season and season-alien counters
-    if (new_season) {
-      season_counter[season] = season_counter[season] + 1
-      block = block + 1
+    if (!is.na(sad_alien) & !is.na(season)) {
+      # Update season and season-alien counters
+      if (new_season | new_phase) {
+        season_counter[season] = season_counter[season] + 1
+        block = block + 1
+      }
+      alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
+      
+      # Update repetition and alien_trial in the subj_file
+      subj_file$block[row] = block
+      subj_file$repetition[row] = season_counter[season][[1]]
+      subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
     }
-    alien_season_counter[sad_alien, season] = alien_season_counter[sad_alien, season] + 1
-    
-    # Update repetition and alien_trial in the subj_file
-    subj_file$block[row] = block
-    subj_file$repetition[row] = season_counter[season][[1]]
-    subj_file$alien_trial[row] = alien_season_counter[sad_alien, season]
   }
   
   # Add subject data back into all_files
@@ -355,7 +377,6 @@ for (subjIDi in unique(all_files$subjID)) {
 
 all_files$block[all_files$block.type == "mixed"] = NA
 summary(all_files)
-dim(all_files)
 ```
 ```{r Code factors as factors}
 all_files$phase = factor(all_files$phase, levels = c("1InitialLearning", "2CloudySeason", "Refresher2", "3PickAliens", "Refresher3", "5RainbowSeason"))
@@ -380,45 +401,52 @@ summary(all_files)
 # Make sure that the dataset has legit responses for each phase
 ggplot(all_files, aes(trial_index, item_chosen, color = phase)) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
-  geom_point()
+  geom_point() #+
+  # facet_grid(~ subjID)
 
-# Make sure that participants are rewarded according to a legit TS in a specific context ("rainiy")
+# Make sure that participants are rewarded according to a legit TS in one particular context
 ddply(subset(all_files, season == "hot" & ACC == 1), .(subjID, TS, sad_alien, item_chosen), summarize,
       rew = mean(reward, na.rm = T))
 ```
+```{r Save preprocessed subj_files}
+# print(paste0("Saving preprocessed files to ", data_dir))
+# for (subj in unique(all_files$subjID)) {
+#   write.csv(subset(all_files, subjID == subj), paste0(data_dir, "preprocessed/alien", subj, ".csv"))
+# }
+```
 ```{r Exclude subjects who don't reach criterion in training block and plot performance and missed trials}
-if (run_on == "humans") {
-  train_dat
-  summary(train_dat)
-  perf_dat = ddply(subset(train_dat, trial_index %in% 30:41),  # 7th repetition of each alien starts at trial 28; training has 41 trials total
-                   .(subjID), summarize,
-                   ACC = mean(correct %in% c("true", "TRUE", T), na.rm = T))
-  gg_criterion_perf = ggplot(perf_dat, aes(factor(subjID), ACC)) +
-    geom_point() +
-    geom_hline(yintercept = perf_criterion, color = "red", linetype = "dotted")
-  perf_dat$below_criterion = perf_dat$ACC < perf_criterion
-  (chance_performers = subset(perf_dat, below_criterion == T))
-  if (exclude_participants) {
-    all_files = subset(all_files, !subjID %in% chance_performers$subjID)
-  }
-  
-  missed_trials_dat = ddply(subset(all_files, !is.na(phase)), .(subjID, phase, block.type), summarize,
-        n_missed_trials = sum(is.na(item_chosen_name)),
-        perc_missed_trials = 100 * mean(is.na(item_chosen_name)),
-        med_RTs = median(rt, na.rm = T))
-  
-  gg_missed_trials = ggplot(missed_trials_dat, aes(phase, perc_missed_trials, color = block.type, fill = block.type)) +
-    stat_summary(fun.y = "mean", geom = "bar", position = position_dodge(width = 0.9), alpha = 0.8) +
-    geom_point(position = "jitter") +
-    stat_summary(fun.data = "mean_se", geom = "pointrange", position = position_dodge(width = 0.9), color = "black")
-  gg_med_RTs = gg_missed_trials + aes(y = med_RTs / 1000)
-  
-  if (gg_save) {
-    ggsave(file.path(plot_dir, "1gg_criterion_perf.png"), gg_criterion_perf, width = 6, height = 3)
-    ggsave(file.path(plot_dir, "1gg_missed_trials.png"), gg_missed_trials, width = 6, height = 3)
-    ggsave(file.path(plot_dir, "1gg_med_RTs.png"), gg_med_RTs, width = 6, height = 3)
-  }
-}
+# if (run_on == "humans") {
+#   train_dat
+#   summary(train_dat)
+#   perf_dat = ddply(subset(train_dat, trial_index %in% 30:41),  # 7th repetition of each alien starts at trial 28; training has 41 trials total
+#                    .(subjID), summarize,
+#                    ACC = mean(correct %in% c("true", "TRUE", T), na.rm = T))
+#   gg_criterion_perf = ggplot(perf_dat, aes(factor(subjID), ACC)) +
+#     geom_point() +
+#     geom_hline(yintercept = perf_criterion, color = "red", linetype = "dotted")
+#   perf_dat$below_criterion = perf_dat$ACC < perf_criterion
+#   (chance_performers = subset(perf_dat, below_criterion == T))
+#   if (exclude_participants) {
+#     all_files = subset(all_files, !subjID %in% chance_performers$subjID)
+#   }
+#   
+#   missed_trials_dat = ddply(subset(all_files, !is.na(phase)), .(subjID, phase, block.type), summarize,
+#         n_missed_trials = sum(is.na(item_chosen_name)),
+#         perc_missed_trials = 100 * mean(is.na(item_chosen_name)),
+#         med_RTs = median(rt, na.rm = T))
+#   
+#   gg_missed_trials = ggplot(missed_trials_dat, aes(phase, perc_missed_trials, color = block.type, fill = block.type)) +
+#     stat_summary(fun.y = "mean", geom = "bar", position = position_dodge(width = 0.9), alpha = 0.8) +
+#     geom_point(position = "jitter") +
+#     stat_summary(fun.data = "mean_se", geom = "pointrange", position = position_dodge(width = 0.9), color = "black")
+#   gg_med_RTs = gg_missed_trials + aes(y = med_RTs / 1000)
+#   
+#   if (gg_save) {
+#     ggsave(file.path(plot_dir, "1gg_criterion_perf.png"), gg_criterion_perf, width = 6, height = 3)
+#     ggsave(file.path(plot_dir, "1gg_missed_trials.png"), gg_missed_trials, width = 6, height = 3)
+#     ggsave(file.path(plot_dir, "1gg_med_RTs.png"), gg_med_RTs, width = 6, height = 3)
+#   }
+# }
 ```
 
 # Results
@@ -440,7 +468,7 @@ ggplot(all_files, aes(trial_index, ACC, color = phase, group = phase)) +
 
 # Plot learning curves (and RTs) overall
 overall_learning_curves =
-  ggplot(all_files, aes(trial_index, 100 * ACC, color = phase, group = phase, shape = factor(block.type))) +
+  ggplot(all_files, aes(trial_index, 100 * ACC, color = phase, group = phase)) +
     stat_summary(fun.data = mean_se, geom = "pointrange") +
     geom_hline(yintercept = 100/3, linetype = "dotted") +
     geom_hline(yintercept = 600/8, linetype = "dotted") +
@@ -495,7 +523,7 @@ alien_TS_obj$value_obj = c(6, 4, 5, 10,
 alien_TS_obj$id = apply(alien_TS_obj[,c("sad_alien", "TS")], 1, paste, collapse = "")
 
 # Put all the average rewards into one dataframe
-dat = subset(all_files, phase %in% c("1InitialLearning", "Refresher2", "Refresher3") & !is.na(item_chosen) & block.type != "mixed")
+dat = subset(all_files, phase %in% c("1InitialLearning", "Refresher2", "Refresher3") & (!is.na(item_chosen_name) | !is.na(item_chosen)) & (is.na(block.type) | block.type != "mixed"))
 
 alien_values = get_values_and_perf(dat, "sad_alien_name", "sad_alien", "alien")
 alien_values$value_obj = 5
@@ -513,6 +541,8 @@ all_values_perf = rbind(alien_values, TS_values, item_values, season_alien_value
 all_values_perf
 
 all_files
+subset(dat, subjID > 100)  # make sure version3.1 data is there
+subset(dat, subjID < 100)  # make sure version1.0 data is there
 ```
 ```{r Create pick_aliens data}
 if (!run_on %in% c("gen_rec", "simulations")) {
@@ -589,6 +619,12 @@ if (!run_on %in% c("gen_rec", "simulations")) {
   pick_aliens_counts$count_unchosen[is.na(pick_aliens_counts$count_unchosen)] = 0
   pick_aliens_counts$chosen_minus_unchosen = with(pick_aliens_counts, count_chosen - count_unchosen)
   pick_aliens_counts
+}
+```
+```{r Save preprocessed pick_aliens}
+print(paste0("Saving preprocessed files to ", data_dir))
+for (subj in unique(all_files$subjID)) {
+  write.csv(subset(pick_aliens, subjID == subj), paste0(data_dir, "preprocessed/pick_alien", subj, ".csv"))
 }
 ```
 ```{r Plot competition phase}
@@ -695,8 +731,8 @@ if (gg_save) {
 }
 ```
 ```{r Prepare feed_aliens}
-# Plotting data: feed_aliens
-feed_aliens = subset(all_files, trial_type == "feed-aliens" & block.type != "mixed")
+# Remove mixed blocks
+feed_aliens = subset(all_files, trial_type == "feed-aliens" & (is.na(block.type) | block.type != "mixed"))
 
 ## Add season-alien values (subj. and obj.)
 all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "alien-same-season")
@@ -710,7 +746,7 @@ feed_aliens = merge(feed_aliens, all.x = T,
                     by = c("subjID", "sad_alien", "TS"))
 
 ## Add TS values (subj. and obj.)
-all_values_perf_sub = subset(all_values_perf, phase ==subj_value_phase & assess == "season")
+all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "season")
 colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("id", "value_subj", "value_obj")] = c("TS", "TS_value_subj", "TS_value_obj")
 
 feed_aliens = merge(feed_aliens, all.x = T,
@@ -738,8 +774,10 @@ for (phas in feed_aliens_phases) {
 
 # Show feed_aliens
 feed_aliens
+subset(ddply(feed_aliens, .(subjID, phase, TS, TS_value_obj, item_value_obj), summarize, ACC=mean(ACC)), subjID > 100)
+subset(all_values_perf, subjID > 100)
 ```
-```{r Plot feed_aliens: learning curves for all seasons and check if it depends on reward size / value}
+```{r Plots}
 # Make sure that subj & obj values correlate
 gg_subj_obj_values = ggplot(subset(feed_aliens, phase != "0Training"), aes(group = subjID)) +
   geom_point(aes(item_value_subj, item_value_obj), color = "red") +
@@ -750,7 +788,8 @@ gg_subj_obj_values = ggplot(subset(feed_aliens, phase != "0Training"), aes(group
   facet_grid(model_name ~ .)
 
 # Plot learning curves dependent on TS value (subj and obj)
-gg_learning_curves_TS_value_obj = ggplot(subset(feed_aliens, phase != "0Training"), aes(alien_trial_sum, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +
+gg_learning_curves_TS_value_obj =
+  ggplot(subset(feed_aliens, phase != "0Training"), aes(alien_trial_sum, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
   stat_summary(fun.data = mean_se, geom = "line") +
   geom_hline(yintercept = 100/3, linetype = "dotted") +
@@ -760,16 +799,18 @@ gg_learning_curves_TS_value_obj = ggplot(subset(feed_aliens, phase != "0Training
   facet_grid(model_name ~ phase)
 
 gg_learning_curves_TS_value_subj = gg_learning_curves_TS_value_obj + aes(color = round(TS_value_subj), group = round(TS_value_subj))
-  
+
 # Plot learning curves dependent on item value (subj and obj)
 gg_learning_curves_item_value_obj = gg_learning_curves_TS_value_obj + aes(color = item_value_obj, group = item_value_obj)
 gg_learning_curves_item_value_subj = gg_learning_curves_TS_value_obj + aes(color = round(item_value_subj), group = round(item_value_subj))
 
 # Plot learning curves by repetition
+# feed_aliens$repetition = as.numeric(as.character(feed_aliens$repetition))
 gg_learning_curves_rep = gg_learning_curves_TS_value_obj +
   aes(group = repetition, color = repetition) +
-  labs(x = "Trial", color = "Repetition") +
-  facet_grid(phase ~ TS)
+  theme(legend.position = 'right')
+  labs(x = "Trial", color = "Repetition")
+gg_learning_curves_rep$data = subset(feed_aliens, phase == '1InitialLearning')
 
 # Plot different items next to each other
 gg_learning_curves_wide = ggplot(subset(feed_aliens, phase != "0Training"), aes(alien_trial_sum, 100 * ACC, color = TS, shape = sad_alien)) +
@@ -787,10 +828,13 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_obj.png"), gg_learning_curves_item_value_obj, width = 10, height = 3 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_subj.png"), gg_learning_curves_item_value_subj, width = 10, height = 3 * length(unique(all_files$model_name)))
   
-  ggsave(file.path(plot_dir, "/2gg_learning_curves_rep.png"), gg_learning_curves_rep, width = 10, height = 10)
+  ggsave(file.path(plot_dir, "/2gg_learning_curves_rep.png"), gg_learning_curves_rep, width = 4, height = 4)
   ggsave(file.path(plot_dir, "/2gg_learning_curves_wide.png"), gg_learning_curves_wide, width = 10, height = 5)
 }
+
+nrow(ddply(subset(feed_aliens, phase != "0Training"), .(subjID), ACC=mean(correct=="true", na.rm=T), summarize))  # check that we are using the rigth data (version1.0 -> 51 participants; version3.1 -> 31 participants)
 ```
+
 ```{r Prepare ACC_1back_dat (ACC_1back_self and ACC_1back_other)}
 # Regression data: ACC_1back_dat
 ## Bring in the right order for regression: each line must be the predictor of the immediate next line!
@@ -829,17 +873,19 @@ summary(ACC_1back_dat)
 feed_alien_trial1 = subset(feed_aliens, alien_trial_sum == 1, select = c(subjID, model_name, sad_alien, TS, trial_index, phase, ACC, block))
 feed_alien_trial1 = feed_alien_trial1[order(feed_alien_trial1$subjID, feed_alien_trial1$trial_index),]
 
-# Add n_seen_aliens and n-back columns (I wish there was a better way to do this, with rollmean or so, but rollmean sets everything before NA..)
+# Add n_seen_aliens and n-back columns (I wish there was a better way to do this, with rollmean or so, but rollmean sets everything before to NA..)
 for (subj in unique(feed_alien_trial1$subjID)) {
   for (blocki in unique(feed_alien_trial1$block)) {
     sub_subj_block = feed_alien_trial1$block == blocki & feed_alien_trial1$subjID == subj
-    feed_alien_trial1[sub_subj_block, "n_seen_aliens"] = 0:3
-    for (n in 1:(n_aliens-1)) {
-      col = paste0("back", n)
-      if (mean(sub_subj_block) > 0) {
-        ACC = feed_alien_trial1[sub_subj_block, "ACC"]
-        ACC_aliens_before = c(rep(NA, n), ACC[1:(length(ACC)-n)])
-        feed_alien_trial1[sub_subj_block, col] = ACC_aliens_before[1:sum(sub_subj_block)]
+    if (sum(sub_subj_block) == 4) {
+      feed_alien_trial1[sub_subj_block, "n_seen_aliens"] = 0:3
+      for (n in 1:(n_aliens-1)) {
+        col = paste0("back", n)
+        if (mean(sub_subj_block) > 0) {
+          ACC = feed_alien_trial1[sub_subj_block, "ACC"]
+          ACC_aliens_before = c(rep(NA, n), ACC[1:(length(ACC)-n)])
+          feed_alien_trial1[sub_subj_block, col] = ACC_aliens_before[1:sum(sub_subj_block)]
+        }
       }
     }
   }
@@ -979,8 +1025,8 @@ subj_av = ddply(subset(persev_dat, !current_TS), .(subjID, none_or_TS), summariz
       ACC = sum(ACC, na.rm = T))
 subj_av = reshape(subj_av, direction = "wide", timevar = "none_or_TS", idvar = "subjID")
 subj_av$fraction_TS_errors = with(subj_av, ACC.TS / (ACC.None + ACC.TS))
-plot(subj_av$fraction_TS_errors - 6/8)
-t.test(subj_av$fraction_TS_errors - 6/8)
+# plot(subj_av$fraction_TS_errors - 6/8)
+# t.test(subj_av$fraction_TS_errors - 6/8)
 grand_av = ddply(subj_av, .(), summarize,
       fraction_TS_errors = mean(fraction_TS_errors, na.rm = T))
 
@@ -1004,12 +1050,105 @@ if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_prevTS_ACC2.png"), gg_prevTS_ACC2, width = 10, height = 3 * length(unique(all_files$model_name)))
 }
 ```
-```{r Run intrusion regression models}
+```{r Run 1back_self 1back_other regression models}
 subjwise_regr_coefs = data.frame()
 all_regressions = data.frame()
 value_obj_predictors = c("TS_value_obj", "item_value_obj")
 predictors_no_interest = c("repetition", "alien_trial_sum")
 
+regression_plot = TS_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "% correct", fill = "Alien")
+regression_plot$data = ACC_1back_dat
+ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 10, height = 3 * length(unique(all_files$model_name)))
+
+nback_predictors = c("ACC_1back_self", "ACC_1back_others")
+value_formula = paste("ACC ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
+nback_formula = paste("ACC ~", paste(paste0(nback_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
+
+for (subj in unique(ACC_1back_dat$subjID)) {
+  print(paste("Calculating SubjID", subj, "(", length(unique(ACC_1back_dat$subjID)), "subjects total)"))
+  
+  for (phas in feed_aliens_phases) {
+  
+    run_this_regr = T
+    dat = subset(ACC_1back_dat, subjID == subj & phase == phas)
+    
+    for (predictor in c(value_obj_predictors, nback_predictors, predictors_no_interest)) {
+      pred_dat = dat[,predictor]
+      zscored_pred = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+      dat[,paste0(predictor, "_zscored")] = zscored_pred
+      if (mean(is.na(zscored_pred)) == 1) {
+        run_this_regr = F
+      }
+    }
+    
+    if (run_this_regr) {
+      value_mod = glm(as.formula(value_formula),
+          family = binomial,
+          data = dat)
+      value_coefs = summary(value_mod)$coef
+      value_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
+      
+      nback_mod = update(value_mod, as.formula(nback_formula))
+      nback_coefs = summary(nback_mod)$coef
+      nback_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
+      
+      subjwise_regr_coefs = rbind(subjwise_regr_coefs, value_coefs, nback_coefs)
+    }
+  }
+}
+summary(subjwise_regr_coefs)
+```
+```{r Plot subjwise regression results}
+interesting_predictors = paste0(c("item_value_obj", "TS_value_obj", "ACC_1back_self", "ACC_1back_others", "rew_1back_self"), "_zscored")
+
+gg_subjwise_regr =
+  ggplot(subjwise_regr_coefs, aes(predictor, Estimate, fill = phase)) +
+    # geom_point(alpha=0.3) +
+    stat_summary(fun.y="median", position=position_dodge(width=0.9), geom="bar") +
+    # geom_boxplot() +
+    # stat_summary(fun.data="mean_se", position=position_dodge(width=0.9), geom="pointrange") +
+    facet_grid(~ regr_model) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave(file.path(plot_dir, "/6gg_subjwise_regr.png"), gg_subjwise_regr, width = 10, height = 5)
+
+write.csv(subjwise_regr_coefs, paste(plot_dir, "/subjwise_regr_coefs.csv", sep = ""))
+```
+```{r}
+if (run_regression) {
+  for (model_namei in unique(ACC_1back_dat$model_name)) {
+    for (phas in feed_aliens_phases) {
+      
+      value_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
+                            "+ (", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "), "| subjID)")
+      nback_formula = paste("ACC ~", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
+                            "+ (", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "), "| subjID)")
+      rew1back_formula = paste("ACC ~ rew_1back_self +", paste(predictors_no_interest, collapse = " + "),
+                             "+ (rew_1back_self + ",  paste(predictors_no_interest, collapse = " + "), "| subjID)")
+      
+      value_glmer = glmer(as.formula(value_formula),
+                        family = binomial,
+                        data = subset(ACC_1back_dat, phase == phas & model_name == model_namei),
+                        na.action = na.omit,
+                        control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
+      value_coefs = summary(value_glmer)$coef
+      value_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
+
+      nback_glmer = update(value_glmer, formula = as.formula(nback_formula))
+      nback_coefs = summary(nback_glmer)$coef
+      nback_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
+      
+      rew1back_glmer = update(value_glmer, formula = as.formula(rew1back_formula))
+      rew1back_coefs = summary(rew1back_glmer)$coef
+      rew1back_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_rewback", predictor = rownames(rew1back_coefs), as.data.frame(rew1back_coefs, row.names = F))
+      
+      all_regressions = rbind(all_regressions, value_coefs, nback_coefs, rew1back_coefs)
+    }
+  }
+}
+summary(all_regressions)
+```
+```{r Run intrusion regression models}
 # Subjectwise / agentwise regression coefficients
 for (subj in unique(persev_dat$subjID)) {
   for (phas in feed_aliens_phases) {
@@ -1056,81 +1195,6 @@ if (run_regression) {
   }
 }
 ```
-```{r Run 1back_sef 1back_other regression models}
-regression_plot = TS_plot + aes(TS, 100 * ACC, fill = sad_alien) + labs(y = "% correct", fill = "Alien")
-regression_plot$data = ACC_1back_dat
-ggsave(file.path(plot_dir, "3regression_plot.png"), regression_plot, width = 10, height = 3 * length(unique(all_files$model_name)))
-
-nback_predictors = c("ACC_1back_self", "ACC_1back_others")
-value_formula = paste("ACC ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
-nback_formula = paste("ACC ~", paste(paste0(nback_predictors, "_zscored"), collapse = " + "), "+", paste(paste0(predictors_no_interest, "_zscored"), collapse = " + "))
-    
-
-for (subj in unique(ACC_1back_dat$subjID)) {
-  for (phas in feed_aliens_phases) {
-  
-    run_this_regr = T
-    dat = subset(ACC_1back_dat, subjID == subj & phase == phas)
-    
-    for (predictor in c(value_obj_predictors, nback_predictors, predictors_no_interest)) {
-      pred_dat = dat[,predictor]
-      zscored_pred = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
-      dat[,paste0(predictor, "_zscored")] = zscored_pred
-      if (mean(is.na(zscored_pred)) == 1) {
-        run_this_regr = F
-      }
-    }
-    
-    if (run_this_regr) {
-      value_mod = glm(as.formula(value_formula),
-          family = binomial,
-          data = dat)
-      value_coefs = summary(value_mod)$coef
-      value_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
-      
-      nback_mod = update(value_mod, as.formula(nback_formula))
-      nback_coefs = summary(nback_mod)$coef
-      nback_coefs = cbind(subjID = subj, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
-      
-      subjwise_regr_coefs = rbind(subjwise_regr_coefs, value_coefs, nback_coefs)
-    }
-  }
-}
-summary(subjwise_regr_coefs)
-
-if (run_regression) {
-  for (model_namei in unique(ACC_1back_dat$model_name)) {
-    for (phas in feed_aliens_phases) {
-      
-      value_formula = paste("ACC ~", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
-                            "+ (", paste(value_obj_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "), "| subjID)")
-      nback_formula = paste("ACC ~", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "),
-                            "+ (", paste(nback_predictors, collapse = " + "), "+", paste(predictors_no_interest, collapse = " + "), "| subjID)")
-      rew1back_formula = paste("ACC ~ rew_1back_self +", paste(predictors_no_interest, collapse = " + "),
-                             "+ (rew_1back_self + ",  paste(predictors_no_interest, collapse = " + "), "| subjID)")
-      
-      value_glmer = glmer(as.formula(value_formula),
-                        family = binomial,
-                        data = subset(ACC_1back_dat, phase == phas & model_name == model_namei),
-                        na.action = na.omit,
-                        control = glmerControl(optimizer = 'bobyqa', optCtrl = list(maxfun = 1e6)))
-      value_coefs = summary(value_glmer)$coef
-      value_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_value", predictor = rownames(value_coefs), as.data.frame(value_coefs, row.names = F))
-
-      nback_glmer = update(value_glmer, formula = as.formula(nback_formula))
-      nback_coefs = summary(nback_glmer)$coef
-      nback_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_nback", predictor = rownames(nback_coefs), as.data.frame(nback_coefs, row.names = F))
-      
-      rew1back_glmer = update(value_glmer, formula = as.formula(rew1back_formula))
-      rew1back_coefs = summary(rew1back_glmer)$coef
-      rew1back_coefs = cbind(model_name = model_namei, phase = phas, regr_model = "ACC_rewback", predictor = rownames(rew1back_coefs), as.data.frame(rew1back_coefs, row.names = F))
-      
-      all_regressions = rbind(all_regressions, value_coefs, nback_coefs, rew1back_coefs)
-    }
-  }
-}
-summary(all_regressions)
-```
 ```{r Create Rainbow season data rainbow_aliens and rainbow_sum_l}
 # Create data.frame that shows accuracy according to each of the 3 TS, none, and missed trials
 all_ACCs = expand.grid(sad_alien = unique(feed_aliens$sad_alien), item_chosen = unique(feed_aliens$item_chosen))
@@ -1167,155 +1231,161 @@ rainbow_sum = ddply(rainbow_aliens, .(subjID), summarize,
 rainbow_sum_l = melt(rainbow_sum, id.vars = c("subjID"), variable.name = "TS", value.name = "times_chosen")
 
 # Add frac_chosen column
-rainbow_sum_l$frac_chosen = rainbow_sum_l$times_chosen / 3  # Every alien is presetend 3 times (1and2, 0and2 have only one opportunity per season)
-rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("0", "1")] = rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("0", "1")] / 3  # 3 opportunities per season to pick TS0 and TS1
-rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("None", "2")] = rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("None", "2")] / 2  # 2 opportunities per season to pick TS0 and TS1
-rainbow_sum_l$frac_chosen[rainbow_sum_l$TS == "Missed"] = NA
-
-# Add values (subj and obj) and task performance column
-all_values_perf_sub = subset(all_values_perf, assess == "season" & phase == "Refresher3", select = c("subjID", "name", "id", "value_subj", "value_obj", "av_ACC"))
-rainbow_sum_l = merge(rainbow_sum_l, all.x = T,
-                      all_values_perf_sub,
-                      by.x = c("subjID", "TS"),
-                      by.y = c("subjID", "id"))
-colnames(rainbow_sum_l)[colnames(rainbow_sum_l) %in% c("value_subj", "value_obj")] = c("TS_value_subj", "TS_value_obj")
-if (run_on == "humans") {
-  rainbow_sum_l$model_name = "humans"
-} else {
-  model_names = subset(parameter_dat, select = c("subjID", "model_name"))
-  rainbow_sum_l = merge(rainbow_sum_l, model_names, by = "subjID", all.x = T)
+if (run_on != "simulations") {
+  rainbow_sum_l$frac_chosen = rainbow_sum_l$times_chosen / 3  # Every alien is presetend 3 times (1and2, 0and2 have only one opportunity per season)
+  rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("0", "1")] = rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("0", "1")] / 3  # 3 opportunities per season to pick TS0 and TS1
+  rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("None", "2")] = rainbow_sum_l$frac_chosen[rainbow_sum_l$TS %in% c("None", "2")] / 2  # 2 opportunities per season to pick TS0 and TS1
+  rainbow_sum_l$frac_chosen[rainbow_sum_l$TS == "Missed"] = NA
+  
+  # Add values (subj and obj) and task performance column
+  all_values_perf_sub = subset(all_values_perf, assess == "season" & phase == "Refresher3", select = c("subjID", "name", "id", "value_subj", "value_obj", "av_ACC"))
+  rainbow_sum_l = merge(rainbow_sum_l, all.x = T,
+                        all_values_perf_sub,
+                        by.x = c("subjID", "TS"),
+                        by.y = c("subjID", "id"))
+  colnames(rainbow_sum_l)[colnames(rainbow_sum_l) %in% c("value_subj", "value_obj")] = c("TS_value_subj", "TS_value_obj")
+  if (run_on == "humans") {
+    rainbow_sum_l$model_name = "humans"
+  } else {
+    model_names = subset(parameter_dat, select = c("subjID", "model_name"))
+    rainbow_sum_l = merge(rainbow_sum_l, model_names, by = "subjID", all.x = T)
+  }
+  # Add objective TS and alien values
+  rainbow_sum_l$item_value_obj = NA
+  rainbow_sum_l$item_value_obj[rainbow_sum_l$TS %in% c(0)] = mean(c(6, 5, 4))
+  rainbow_sum_l$item_value_obj[rainbow_sum_l$TS %in% c(1)] = mean(c(3, 7, 8))
+  rainbow_sum_l$item_value_obj[rainbow_sum_l$TS == 2] = mean(c(3, 3))
+  rainbow_sum_l
 }
-# Add objective TS and alien values
-rainbow_sum_l$item_value_obj = NA
-rainbow_sum_l$item_value_obj[rainbow_sum_l$TS %in% c(0)] = mean(c(6, 5, 4))
-rainbow_sum_l$item_value_obj[rainbow_sum_l$TS %in% c(1)] = mean(c(3, 7, 8))
-rainbow_sum_l$item_value_obj[rainbow_sum_l$TS == 2] = mean(c(3, 3))
-rainbow_sum_l
 ```
 ```{r Plot rainbow season data}
-# Look at how often each TS is chosen on average
-gg_rainbow_avs = ggplot(rainbow_sum_l, aes(TS)) +
-  stat_summary(aes(y = frac_chosen), fun.data="mean_se", geom="pointrange") +#, color = "red"
-  # stat_summary(aes(y = times_chosen), color = "blue", fun.data="mean_se", geom="pointrange") +
-  labs(y = "Fraction chosen") +# (red); Times chosen (blue)
-  facet_grid(model_name ~ .)
-
-# Histogram of how often the three TS are chosen
-gg_rainbow_TS = ggplot(subset(rainbow_sum_l, TS %in% c("0", "1", "2", "None")), aes(times_chosen, fill = TS)) +
-  geom_histogram(stat = "density", position = "identity", alpha = 0.8) +
-  labs(x = "# TS choices") +
-  facet_grid(model_name ~ .)
-
-gg_rainbow_TS_full = gg_rainbow_TS
-gg_rainbow_TS_full$data = rainbow_sum_l
-
-# Histogram, split by TS values (obj and subj) rather than TS identity
-gg_rainbow_value_obj = gg_rainbow_TS + aes(fill = TS_value_obj, group = TS_value_obj) +
-    labs(x = "# TS choices", fill = "Obj. TS value")
-gg_rainbow_value_obj$data = subset(rainbow_sum_l, !is.na(TS_value_obj))
-
-rainbow_sum_l$TS_value_subj_cat = round(rainbow_sum_l$TS_value_subj * 2) / 2
-gg_rainbow_value_subj = gg_rainbow_TS + aes(color = TS_value_subj_cat, fill = TS_value_subj_cat, group = TS_value_subj_cat) +
-  labs(color = "Subj. TS value", fill = "Subj. TS value")
-gg_rainbow_value_subj$data = subset(rainbow_sum_l, !is.na(TS_value_subj))
-
-# Histogram, split by ACC rather than TS
-rainbow_sum_l$av_ACC_cat = round(rainbow_sum_l$av_ACC * 5) / 5
-gg_rainbow_ACC = gg_rainbow_TS + aes(fill = av_ACC_cat, group = av_ACC_cat) +
-    labs(x = "# TS choices", fill = "TS performance")
-gg_rainbow_ACC$data = subset(rainbow_sum_l, !is.na(av_ACC_cat))
-
-if (gg_save) {
-  ggsave(file.path(plot_dir, "5gg_rainbow_avs.png"), gg_rainbow_avs, width = 5, height = 3 * length(unique(all_files$model_name)))
+if (run_on != "simulations") {
+  # Look at how often each TS is chosen on average
+  gg_rainbow_avs = ggplot(rainbow_sum_l, aes(TS)) +
+    stat_summary(aes(y = frac_chosen), fun.data="mean_se", geom="pointrange") +#, color = "red"
+    # stat_summary(aes(y = times_chosen), color = "blue", fun.data="mean_se", geom="pointrange") +
+    labs(y = "Fraction chosen") +# (red); Times chosen (blue)
+    facet_grid(model_name ~ .)
   
-  ggsave(file.path(plot_dir, "5gg_rainbow_TS.png"), gg_rainbow_TS, width = 5, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "5gg_rainbow_TS_full.png"), gg_rainbow_TS_full, width = 5, height = 3 * length(unique(all_files$model_name)))
+  # Histogram of how often the three TS are chosen
+  gg_rainbow_TS = ggplot(subset(rainbow_sum_l, TS %in% c("0", "1", "2", "None")), aes(times_chosen, fill = TS)) +
+    geom_histogram(stat = "density", position = "identity", alpha = 0.8) +
+    labs(x = "# TS choices") +
+    facet_grid(model_name ~ .)
   
-  ggsave(file.path(plot_dir, "5gg_rainbow_value_obj.png"), gg_rainbow_value_obj, width = 5, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "5gg_rainbow_value_subj.png"), gg_rainbow_value_subj, width = 5, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "5gg_rainbow_ACC.png"), gg_rainbow_ACC, width = 5, height = 3 * length(unique(all_files$model_name)))
+  gg_rainbow_TS_full = gg_rainbow_TS
+  gg_rainbow_TS_full$data = rainbow_sum_l
+  
+  # Histogram, split by TS values (obj and subj) rather than TS identity
+  gg_rainbow_value_obj = gg_rainbow_TS + aes(fill = TS_value_obj, group = TS_value_obj) +
+      labs(x = "# TS choices", fill = "Obj. TS value")
+  gg_rainbow_value_obj$data = subset(rainbow_sum_l, !is.na(TS_value_obj))
+  
+  rainbow_sum_l$TS_value_subj_cat = round(rainbow_sum_l$TS_value_subj * 2) / 2
+  gg_rainbow_value_subj = gg_rainbow_TS + aes(color = TS_value_subj_cat, fill = TS_value_subj_cat, group = TS_value_subj_cat) +
+    labs(color = "Subj. TS value", fill = "Subj. TS value")
+  gg_rainbow_value_subj$data = subset(rainbow_sum_l, !is.na(TS_value_subj))
+  
+  # Histogram, split by ACC rather than TS
+  rainbow_sum_l$av_ACC_cat = round(rainbow_sum_l$av_ACC * 5) / 5
+  gg_rainbow_ACC = gg_rainbow_TS + aes(fill = av_ACC_cat, group = av_ACC_cat) +
+      labs(x = "# TS choices", fill = "TS performance")
+  gg_rainbow_ACC$data = subset(rainbow_sum_l, !is.na(av_ACC_cat))
+  
+  if (gg_save) {
+    ggsave(file.path(plot_dir, "5gg_rainbow_avs.png"), gg_rainbow_avs, width = 5, height = 3 * length(unique(all_files$model_name)))
+    
+    ggsave(file.path(plot_dir, "5gg_rainbow_TS.png"), gg_rainbow_TS, width = 5, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "5gg_rainbow_TS_full.png"), gg_rainbow_TS_full, width = 5, height = 3 * length(unique(all_files$model_name)))
+    
+    ggsave(file.path(plot_dir, "5gg_rainbow_value_obj.png"), gg_rainbow_value_obj, width = 5, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "5gg_rainbow_value_subj.png"), gg_rainbow_value_subj, width = 5, height = 3 * length(unique(all_files$model_name)))
+    ggsave(file.path(plot_dir, "5gg_rainbow_ACC.png"), gg_rainbow_ACC, width = 5, height = 3 * length(unique(all_files$model_name)))
+  }
 }
 ```
 ```{r Run rainbow regression models}
-# Model: frac_chosen ~ TS_value_obj + item_value_obj + TS_ACC
-rainbow_sum_l
-rainbow_regr_dat = subset(rainbow_sum_l, TS %in% c("0", "1", "2"))
-rainbow_regr_dat$TS = factor(rainbow_regr_dat$TS)  #factor(rainbow_regr_dat$TS, labels = c("0", "1", "2"), levels = c("0all", "1all", "2"))
-# rainbow_regr_dat$TS[rainbow_regr_dat$TS %in% c("0and2")]
-contrasts(rainbow_regr_dat$TS) = -contr.poly(3)
-
-# One joint model for all agents
-if (run_regression) {
-  for (model_namei in unique(rainbow_regr_dat$model_name)) {
+if (run_on != "simulations") {
+  # Model: frac_chosen ~ TS_value_obj + item_value_obj + TS_ACC
+  rainbow_sum_l
+  rainbow_regr_dat = subset(rainbow_sum_l, TS %in% c("0", "1", "2"))
+  rainbow_regr_dat$TS = factor(rainbow_regr_dat$TS)  #factor(rainbow_regr_dat$TS, labels = c("0", "1", "2"), levels = c("0all", "1all", "2"))
+  # rainbow_regr_dat$TS[rainbow_regr_dat$TS %in% c("0and2")]
+  contrasts(rainbow_regr_dat$TS) = -contr.poly(3)
+  
+  # One joint model for all agents
+  if (run_regression) {
+    for (model_namei in unique(rainbow_regr_dat$model_name)) {
+        
+      rainbow_dat = subset(rainbow_regr_dat, model_name == model_namei)
+  
+      for (predictor in value_obj_predictors) {
+        pred_dat = rainbow_dat[,predictor]
+        rainbow_dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+      }
+    
+      rainbow_formula = paste("frac_chosen ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+ (1 | subjID)")  # paste(paste0(value_obj_predictors, "_zscored"), collapse = " + ")
       
-    rainbow_dat = subset(rainbow_regr_dat, model_name == model_namei)
-
-    for (predictor in value_obj_predictors) {
-      pred_dat = rainbow_dat[,predictor]
-      rainbow_dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+      rainbow_lmer = lmer(as.formula(rainbow_formula),
+                            data = rainbow_dat,
+                            na.action = na.omit,
+                            control = lmerControl(optCtrl = list(maxfun = 1e6)))
+      lmer_coefs = summary(rainbow_lmer)$coef
+      lmer_coefs = cbind(model_name = model_namei, phase = "5RainbowSeason", regr_model = "ACC_value", predictor = rownames(lmer_coefs), as.data.frame(lmer_coefs, row.names = F))
+      all_regressions = rbind(all_regressions, lmer_coefs)
     }
-  
-    rainbow_formula = paste("frac_chosen ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "), "+ (1 | subjID)")  # paste(paste0(value_obj_predictors, "_zscored"), collapse = " + ")
-    
-    rainbow_lmer = lmer(as.formula(rainbow_formula),
-                          data = rainbow_dat,
-                          na.action = na.omit,
-                          control = lmerControl(optCtrl = list(maxfun = 1e6)))
-    lmer_coefs = summary(rainbow_lmer)$coef
-    lmer_coefs = cbind(model_name = model_namei, phase = "5RainbowSeason", regr_model = "ACC_value", predictor = rownames(lmer_coefs), as.data.frame(lmer_coefs, row.names = F))
-    all_regressions = rbind(all_regressions, lmer_coefs)
-  }
-}
-
-for (subj in unique(rainbow_regr_dat$subjID)) {
-  
-  dat = subset(rainbow_regr_dat, subjID == subj)
-  
-  for (predictor in value_obj_predictors) {
-    pred_dat = dat[,predictor]
-    dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
   }
   
-  rainbow_formula = paste("frac_chosen ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "))
+  for (subj in unique(rainbow_regr_dat$subjID)) {
     
-  rainbow_mod = lm(as.formula(rainbow_formula),
-                   dat,
-                   na.action=na.omit)
-  rainbow_coefs = summary(rainbow_mod)$coef
-  rainbow_coefs = cbind(subjID = subj, phase = "5RainbowSeason", regr_model = "rainbow", predictor = rownames(rainbow_coefs), as.data.frame(rainbow_coefs, row.names = F))
-  colnames(rainbow_coefs) = colnames(subjwise_regr_coefs)
-  subjwise_regr_coefs = rbind(subjwise_regr_coefs, rainbow_coefs)
+    dat = subset(rainbow_regr_dat, subjID == subj)
+    
+    for (predictor in value_obj_predictors) {
+      pred_dat = dat[,predictor]
+      dat[,paste0(predictor, "_zscored")] = (pred_dat - mean(pred_dat, na.rm = T)) / sd(pred_dat, na.rm = T)
+    }
+    
+    rainbow_formula = paste("frac_chosen ~", paste(paste0(value_obj_predictors, "_zscored"), collapse = " + "))
+      
+    rainbow_mod = lm(as.formula(rainbow_formula),
+                     dat,
+                     na.action=na.omit)
+    rainbow_coefs = summary(rainbow_mod)$coef
+    rainbow_coefs = cbind(subjID = subj, phase = "5RainbowSeason", regr_model = "rainbow", predictor = rownames(rainbow_coefs), as.data.frame(rainbow_coefs, row.names = F))
+    colnames(rainbow_coefs) = colnames(subjwise_regr_coefs)
+    subjwise_regr_coefs = rbind(subjwise_regr_coefs, rainbow_coefs)
+  }
+  
+  # Were more TS-related items selected than expected based on chance?
+  TS_choices = 12 - rainbow_sum$Missed - rainbow_sum$None
+  Valid_choices = 12 - rainbow_sum$Missed
+  mean(TS_choices)
+  mean(Valid_choices)
+  mean(TS_choices / Valid_choices)
+  t.test(TS_choices - 10 / 12 * Valid_choices)
+  
+  None_choices = rainbow_sum$None
+  mean(None_choices / Valid_choices)
+  t.test(None_choices - 2 / 12 * Valid_choices)
+  
+  # mean(rainbow_sum$TS0)
+  # mean(rainbow_sum$TS0 / Valid_choices)
+  # t.test(rainbow_sum$TS0 - 3 / 12 * Valid_choices)
+  # mean(rainbow_sum$TS1)
+  # mean(rainbow_sum$TS1 / Valid_choices)
+  # t.test(rainbow_sum$TS1 - 3 / 12 * Valid_choices)
+  # t.test(rainbow_sum$TS0 - rainbow_sum$TS1)
+  # mean(rainbow_sum$TS2)
+  # mean(rainbow_sum$TS2 / Valid_choices)
+  # t.test(rainbow_sum$TS2 - 2 / 12 * Valid_choices)
+  # mean(rainbow_sum$None)
+  # mean(rainbow_sum$None / Valid_choices)
+  # t.test(rainbow_sum$None - 2 / 12 * Valid_choices)
+  # Double_TS_choices = rainbow_sum$TS0and2 + rainbow_sum$TS1and2
+  # mean(Double_TS_choices)
+  # mean(Double_TS_choices / Valid_choices)
+  # t.test(Double_TS_choices - 2 / 12 * Valid_choices)
 }
-
-# Were more TS-related items selected than expected based on chance?
-TS_choices = 12 - rainbow_sum$Missed - rainbow_sum$None
-Valid_choices = 12 - rainbow_sum$Missed
-mean(TS_choices)
-mean(Valid_choices)
-mean(TS_choices / Valid_choices)
-t.test(TS_choices - 10 / 12 * Valid_choices)
-
-None_choices = rainbow_sum$None
-mean(None_choices / Valid_choices)
-t.test(None_choices - 2 / 12 * Valid_choices)
-
-# mean(rainbow_sum$TS0)
-# mean(rainbow_sum$TS0 / Valid_choices)
-# t.test(rainbow_sum$TS0 - 3 / 12 * Valid_choices)
-# mean(rainbow_sum$TS1)
-# mean(rainbow_sum$TS1 / Valid_choices)
-# t.test(rainbow_sum$TS1 - 3 / 12 * Valid_choices)
-# t.test(rainbow_sum$TS0 - rainbow_sum$TS1)
-# mean(rainbow_sum$TS2)
-# mean(rainbow_sum$TS2 / Valid_choices)
-# t.test(rainbow_sum$TS2 - 2 / 12 * Valid_choices)
-# mean(rainbow_sum$None)
-# mean(rainbow_sum$None / Valid_choices)
-# t.test(rainbow_sum$None - 2 / 12 * Valid_choices)
-# Double_TS_choices = rainbow_sum$TS0and2 + rainbow_sum$TS1and2
-# mean(Double_TS_choices)
-# mean(Double_TS_choices / Valid_choices)
-# t.test(Double_TS_choices - 2 / 12 * Valid_choices)
 ```
 ```{r Same for cloudy}
 # cloudy_aliens = merge(subset(feed_aliens, phase == "2CloudySeason" & trial == 1, select = c("subjID", "sad_alien", "item_chosen")), all.x = T,
@@ -1373,99 +1443,134 @@ t.test(None_choices - 2 / 12 * Valid_choices)
 ```
 ```{r Get mixed-block data and add values}
 if (run_on == "humans") {
-mixed_block = subset(all_files, block.type == "mixed")
-
-# Add season-alien values (subj. and obj.)
-all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "alien-same-season")
-all_values_perf_sub$TS = substr(all_values_perf_sub$id, 2, 2)
-all_values_perf_sub$sad_alien = substr(all_values_perf_sub$id, 1, 1)
-all_values_perf_sub = subset(all_values_perf_sub, select = c("subjID", "TS", "sad_alien", "value_subj", "value_obj"))
-colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("value_subj", "value_obj")] = c("item_value_subj", "item_value_obj")
-
-mixed_block = merge(mixed_block, all.x = T,
-                    subset(all_values_perf_sub, select = c("subjID", "TS", "sad_alien", "item_value_subj", "item_value_obj")),
-                    by = c("subjID", "sad_alien", "TS"))
-
-# Add TS values (subj. and obj.)
-all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "season")
-colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("id", "value_subj", "value_obj")] = c("TS", "TS_value_subj", "TS_value_obj")
-
-mixed_block = merge(mixed_block, all.x = T,
-                    subset(all_values_perf_sub, select = c("subjID", "TS", "TS_value_subj", "TS_value_obj")),
-                    by = c("subjID", "TS"))
-
-# Mark all trials with TS change only, alien change only, and change in both
-mixed_block = mixed_block[order(mixed_block$subjID, mixed_block$trial_index),]
-TS_switch = mixed_block$TS[1:nrow(mixed_block)-1] != mixed_block$TS[2:nrow(mixed_block)]
-mixed_block$ts = c(NA, ifelse(TS_switch, "Switch", "Stay"))
-alien_switch = mixed_block$sad_alien[1:nrow(mixed_block)-1] != mixed_block$sad_alien[2:nrow(mixed_block)]
-mixed_block$alien = c(NA, ifelse(alien_switch, "Switch", "Stay"))
-both_switch = mixed_block$ts == "Switch" & mixed_block$alien == "Switch"
-both_stay = mixed_block$ts == "Stay" & mixed_block$alien == "Stay"
-mixed_block$both = ifelse(both_switch, "Switch", ifelse(both_stay, "Stay", NA))
-mixed_block$ts[mixed_block$both == "Switch"] = mixed_block$alien[mixed_block$both == "Switch"] = NA  # Remove trials from ts and aliens in which both switch
-
-# Melt switch
-mixed_block_l = melt(mixed_block, measure.vars = c("ts", "alien", "both"), variable.name = "level", value.name = "switch")
-mixed_block_l$level = factor(mixed_block_l$level, levels = c("alien", "ts", "both"))
-mixed_block_l_sum = ddply(subset(mixed_block_l, level == "ts" & !is.na(switch)), .(subjID, switch), summarize,
-      n_trials = length(switch),
-      ts_RT = median(rt, na.rm = T),
-      ts_ACC = mean(ACC, na.rm = T))
-mixed_block_l_sum_wide = reshape(mixed_block_l_sum, direction = "wide", timevar = "switch", idvar = c("subjID"))
-mixed_block_l_sum_wide$RT_diff = with(mixed_block_l_sum_wide, ts_RT.Switch - ts_RT.Stay)
-mixed_block_l_sum_wide$ACC_diff = with(mixed_block_l_sum_wide, ts_ACC.Switch - ts_ACC.Stay)
-
-# Check everything looks good
-mixed_block
-subset(mixed_block, select = c("TS", "rt", "sad_alien", "ts", "alien", "both"))
-mixed_block_l
-mixed_block_l_sum_wide
+  mixed_block = subset(all_files, block.type == "mixed")
+  
+  # Add season-alien values (subj. and obj.)
+  all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "alien-same-season")
+  all_values_perf_sub$TS = substr(all_values_perf_sub$id, 2, 2)
+  all_values_perf_sub$sad_alien = substr(all_values_perf_sub$id, 1, 1)
+  all_values_perf_sub = subset(all_values_perf_sub, select = c("subjID", "TS", "sad_alien", "value_subj", "value_obj"))
+  colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("value_subj", "value_obj")] = c("item_value_subj", "item_value_obj")
+  
+  mixed_block = merge(mixed_block, all.x = T,
+                      subset(all_values_perf_sub, select = c("subjID", "TS", "sad_alien", "item_value_subj", "item_value_obj")),
+                      by = c("subjID", "sad_alien", "TS"))
+  
+  # Add TS values (subj. and obj.)
+  all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess == "season")
+  colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("id", "value_subj", "value_obj")] = c("TS", "TS_value_subj", "TS_value_obj")
+  
+  mixed_block = merge(mixed_block, all.x = T,
+                      subset(all_values_perf_sub, select = c("subjID", "TS", "TS_value_subj", "TS_value_obj")),
+                      by = c("subjID", "TS"))
+  
+  # Mark all trials with TS change only, alien change only, and change in both
+  mixed_block = mixed_block[order(mixed_block$subjID, mixed_block$trial_index),]
+  TS_switch = mixed_block$TS[1:nrow(mixed_block)-1] != mixed_block$TS[2:nrow(mixed_block)]
+  mixed_block$ts = c(NA, ifelse(TS_switch, "Switch", "Stay"))
+  alien_switch = mixed_block$sad_alien[1:nrow(mixed_block)-1] != mixed_block$sad_alien[2:nrow(mixed_block)]
+  mixed_block$alien = c(NA, ifelse(alien_switch, "Switch", "Stay"))
+  both_switch = mixed_block$ts == "Switch" & mixed_block$alien == "Switch"
+  both_stay = mixed_block$ts == "Stay" & mixed_block$alien == "Stay"
+  mixed_block$both = ifelse(both_switch, "Switch", ifelse(both_stay, "Stay", NA))
+  mixed_block$ts[mixed_block$both == "Switch"] = mixed_block$alien[mixed_block$both == "Switch"] = NA  # Remove trials from ts and aliens in which both switch
+  
+  # Melt switch
+  mixed_block_l = melt(mixed_block, measure.vars = c("ts", "alien", "both"), variable.name = "level", value.name = "switch")
+  mixed_block_l$level = factor(mixed_block_l$level, levels = c("alien", "ts", "both"))
+  mixed_block_l_sum = ddply(subset(mixed_block_l, level == "ts" & !is.na(switch)), .(subjID, switch), summarize,
+        n_trials = length(switch),
+        ts_RT = median(rt, na.rm = T),
+        ts_ACC = mean(ACC, na.rm = T))
+  mixed_block_l_sum_wide = reshape(mixed_block_l_sum, direction = "wide", timevar = "switch", idvar = c("subjID"))
+  mixed_block_l_sum_wide$RT_diff = with(mixed_block_l_sum_wide, ts_RT.Switch - ts_RT.Stay)
+  mixed_block_l_sum_wide$ACC_diff = with(mixed_block_l_sum_wide, ts_ACC.Switch - ts_ACC.Stay)
+  
+  # Check everything looks good
+  mixed_block
+  subset(mixed_block, select = c("TS", "rt", "sad_alien", "ts", "alien", "both"))
+  mixed_block_l
+  mixed_block_l_sum_wide
 }
 ```
 ```{r Mixed-block performance and RTs}
 if (run_on == "humans") {
-# Performance over time, dependent on (subj and obj) item values and TS values
-gg_mixed_acc_TS_obj = ggplot(mixed_block, aes(alien_trial, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +  # it looks like there are just 7 blocks, but there shold be 7 * 3...
-  stat_summary(fun.data = mean_se, geom = "pointrange") +
-  stat_summary(fun.data = mean_se, geom = "line") +
-  labs(x = "Block", y = "% correct", color = "TS value (obj.)")
-gg_mixed_acc_TS_subj = gg_mixed_acc_TS_obj + aes(color = round(TS_value_subj), group = round(TS_value_subj)) + labs(color = "TS value (subj.)")
-gg_mixed_acc_item_obj = gg_mixed_acc_TS_obj + aes(color = round(item_value_obj / 2 ) * 2, group = round(item_value_obj / 2) * 2) + labs(color = "Item value (obj.)")
-gg_mixed_acc_item_subj = gg_mixed_acc_TS_obj + aes(color = round(item_value_subj / 2) * 2, group = round(item_value_subj / 2) * 2) + labs(color = "Item value (subj.)")
-
-# RTs for changes in TS vs changes in alien
-n_subj = length(unique(mixed_block$subjID))
-ddply(mixed_block_l, .(level), summarize, n_trials_switch = sum(switch == "Switch", na.rm = T) / n_subj)
-ddply(mixed_block_l, .(level), summarize, n_trials_stay = sum(switch == "Stay", na.rm = T) / n_subj)
-
-gg_mixed_rts = ggplot(subset(mixed_block_l, !is.na(switch) & ACC == 1), aes(level, rt, color = level)) +
-  stat_summary(fun.data = mean_se, geom = "pointrange", position = position_dodge(width = 0.9)) +
-  labs(x = "", y = "RT (msec)", fill = "") +
-  theme(legend.position = "none") +
-  facet_grid(~ switch)
-gg_mixed_ACCs = gg_mixed_rts + aes(y = 100 * ACC) + labs(y = "% correct")
-gg_mixed_ACCs$data = subset(mixed_block_l, !is.na(switch))
-
-gg_mixed_rts_within = ggplot(mixed_block_l_sum_wide, aes('', RT_diff, color = subjID)) +
-  # geom_violin() +
-  stat_summary(fun.data = mean_se, geom = 'pointrange') +
-  geom_dotplot(binaxis = "y", stackdir = "center", alpha = 0.3) +
-  labs(x = "", y = "RT TS switch minus TS stay") +
-  theme(legend.position = "none")
-gg_mixed_ACCs_within = gg_mixed_rts_within + aes(y = ACC_diff) + labs(y = "ACC TS Switch minus ACC Stay")
-
-if (gg_save) {
-  ggsave(file.path(plot_dir, "6gg_mixed_acc_TS_obj.png"), gg_mixed_acc_TS_obj, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "6gg_mixed_acc_TS_subj.png"), gg_mixed_acc_TS_subj, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "6gg_mixed_acc_item_subj.png"), gg_mixed_acc_item_subj, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "6gg_mixed_acc_item_obj.png"), gg_mixed_acc_item_obj, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "6gg_mixed_rts.png"), gg_mixed_rts, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "6gg_mixed_ACCs.png"), gg_mixed_ACCs, width = 4, height = 3)
-  ggsave(file.path(plot_dir, "6gg_mixed_rts_within.png"), gg_mixed_rts_within, width = 2, height = 3)
-  ggsave(file.path(plot_dir, "6gg_mixed_ACCs_within.png"), gg_mixed_ACCs_within, width = 2, height = 3)
+  # Performance over time, dependent on (subj and obj) item values and TS values
+  gg_mixed_acc_TS_obj = ggplot(mixed_block, aes(alien_trial, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +  # it looks like there are just 7 blocks, but there shold be 7 * 3...
+    stat_summary(fun.data = mean_se, geom = "pointrange") +
+    stat_summary(fun.data = mean_se, geom = "line") +
+    labs(x = "Block", y = "% correct", color = "TS value (obj.)")
+  gg_mixed_acc_TS_subj = gg_mixed_acc_TS_obj + aes(color = round(TS_value_subj), group = round(TS_value_subj)) + labs(color = "TS value (subj.)")
+  gg_mixed_acc_item_obj = gg_mixed_acc_TS_obj + aes(color = round(item_value_obj / 2 ) * 2, group = round(item_value_obj / 2) * 2) + labs(color = "Item value (obj.)")
+  gg_mixed_acc_item_subj = gg_mixed_acc_TS_obj + aes(color = round(item_value_subj / 2) * 2, group = round(item_value_subj / 2) * 2) + labs(color = "Item value (subj.)")
+  
+  # RTs for changes in TS vs changes in alien
+  n_subj = length(unique(mixed_block$subjID))
+  ddply(mixed_block_l, .(level), summarize, n_trials_switch = sum(switch == "Switch", na.rm = T) / n_subj)
+  ddply(mixed_block_l, .(level), summarize, n_trials_stay = sum(switch == "Stay", na.rm = T) / n_subj)
+  
+  # Tests
+  hist(mixed_block_l_sum_wide$RT_diff)
+  t.test(mixed_block_l_sum_wide$RT_diff)
+  
+  hist(mixed_block_l_sum_wide$ACC_diff)
+  t.test(mixed_block_l_sum_wide$ACC_diff)
+  
+  gg_mixed_rts = ggplot(subset(mixed_block_l, !is.na(switch) & ACC == 1), aes(level, rt, color = level)) +
+    stat_summary(fun.data = mean_se, geom = "pointrange", position = position_dodge(width = 0.9)) +
+    labs(x = "", y = "RT (msec)", fill = "") +
+    theme(legend.position = "none") +
+    facet_grid(~ switch)
+  gg_mixed_ACCs = gg_mixed_rts + aes(y = 100 * ACC) + labs(y = "% correct")
+  gg_mixed_ACCs$data = subset(mixed_block_l, !is.na(switch))
+  
+  gg_mixed_rts_within = ggplot(mixed_block_l_sum_wide, aes('', RT_diff, color = subjID)) +
+    # geom_violin() +
+    stat_summary(fun.data = mean_se, geom = 'pointrange') +
+    geom_dotplot(binaxis = "y", stackdir = "center", alpha = 0.3) +
+    labs(x = "", y = "RT TS switch minus TS stay") +
+    theme(legend.position = "none")
+  gg_mixed_ACCs_within = gg_mixed_rts_within + aes(y = ACC_diff) + labs(y = "ACC TS Switch minus ACC Stay")
+  
+  if (gg_save) {
+    ggsave(file.path(plot_dir, "6gg_mixed_acc_TS_obj.png"), gg_mixed_acc_TS_obj, width = 4, height = 3)
+    ggsave(file.path(plot_dir, "6gg_mixed_acc_TS_subj.png"), gg_mixed_acc_TS_subj, width = 4, height = 3)
+    ggsave(file.path(plot_dir, "6gg_mixed_acc_item_subj.png"), gg_mixed_acc_item_subj, width = 4, height = 3)
+    ggsave(file.path(plot_dir, "6gg_mixed_acc_item_obj.png"), gg_mixed_acc_item_obj, width = 4, height = 3)
+    ggsave(file.path(plot_dir, "6gg_mixed_rts.png"), gg_mixed_rts, width = 4, height = 3)
+    ggsave(file.path(plot_dir, "6gg_mixed_ACCs.png"), gg_mixed_ACCs, width = 4, height = 3)
+    ggsave(file.path(plot_dir, "6gg_mixed_rts_within.png"), gg_mixed_rts_within, width = 2, height = 3)
+    ggsave(file.path(plot_dir, "6gg_mixed_ACCs_within.png"), gg_mixed_ACCs_within, width = 2, height = 3)
+  }
 }
-}
+```
+
+# Paper stats and tests
+```{r regressions}
+# Effect of action values and task-set values on performance
+colnames(feed_aliens)
+act_ts_val_mode = glmer(correct ~ item_value_obj * TS_value_obj + (1 | subjID) + (1 | alien_trial) + (1 | repetition),
+                subset(feed_aliens, phase=="1InitialLearning"), binomial)
+summary(act_ts_val_mode)
+
+# Reactivation of task-sets
+# feed_alien_trial1$TS = as.numeric(as.character(feed_alien_trial1$TS))
+# react_4trials_mod = glmer(ACC ~ n_seen_aliens + TS + (1 | subjID) + (1 | block),
+#                           subset(feed_alien_trial1, phase=="2CloudySeason"),
+#                           binomial)
+# summary(react_4trials_mod)
+
+sum_react_dat = ddply(subset(feed_alien_trial1, phase=="2CloudySeason"), .(subjID, phase, n_seen_aliens), ACC=mean(ACC, na.rm=T), summarize)
+ggplot(sum_react_dat, aes(ACC, n_seen_aliens)) + geom_point(position="jitter", alpha=0.1)
+cor.test(sum_react_dat$ACC, sum_react_dat$n_seen_aliens)
+
+reactivation_mod = glmer(ACC ~ ACC_1back_self + ACC_1back_others + (1 | subjID) + (1 | alien_trial_sum) + (1 | repetition),
+            subset(ACC_1back_dat, phase=="2CloudySeason"),
+            binomial)
+summary(reactivation_mod)
+
+reactivation_mod_IL = update(reactivation_mod, data=subset(ACC_1back_dat, phase=="1InitialLearning"))
+summary(reactivation_mod_IL)
 ```
 
 # Relationships between model parameters and behavior
@@ -1524,7 +1629,7 @@ gg_ACCfirst8 =
 ggsave(file.path(plot_dir, "/6gg_ACCfirst8.png"), gg_ACCfirst8, width = 8, height = 3 * length(unique(all_files$model_name)))
 ```
 ```{r Model parameters and pick aliens}
-if (run_on != "humans"0) {
+if (run_on != "humans") {
 pick_aliens_avs_sub = subset(pick_aliens_avs, select = c("subjID", "model_name", "assess", "value_obj_diff", "av_ACC_diff", "selected_better_obj"), assess %in% c("alien-same-season", "season"))
 pick_aliens_avs_long =
   melt(pick_aliens_avs_sub, id.vars = c("subjID", "model_name", "assess"), variable.name = "measure")
@@ -1556,7 +1661,6 @@ if (gg_save) {
 ```
 ```{r Compare effects of TS and alien values (subjwise_regr_coefs)}
 subjwise_regr_coefs = merge(subjwise_regr_coefs, parameter_dat, by = "subjID", all.x = T)
-interesting_predictors =  paste0(c("item_value_obj", "TS_value_obj", "ACC_1back_self", "ACC_1back_others", "rew_1back_self"), "_zscored")
 models = unique(subjwise_regr_coefs$regr_model)
 
 gg_values =
@@ -1608,7 +1712,6 @@ if (run_regression) {
   ggsave(file.path(plot_dir, "/6gg_all_regr.png"), gg_all_regr, width = 10, height = 2 * length(unique(all_files$model_name)))
 
   write.csv(all_regressions, paste(plot_dir, "/all_regressions.csv", sep = ""))
-  write.csv(subjwise_regr_coefs, paste(plot_dir, "/subjwise_regr_coefs.csv", sep = ""))
 }
 ```
 ```{r Grant plots}

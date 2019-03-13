@@ -55,10 +55,7 @@ console.log(n_trials_total_minus_training_rainbow);
 
 n_trials_comp = 96;
 
-
-
 total_trials_so_far = 0;
-
 
 ITI_duration_shuffled = shuffle(ITI_durations, n_trials_total_minus_training_rainbow);
 
