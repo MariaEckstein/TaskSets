@@ -14,7 +14,7 @@ theme_set(theme_bw())
 # TDs
 # change colnames(all_files)[colnames(all_files) == "create_TS_biased_prefer_new"] = "create_TS_biased"
 
-run_on = "simulations"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
+run_on = "humans"  # can be "fitted_humans", "gen_rec", "humans", or "simulations"
 gg_save = T
 run_regression = F
 parameter_names = c("alpha", "beta", "forget", "alpha_high", "beta_high", "forget_high")  # , "beta_high", 'TS_bias', "epsilon"
@@ -29,11 +29,11 @@ feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refre
 colnames(n_trials) = paste0("X", feed_aliens_phases)
 colnames(n_blocks) = paste0("X", feed_aliens_phases)
 if (run_on == "humans") {
-  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version1.0"  # version3.1  # versions1.0and3.1  # version1.0  # versionEEG
+  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"  # version3.1  # versions1.0and3.1  # version1.0  # versionEEG
   patt = ".*csv"
 } else if (run_on == "simulations") {
-  data_dir = "C:/Users/maria/MEGAsync/SLCN/PSsimulations/"   # "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/MaxInsteadOfSoftmax/"
-  patt = "aliens_hier.*csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
+  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AliensFitting/SummariesInsteadOfFitting_revision/FullSimulations/" # "C:/Users/maria/MEGAsync/SLCN/PSsimulations/"   # "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/MaxInsteadOfSoftmax/"
+  patt = "aliens_Bayes.*csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   feed_aliens_phases = feed_aliens_phases[feed_aliens_phases != "2CloudySeason"]
 } else if (run_on == "gen_rec") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/fit_par/"
@@ -79,6 +79,8 @@ all_files
 summary(all_files)
 dim(all_files)
 orig_all_files = all_files
+unique(all_files$subjID)
+# chance_performers
 ```
 ```{r Human demographics and training trials}
 if (run_on == "humans") {
@@ -134,21 +136,21 @@ summary(all_files)
 all_files
 ```
 ```{r Get simulated data into the right format}
+old_allfiles = all_files
+
 if (run_on %in% c("simulations", "gen_rec")) {
-  all_files[all_files$learning_style %in% c("flat", "s-flat"), "alpha_high"] = 0
-  all_files[all_files$learning_style %in% c("flat", "s-flat"), "beta_high"] = 0
-  all_files[all_files$learning_style == "hierarchical" & all_files$alpha == all_files$alpha_high, "alpha_high"] = 0
-  all_files[all_files$learning_style == "hierarchical" & all_files$beta == all_files$beta_high, "beta_high"] = 0
+  all_files[all_files$model_name %in% c("flat", "s-flat", "Bayes"), "alpha_high"] = 0
+  all_files[all_files$model_name %in% c("flat", "s-flat"), "beta_high"] = 0
+  all_files[all_files$model_name == "hier" & all_files$alpha == all_files$alpha_high, "alpha_high"] = 0
+  all_files[all_files$model_name == "hier" & all_files$beta == all_files$beta_high, "beta_high"] = 0
   # Rename TS-related columns
-  colnames(all_files)[colnames(all_files) == "sID"] = "subjID"
   colnames(all_files)[colnames(all_files) == "context"] = "TS"
-  # colnames(all_files)[colnames(all_files) == "TS"] = "selected_TS"
   
   # Remove unwanted rows
   if (!"phase" %in% colnames(all_files)) {
     all_files$phase = "1InitialLearning"
-    subj_value_phase = "1InitialLearning"
   }
+  subj_value_phase = "1InitialLearning"
   all_files = subset(all_files, reward != 0)
   
   # Add season and xyz_name columns
@@ -162,9 +164,9 @@ if (run_on %in% c("simulations", "gen_rec")) {
     # all_files[subj_rows, "model_name"] = paste(non0_parameters, collapse="_")[1]
   
     subj_feedaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase != "3PickAliens")
-    subj_pickaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase == "3PickAliens")
     subj_file_feed = all_files[subj_feedaliens_rows,]
-    subj_file_pick = all_files[subj_pickaliens_rows,]
+    # subj_pickaliens_rows = (all_files$subjID == subjIDi) & (all_files$phase == "3PickAliens")
+    # subj_file_pick = all_files[subj_pickaliens_rows,]
       
     if (run_on == "simulations") {
       TS_seasons = data.frame(TS = c(0, 1, 2, 4), season = c(sample(c("hot", "cold", "rainy")), "rainbow"))
@@ -241,15 +243,18 @@ if (run_on == "gen_rec") {
   
   parameter_long = merge(parameter_long_gen, parameter_long_rec, by = c("subjID", "model_name", "parameter"))
   assertthat::assert_that(dim(parameter_long)[1] == (length(parameter_names) + 1) * dim(parameter_dat)[1])
+  
 } else if (run_on == "simulations") {
   parameter_dat = ddply(all_files, c("subjID", "model_name", parameter_names), summarize, bla=NA)
   parameter_dat$bla = NULL
+  
 } else {
   parameter_dat = data.frame(subjID = unique(all_files$subjID), model_name = "human")
   for (par_name in parameter_names) {
     parameter_dat[,par_name] = 999
   }
 }
+
 parameter_dat
 ```
 
@@ -419,7 +424,7 @@ ddply(subset(all_files, season == "hot" & ACC == 1), .(subjID, TS, sad_alien, it
 # }
 ```
 ```{r Exclude subjects who don't reach criterion in training block and plot performance and missed trials}
-if (run_on == "humans") {
+if (run_on %in% c("humans", "simulations")) {
   
   ggplot(subset(all_files, phase=="1InitialLearning"), aes(subjID, ACC, color=TS)) +
     stat_summary(fun.data=mean_cl_normal, geom='pointrange')
@@ -456,6 +461,23 @@ if (run_on == "humans") {
     ggsave(file.path(plot_dir, "1gg_med_RTs.png"), gg_med_RTs, width = 6, height = 3)
   }
 }
+```
+
+# Create NIH data summary
+
+```{r}
+# demos = read.csv("C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/DemographicsEEG.csv")
+# demos = subset(demos, select=c("Subject.ID", "Pseudo.GUID"))
+# demos$subjID = demos$Subject.ID
+# demos$Subject.ID = NULL
+# 
+# nih_sum = ddply(all_files, .(subjID, TS, phase), reward=mean(reward, na.rm=T), ACC=mean(ACC, na.rm=T), RT=median(rt, na.rm=T), summarize)
+# nih_sum = subset(nih_sum, !is.na(phase))
+# nih_sum$reward[nih_sum$phase == "5RainbowSeason"] = NA
+# nih_sum$ACC[nih_sum$phase == "5RainbowSeason"] = NA
+# 
+# nih_sum = merge(nih_sum, demos, all.x=T, all.y=F)
+# write.csv(nih_sum, paste0(data_dir, "nih_summary.csv"))
 ```
 
 # Results
@@ -552,7 +574,7 @@ all_values_perf
 
 all_files
 subset(dat, subjID > 100)  # make sure version3.1 data is there
-subset(dat, subjID < 100)  # make sure version1.0 data is there
+subset(dat, subjID < 100)  # make sure version1.0 and versionEEG data is there
 ```
 ```{r Create pick_aliens data}
 if (!run_on %in% c("gen_rec", "simulations")) {
@@ -762,6 +784,14 @@ all_values_perf_sub$sad_alien = substr(all_values_perf_sub$id, 1, 1)
 all_values_perf_sub = subset(all_values_perf_sub, select = c("subjID", "TS", "sad_alien", "value_subj", "value_obj"))
 colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("value_subj", "value_obj")] = c("item_value_subj", "item_value_obj")
 
+### Add data for subj 9 (dropped out before refresher 2)
+if (substr(data_dir, 55, 57) == "EEG") {
+  subj9 = subset(all_values_perf_sub, subjID == 8)
+  subj9$subjID = 9
+  subj9$item_value_subj = NA
+  all_values_perf_sub = rbind(all_values_perf_sub, subj9)
+}
+
 feed_aliens = merge(feed_aliens, all.x = T,
                     subset(all_values_perf_sub, select = c("subjID", "TS", "sad_alien", "item_value_subj", "item_value_obj")),
                     by = c("subjID", "sad_alien", "TS"))
@@ -771,6 +801,16 @@ all_values_perf_sub = subset(all_values_perf, phase == subj_value_phase & assess
 colnames(all_values_perf_sub)[colnames(all_values_perf_sub) %in% c("id", "value_subj", "value_obj")] = c("TS", "TS_value_subj", "TS_value_obj")
 all_values_perf_sub[order(all_values_perf_sub$subjID),]
 
+### Add data for subj 9 (dropped out before refresher 2)
+if (substr(data_dir, 55, 57) == "EEG") {
+  subj9 = subset(all_values_perf_sub, subjID == 8)
+  subj9$subjID = 9
+  subj9$TS_value_subj = NA
+  subj9$av_ACC = NA
+  all_values_perf_sub = rbind(all_values_perf_sub, subj9)
+}
+
+### Add subj and obj values to feed_aliens
 feed_aliens = merge(feed_aliens, all.x = T,
                     subset(all_values_perf_sub, select = c("subjID", "TS", "TS_value_subj", "TS_value_obj")),
                     by = c("subjID", "TS"))
@@ -800,6 +840,10 @@ subset(ddply(feed_aliens, .(subjID, phase, TS, TS_value_obj, item_value_obj), su
 subset(all_values_perf, subjID > 100)
 subset(feed_aliens, subjID==0 & sad_alien==1 & TS==0)
 ```
+
+```{r}
+subset(feed_aliens, phase == "1InitialLearning" & is.na(TS_value_obj))
+```
 ```{r Plots}
 # Make sure that subj & obj values correlate
 gg_subj_obj_values = ggplot(subset(feed_aliens, phase != "0Training"), aes(group = subjID)) +
@@ -812,7 +856,8 @@ gg_subj_obj_values = ggplot(subset(feed_aliens, phase != "0Training"), aes(group
 
 # Plot learning curves dependent on TS value (subj and obj)
 gg_learning_curves_TS_value_obj =
-  ggplot(subset(feed_aliens, phase != "0Training"), aes(alien_trial_sum, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +
+  ggplot(subset(feed_aliens, phase != "0Training"),
+         aes(alien_trial_sum, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +
   stat_summary(fun.data = mean_se, geom = "pointrange") +
   stat_summary(fun.data = mean_se, geom = "line") +
   geom_hline(yintercept = 100/3, linetype = "dotted") +
@@ -846,9 +891,9 @@ gg_learning_curves_wide = ggplot(subset(feed_aliens, phase != "0Training"), aes(
 if (gg_save) {
   ggsave(file.path(plot_dir, "/2gg_subj_obj_values.png"), gg_subj_obj_values, width = 3, height = 1.5 * length(unique(all_files$model_name)))
   
-  ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_obj.png"), gg_learning_curves_TS_value_obj, width = 2.7, height = 3 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_obj.png"), gg_learning_curves_TS_value_obj, width = 10, height = 3 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/2gg_learning_curves_TS_value_subj.png"), gg_learning_curves_TS_value_subj, width = 10, height = 3 * length(unique(all_files$model_name)))
-  ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_obj.png"), gg_learning_curves_item_value_obj, width = 2.7, height = 3 * length(unique(all_files$model_name)))
+  ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_obj.png"), gg_learning_curves_item_value_obj, width = 10, height = 3 * length(unique(all_files$model_name)))
   ggsave(file.path(plot_dir, "/2gg_learning_curves_item_value_subj.png"), gg_learning_curves_item_value_subj, width = 10, height = 3 * length(unique(all_files$model_name)))
   
   ggsave(file.path(plot_dir, "/2gg_learning_curves_rep.png"), gg_learning_curves_rep, width = 4, height = 4)
@@ -1260,6 +1305,8 @@ rainbow_sum = ddply(rainbow_aliens, .(subjID), summarize,
                     `1and2` = sum(ACC.12, na.rm = T),
                     Missed = sum(ACC.Missed, na.rm = T),
                     None = sum(ACC.None, na.rm = T))
+rainbow_sum$total = with(rainbow_sum, `0` + `1` + `2` + `0and2` + `1and2` + None)
+rainbow_fracs = rainbow_sum / rainbow_sum$total  # or rainbow_sum / 12? which does agree with the python version?
 
 # Create rainbow_sum_l (put all TS into a single column)
 rainbow_sum_l = melt(rainbow_sum, id.vars = c("subjID"), variable.name = "TS", value.name = "times_chosen")
@@ -1391,19 +1438,121 @@ if (run_on != "simulations") {
   }
 }
 ```
-```{r Same for cloudy}
-# cloudy_aliens = merge(subset(feed_aliens, phase == "2CloudySeason" & trial == 1, select = c("subjID", "sad_alien", "item_chosen")), all.x = T,
-#                        all_ACCs)
-# cloudy_aliens[order(cloudy_aliens$subjID, cloudy_aliens$sad_alien),]
-# 
-# cloudy_sum = ddply(cloudy_aliens, .(subjID), summarize,
-#       TS0 = sum(ACC.only0, na.rm = T),
-#       TS1 = sum(ACC.only1, na.rm = T),
-#       TS2 = sum(ACC.only2, na.rm = T),
-#       TS0and2 = sum(ACC.02, na.rm = T),
-#       TS1and2 = sum(ACC.12, na.rm = T),
-#       Missed = sum(ACC.Missed, na.rm = T),
-#       None = sum(ACC.None, na.rm = T))
+```{r Chosen TS in cloudy - same as rainbow}
+# Add all_ACCs columns to rainbow_data
+cloudy_all_dat = subset(all_files, phase == "2CloudySeason")
+first_trials = ddply(cloudy_all_dat, .(repetition), summarize, first_alien_trial=min(alien_trial))$first_alien_trial
+cloudy_dat = subset(cloudy_all_dat, alien_trial %in% first_trials, select = c("subjID", "sad_alien", "item_chosen", "trial_index", "repetition", "alien_trial"))
+
+cloudy_aliens = merge(cloudy_dat, all.x = T, all_ACCs)
+cloudy_aliens = cloudy_aliens[order(cloudy_aliens$subjID, cloudy_aliens$trial_index),]
+
+# Create rainbow_sum (count how many action would be correct in each TS)
+cloudy_sum = ddply(cloudy_aliens, .(subjID), summarize,
+                    `0` = sum(ACC.only0, na.rm = T),
+                    `1` = sum(ACC.only1, na.rm = T),
+                    `2` = sum(ACC.only2, na.rm = T),
+                    `0and2` = sum(ACC.02, na.rm = T),
+                    `1and2` = sum(ACC.12, na.rm = T),
+                    Missed = sum(ACC.Missed, na.rm = T),
+                    None = sum(ACC.None, na.rm = T))
+cloudy_sum$total = with(cloudy_sum, `0` + `1` + `2` + `0and2` + `1and2` + None)
+cloudy_fracs = cloudy_sum / cloudy_sum$total  # or cloudy_sum / 12? which does agree with the python version?
+cloudy_sum$total = NULL
+
+# Create rainbow_sum_l (put all TS into a single column)
+cloudy_sum_l = melt(cloudy_sum, id.vars = c("subjID"), variable.name = "TS", value.name = "times_chosen")
+
+# Add frac_chosen column
+if (run_on != "simulations") {
+  cloudy_sum_l$frac_chosen = cloudy_sum_l$times_chosen / 3  # Every alien is presetend 3 times (1and2, 0and2 have only one opportunity per season)
+  cloudy_sum_l$frac_chosen[cloudy_sum_l$TS %in% c("0", "1")] = cloudy_sum_l$frac_chosen[cloudy_sum_l$TS %in% c("0", "1")] / 3  # 3 opportunities per season to pick TS0 and TS1
+  cloudy_sum_l$frac_chosen[cloudy_sum_l$TS %in% c("None", "2")] = cloudy_sum_l$frac_chosen[cloudy_sum_l$TS %in% c("None", "2")] / 2  # 2 opportunities per season to pick TS0 and TS1
+  cloudy_sum_l$frac_chosen[cloudy_sum_l$TS == "Missed"] = NA
+  
+  # Add values (subj and obj) and task performance column
+  all_values_perf_sub = subset(all_values_perf, assess == "season" & phase == "Refresher3", select = c("subjID", "name", "id", "value_subj", "value_obj", "av_ACC"))
+  cloudy_sum_l = merge(cloudy_sum_l, all.x = T,
+                        all_values_perf_sub,
+                        by.x = c("subjID", "TS"),
+                        by.y = c("subjID", "id"))
+  colnames(cloudy_sum_l)[colnames(cloudy_sum_l) %in% c("value_subj", "value_obj")] = c("TS_value_subj", "TS_value_obj")
+  if (run_on == "humans") {
+    cloudy_sum_l$model_name = "humans"
+  } else {
+    model_names = subset(parameter_dat, select = c("subjID", "model_name"))
+    cloudy_sum_l = merge(cloudy_sum_l, model_names, by = "subjID", all.x = T)
+  }
+  # Add objective TS and alien values
+  cloudy_sum_l$item_value_obj = NA
+  cloudy_sum_l$item_value_obj[cloudy_sum_l$TS %in% c(0)] = mean(c(6, 5, 4))
+  cloudy_sum_l$item_value_obj[cloudy_sum_l$TS %in% c(1)] = mean(c(3, 7, 8))
+  cloudy_sum_l$item_value_obj[cloudy_sum_l$TS == 2] = mean(c(3, 3))
+  cloudy_sum_l
+}
+
+ggplot(cloudy_sum_l, aes(TS, times_chosen, color=subjID)) +
+  stat_summary(fun.data = mean_cl_normal, geom = "bar") +
+  stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
+  geom_point(position='jitter', alpha=0.5)
+```
+```{r Chosen TS in initial learning - same as rainbow}
+# Add all_ACCs columns to rainbow_data
+initiallearn_all_dat = subset(all_files, phase == "1InitialLearning")
+first_trials = ddply(initiallearn_all_dat, .(repetition), summarize, first_alien_trial=min(alien_trial))$first_alien_trial
+initiallearn_dat = subset(initiallearn_all_dat, alien_trial %in% first_trials, select = c("subjID", "sad_alien", "item_chosen", "trial_index", "repetition", "alien_trial"))
+
+initiallearn_aliens = merge(initiallearn_dat, all.x = T, all_ACCs)
+initiallearn_aliens = initiallearn_aliens[order(initiallearn_aliens$subjID, initiallearn_aliens$trial_index),]
+
+# Create rainbow_sum (count how many action would be correct in each TS)
+initiallearn_sum = ddply(initiallearn_aliens, .(subjID), summarize,
+                    `0` = sum(ACC.only0, na.rm = T),
+                    `1` = sum(ACC.only1, na.rm = T),
+                    `2` = sum(ACC.only2, na.rm = T),
+                    `0and2` = sum(ACC.02, na.rm = T),
+                    `1and2` = sum(ACC.12, na.rm = T),
+                    Missed = sum(ACC.Missed, na.rm = T),
+                    None = sum(ACC.None, na.rm = T))
+initiallearn_sum$total = with(initiallearn_sum, `0` + `1` + `2` + `0and2` + `1and2` + None)
+initiallearn_fracs = initiallearn_sum / initiallearn_sum$total  # or initiallearn_sum / 12? which does agree with the python version?
+initiallearn_sum$total = NULL
+
+# Create rainbow_sum_l (put all TS into a single column)
+initiallearn_sum_l = melt(initiallearn_sum, id.vars = c("subjID"), variable.name = "TS", value.name = "times_chosen")
+
+# Add frac_chosen column
+if (run_on != "simulations") {
+  initiallearn_sum_l$frac_chosen = initiallearn_sum_l$times_chosen / 3  # Every alien is presetend 3 times (1and2, 0and2 have only one opportunity per season)
+  initiallearn_sum_l$frac_chosen[initiallearn_sum_l$TS %in% c("0", "1")] = initiallearn_sum_l$frac_chosen[initiallearn_sum_l$TS %in% c("0", "1")] / 3  # 3 opportunities per season to pick TS0 and TS1
+  initiallearn_sum_l$frac_chosen[initiallearn_sum_l$TS %in% c("None", "2")] = initiallearn_sum_l$frac_chosen[initiallearn_sum_l$TS %in% c("None", "2")] / 2  # 2 opportunities per season to pick TS0 and TS1
+  initiallearn_sum_l$frac_chosen[initiallearn_sum_l$TS == "Missed"] = NA
+  
+  # Add values (subj and obj) and task performance column
+  all_values_perf_sub = subset(all_values_perf, assess == "season" & phase == "Refresher3", select = c("subjID", "name", "id", "value_subj", "value_obj", "av_ACC"))
+  initiallearn_sum_l = merge(initiallearn_sum_l, all.x = T,
+                        all_values_perf_sub,
+                        by.x = c("subjID", "TS"),
+                        by.y = c("subjID", "id"))
+  colnames(initiallearn_sum_l)[colnames(initiallearn_sum_l) %in% c("value_subj", "value_obj")] = c("TS_value_subj", "TS_value_obj")
+  if (run_on == "humans") {
+    initiallearn_sum_l$model_name = "humans"
+  } else {
+    model_names = subset(parameter_dat, select = c("subjID", "model_name"))
+    initiallearn_sum_l = merge(initiallearn_sum_l, model_names, by = "subjID", all.x = T)
+  }
+  # Add objective TS and alien values
+  initiallearn_sum_l$item_value_obj = NA
+  initiallearn_sum_l$item_value_obj[initiallearn_sum_l$TS %in% c(0)] = mean(c(6, 5, 4))
+  initiallearn_sum_l$item_value_obj[initiallearn_sum_l$TS %in% c(1)] = mean(c(3, 7, 8))
+  initiallearn_sum_l$item_value_obj[initiallearn_sum_l$TS == 2] = mean(c(3, 3))
+  initiallearn_sum_l
+}
+
+ggplot(initiallearn_sum_l, aes(TS, times_chosen, color=subjID)) +
+  stat_summary(fun.data = mean_cl_normal, geom = "bar") +
+  stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
+  geom_point(position='jitter', alpha=0.5)
 ```
 ```{r Rainbow season - plot choice descriptives}
 # # Combine OPTIMAL CHOICES with subject's choices in the rainbow season
@@ -1479,16 +1628,50 @@ if (run_on == "humans" & substr(data_dir, 55, 58) != "1.0") {
   mixed_block$both = ifelse(both_switch, "Switch", ifelse(both_stay, "Stay", NA))
   mixed_block$ts[mixed_block$both == "Switch"] = mixed_block$alien[mixed_block$both == "Switch"] = NA  # Remove trials from ts and aliens in which both switch
   
-  # Melt switch
-  mixed_block_l = melt(mixed_block, measure.vars = c("ts", "alien", "both"), variable.name = "level", value.name = "switch")
-  mixed_block_l$level = factor(mixed_block_l$level, levels = c("alien", "ts", "both"))
-  mixed_block_l_sum = ddply(subset(mixed_block_l, level == "ts" & !is.na(switch)), .(subjID, switch), summarize,
-        n_trials = length(switch),
-        ts_RT = median(rt, na.rm = T),
-        ts_ACC = mean(ACC, na.rm = T))
-  mixed_block_l_sum_wide = reshape(mixed_block_l_sum, direction = "wide", timevar = "switch", idvar = c("subjID"))
-  mixed_block_l_sum_wide$RT_diff = with(mixed_block_l_sum_wide, ts_RT.Switch - ts_RT.Stay)
-  mixed_block_l_sum_wide$ACC_diff = with(mixed_block_l_sum_wide, ts_ACC.Switch - ts_ACC.Stay)
+  # # Melt switch
+  # mixed_block_l = melt(mixed_block, measure.vars = c("ts", "alien", "both"), variable.name = "level", value.name = "switch")
+  # mixed_block_l$level = factor(mixed_block_l$level, levels = c("alien", "ts", "both"))
+  # mixed_block_l_sum = ddply(subset(mixed_block_l, level == "ts" & !is.na(switch)), .(subjID, switch), summarize,
+  #       n_trials = length(switch),
+  #       ts_RT = median(rt, na.rm = T),
+  #       ts_ACC = mean(ACC, na.rm = T))
+  # mixed_block_l_sum_wide = reshape(mixed_block_l_sum, direction = "wide", timevar = "switch", idvar = c("subjID"))
+  # mixed_block_l_sum_wide$RT_diff = with(mixed_block_l_sum_wide, ts_RT.Switch - ts_RT.Stay)
+  # mixed_block_l_sum_wide$ACC_diff = with(mixed_block_l_sum_wide, ts_ACC.Switch - ts_ACC.Stay)
+  
+  # Function to create data
+  make_mixed_dataframes = function(dat) {
+    mixed_block_l = melt(dat, measure.vars = c("ts", "alien", "both"), variable.name = "level", value.name = "switch")
+    mixed_block_l$level = factor(mixed_block_l$level, levels = c("alien", "ts", "both"))
+    mixed_block_l_sum = ddply(subset(mixed_block_l, level == "ts" & !is.na(switch)), .(subjID, switch), summarize,
+          n_trials = length(switch),
+          ts_RT = median(rt, na.rm = T),
+          ts_ACC = mean(ACC, na.rm = T))
+    mixed_block_l_sum_wide = reshape(mixed_block_l_sum, direction = "wide", timevar = "switch", idvar = c("subjID"))
+    mixed_block_l_sum_wide$RT_diff = with(mixed_block_l_sum_wide, ts_RT.Switch - ts_RT.Stay)
+    mixed_block_l_sum_wide$ACC_diff = with(mixed_block_l_sum_wide, ts_ACC.Switch - ts_ACC.Stay)
+    return(list(mixed_block_l, mixed_block_l_sum, mixed_block_l_sum_wide))
+  }
+  
+  # Get data
+  all_three = make_mixed_dataframes(mixed_block)
+  mixed_block_l = all_three[[1]]
+  mixed_block_l_sum = all_three[[2]]
+  mixed_block_l_sum_wide = all_three[[3]]
+  
+  # Split data into two blocks
+  mixed_trial_idx = unique(mixed_block$trial_index)
+  half_trial_idx = round(mean(mixed_trial_idx))
+  
+  first_all_three = make_mixed_dataframes(subset(mixed_block, trial_index < half_trial_idx))
+  first_mixed_block_l = first_all_three[[1]]
+  first_mixed_block_l_sum = first_all_three[[2]]
+  first_mixed_block_l_sum_wide = first_all_three[[3]]
+  
+  second_all_three = make_mixed_dataframes(subset(mixed_block, trial_index >= half_trial_idx))
+  second_mixed_block_l = second_all_three[[1]]
+  second_mixed_block_l_sum = second_all_three[[2]]
+  second_mixed_block_l_sum_wide = second_all_three[[3]]
   
   # Check everything looks good
   mixed_block
@@ -1541,12 +1724,14 @@ if (run_on == "humans" & substr(data_dir, 55, 58) != "1.0") {
 
 ```{r Average performance}
 subj_dat = ddply(subset(all_files, phase=="1InitialLearning"), .(subjID), summarize, ACC=mean(ACC, na.rm=T))
+length(unique(subj_dat$subjID))
 mean(subj_dat$ACC)
 sd(subj_dat$ACC)
 ```
 
 ```{r assymetric switch costs}
 if (substr(data_dir, 55, 58) != "1.0") {
+  
   # RTs for changes in TS vs changes in alien
   n_subj = length(unique(mixed_block$subjID))
   ddply(mixed_block_l, .(level), summarize, n_trials_switch = sum(switch == "Switch", na.rm = T) / n_subj)
@@ -1558,6 +1743,15 @@ if (substr(data_dir, 55, 58) != "1.0") {
   
   hist(mixed_block_l_sum_wide$ACC_diff)
   print(t.test(mixed_block_l_sum_wide$ACC_diff))
+  
+  # Based on half-blocks (first influence by previous blocked expectations, second one clean)
+  hist(first_mixed_block_l_sum_wide$RT_diff)
+  print(t.test(first_mixed_block_l_sum_wide$RT_diff))
+  
+  hist(second_mixed_block_l_sum_wide$RT_diff)
+  print(t.test(second_mixed_block_l_sum_wide$RT_diff))
+  
+  t.test(first_mixed_block_l_sum_wide$RT_diff - second_mixed_block_l_sum_wide$RT_diff)
 }
 ```
 
@@ -1593,7 +1787,7 @@ ggplot(sum_react_dat, aes(ACC, n_seen_aliens)) + geom_point(position="jitter", a
 cor.test(sum_react_dat$ACC, sum_react_dat$n_seen_aliens)
 
 reactivation_mod = glmer(ACC ~ ACC_1back_self + ACC_1back_others + (1 | subjID) + (1 | alien_trial_sum) + (1 | repetition),
-            subset(ACC_1back_dat, phase=="2CloudySeason"),
+            subset(ACC_1back_dat, phase=="1InitialLearning"),
             binomial)
 summary(reactivation_mod)
 
@@ -1690,6 +1884,37 @@ mean(rainbow_sum$None) / 12
 # mean(Double_TS_choices)
 # mean(Double_TS_choices / Valid_choices)
 # t.test(Double_TS_choices - 2 / 12 * Valid_choices)
+```
+```{r Diagnostic Trials}
+# Mark "non-diagnostic" trials (same action is correct for an alien in TWO DIFFERENT task-sets)
+feed_aliens$correct = as.logical(feed_aliens$correct)
+feed_aliens$diagnostic_trial = TRUE
+feed_aliens$diagnostic_trial[feed_aliens$sad_alien == 0 & feed_aliens$TS == 2] = FALSE  # alien: 0, item: 2, reward: 7
+feed_aliens$diagnostic_trial[feed_aliens$sad_alien == 0 & feed_aliens$TS == 1] = FALSE  # alien: 0, item: 2, reward: 2
+feed_aliens$diagnostic_trial[feed_aliens$sad_alien == 3 & feed_aliens$TS == 0] = FALSE  # alien: 3, item: 0, reward: 10
+feed_aliens$diagnostic_trial[feed_aliens$sad_alien == 3 & feed_aliens$TS == 0] = FALSE  # alien: 3, item: 0, reward: 2
+
+# Find trials that follow diagnostic and non-diagnostic trials
+feed_aliens$after_diagnostic = c(NA, feed_aliens$diagnostic_trial[1:length(feed_aliens$diagnostic_trial)-1])
+
+ACC_1back = c(NA, as.logical(feed_aliens$correct[1:length(feed_aliens$correct)-1]))
+ACC_1back[feed_aliens$trial_index == 44] = NA
+feed_aliens$ACC_1back = ACC_1back
+
+# Compare performance
+diag_dat = ddply(
+  subset(feed_aliens, ACC_1back == TRUE & after_diagnostic == TRUE & phase == "2CloudySeason"),
+  .(subjID), summarize,
+  ACC=mean(correct, na.rm=TRUE))
+nondiag_dat = ddply(
+  subset(feed_aliens, ACC_1back == TRUE & after_diagnostic == FALSE & phase == "2CloudySeason"),
+  .(subjID), summarize,
+  ACC=mean(correct, na.rm=TRUE))
+diag_data = merge(diag_dat, nondiag_dat, by="subjID", suff=c("_diag", "_nondiag"))
+
+# Performance after diag and non-diag
+summary(diag_data)
+t.test(diag_data$ACC_diag - diag_data$ACC_nondiag)
 ```
 
 # Relationships between model parameters and behavior
