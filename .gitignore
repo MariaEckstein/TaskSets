@@ -6,4 +6,7 @@ Data
 .Rhistory
 .idea*
 *.html
+/paperplots/
+/models/
+/old/
 *.pdf

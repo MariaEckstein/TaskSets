@@ -1,0 +1,412 @@
+% \documentclass[9pt,twocolumn,twoside,lineno]{pnas-new}
+% \templatetype{pnasresearcharticle} % Choose template 
+\documentclass[10pt,letterpaper]{article}  % PNAS template does not display the bibliography
+
+% \usepackage{apacite}
+\usepackage{amsmath}
+\usepackage{natbib}
+\setcitestyle{numbers}
+\usepackage{array}
+% \usepackage{arxiv}
+\newcolumntype{W}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{float}
+\usepackage{graphicx}
+% \usepackage{lineno}
+\usepackage{makecell}
+\renewcommand\theadfont{\bfseries}
+\usepackage{pslatex}
+\usepackage{tabularx}
+\usepackage[left=1in,right=1in,top=1in,bottom=1in,]{geometry}
+\usepackage{xcolor}
+\newcommand{\rev}{\color{black}}
+
+\usepackage{xr}
+\makeatletter
+\newcommand*{\addFileDependency}[1]{% argument=file name and extension
+  \typeout{(#1)}
+  \@addtofilelist{#1}
+  \IfFileExists{#1}{}{\typeout{No file #1.}}
+}
+\makeatother
+ 
+\newcommand*{\myexternaldocument}[1]{%
+    \externaldocument{#1}%
+    \addFileDependency{#1.tex}%
+    \addFileDependency{#1.aux}%
+}
+\myexternaldocument{Supplements}
+
+\title{Evidence for hierarchically-structured reinforcement learning in humans}
+
+\author{
+  Maria K Eckstein \\
+  \texttt{maria.eckstein@berkeley.edu} \\  
+  \And
+  Anne GE Collins \\
+  Department of Psychology \\
+  UC Berkeley \\
+  Berkeley, CA 94720 \\
+  \texttt{annecollins@berkeley.edu} \\
+}
+
+\listfiles  % to check which documents are loaded for referencing
+
+\begin{document}
+
+\maketitle
+
+\section*{Abstract}
+Humans have the fascinating ability to achieve goals in a complex and constantly changing world, still surpassing modern machine learning algorithms in terms of flexibility and learning speed. It is generally accepted that a crucial factor for this ability is the use of abstract, hierarchical representations, which employ structure in the environment to guide learning and decision making. Nevertheless, it is poorly understood how we create and use these hierarchical representations. This study presents evidence that human behavior can be characterized as hierarchical reinforcement learning (RL). We designed an experiment to test specific predictions of hierarchical RL using a series of subtasks in the realm of context-based learning, and observed several behavioral markers of hierarchical RL, for instance asymmetric switch costs between changes in higher-level versus lower-level features, faster learning in higher-valued compared to lower-valued contexts, and preference for higher-valued compared to lower-valued contexts, most of which replicated across three independent samples. We simulated three models: a classic RL, a hierarchical RL, and a hierarchical Bayesian model, and compared their behavior to human results. {\rev While the flat RL model captured some aspects of participants' sensitivity to outcome values, and the hierarchical Bayesian model some markers of rule transfer, only hierarchical RL accounted for all patterns observed in human behavior simultaneously}. This work shows that hierarchical RL, a biologically-inspired and computationally {\rev simple} algorithm, can capture human behavior in complex, hierarchical environments, and opens the avenue for future research in this field.
+
+\newpage
+\section*{Introduction}
+
+%\subsection*{Hierarchy}
+Research in the cognitive sciences has long highlighted the importance of hierarchical representations for intelligent behavior, in domains including perception \cite{lee_hierarchical_2003}, learning and decision making \cite{botvinick_reinforcement_2015, botvinick_hierarchically_2009}, planning and problem solving \cite{chase_perception_1973}, cognitive control \cite{miller_integrative_2001}, and creativity \cite{collins_reasoning_2012}, among many others \cite{tenenbaum_how_2011, griffiths_doing_2019}. %, resulting in a variety of frameworks of hierarchical cognition. 
+The common thread across all these domains is the insight that hierarchical representation---i.e., the simultaneous representation of information at different levels of abstraction---allows humans to behave adaptively and flexibly in complex, high-dimensional, and ever-changing environments. {\rev Exhaustive non-hierarchical (\textit{flat}) representations, on the other hand, would be unable to achieve these behaviors.} %{\rev \textif{Flat} representations, in contrasts, treat all aspects of information similarly, representing it exhaustively.}
+
+%Example:
+To illustrate, consider the following situation. Mornings in your office, your colleagues are working silently, or quietly discussing work-related topics. After work, they are laughing and chatting loudly at their favorite bar. In this example, a context change induced a drastic change in behavior, despite the same interaction partners (i.e., "stimuli"). Hierarchical theories of cognition capture this behavior by positing that we learn strategies hierarchically, activating different behavioral strategies (or "task-sets") in different contexts.
+
+Although hierarchical representations can incur additional cognitive cost \cite{collins_cost_2017}, they provide a range of advantages compared to exhaustive flat representations: Once a task-set has been selected (e.g., office), attention can be focused on a subset of environmental features (e.g., just the interaction partner) \cite{frank_mechanisms_2012, niv_reinforcement_2015, leong_dynamic_2017, wilson_inferring_2012}. When new contexts are encountered (e.g., new workplace, new bar), entire task-sets can be reused, allowing for generalization \cite{collins_reasoning_2012, donoso_foundations_2014, taatgen_nature_2013}. Old skills are not catastrophically forgotten \cite{flesch_comparing_2018}. Lastly, hierarchical representations deal elegantly with incomplete information, for example when context information is unavailable \cite{collins_reasoning_2012, collins_cognitive_2013}. {\rev We explicitly test these predictions in the current study.}
+
+%Goal of the study:
+Although we know that hierarchical representations are essential for flexible behavior, how humans create these representations and how they learn to use them is still poorly understood. Here, we hypothesize that hierarchical reinforcement learning (RL), in which simple RL computations are combined to simultaneously operate at different levels of abstraction, provides an explanation. %We will test the specific predictions of this model in a behavioral experiment.
+
+%\subsection*{Reinforcement learning (RL)}
+RL theory \cite{sutton_reinforcement_2017} formalizes how to adjust behavior based on feedback in order to maximize rewards. Standard RL algorithms estimate how much reward to expect when selecting actions in response to stimuli, and use these estimates (called "action-values") to select actions. Old action-values are updated in proportion to the "reward prediction error", the discrepancy between action-values and received reward, to produce increasingly accurate estimates. Such "flat" RL algorithms operate over flat, exhaustive representations (suppl. Fig. \ref{figure:F8_HierFlatTables}A), converge to optimal behavior, are computationally inexpensive, and have led to several recent breakthroughs in the field of artificial intelligence \cite{sutton_reinforcement_2017}. %Nevertheless, there are also important shortcomings to flat RL. These include the curse of dimensionality, i.e., the exponential drop in learning speed with increasing numbers of states and/or actions; the lack of flexible behavioral changes; and oftentimes difficulties with generalizing, i.e., transferring old knowledge to new situations. Hierarchical RL \cite{konidaris_necessity_2019} attempts to resolve these shortcomings by nesting RL processes at different levels of temporal \cite{botvinick_hierarchical_2012, momennejad_successor_2017, ribas_fernandes_neural_2011} or state abstraction \cite{leong_dynamic_2017, farashahi_feature-based_2017}. 
+
+% \subsection*{Hierarchical RL as a model for brain and cognition}
+There is broad evidence suggesting that the brain implements similar RL computations: Dopamine neurons generate reward prediction errors \cite{schultz_neural_1997, bayer_midbrain_2005}, and a wide-spread network of frontal cortical regions \cite{lee_neural_2012} and basal ganglia \cite{abler_prediction_2006, tai_transient_2012} represents action values. Specific brain circuits thereby form "RL loops" \cite{alexander_parallel_1986, collins_cognitive_2013}, in which learning is implemented through the continuous updating of action values \cite{schultz_updating_2013, niv_reinforcement_2015}.
+{\rev In this sense, estimating action-values via RL is an algorithm of special interest to cognition: There is strong evidence that the brain implements a simple mechanism to perform the necessary computations.} 
+
+Nevertheless, RL algorithms have important shortcomings: They suffer from the curse of dimensionality (an exponential drop in learning speed with increasing problem complexity); they lack flexibility for behavioral change; and they cannot easily generalize or transfer old knowledge to new situations. Hierarchical RL \cite{konidaris_necessity_2019} attempts to resolve these shortcomings by nesting RL processes at different levels of temporal \cite{botvinick_hierarchical_2012, momennejad_successor_2017, ribas_fernandes_neural_2011} or state abstraction \cite{leong_dynamic_2017, farashahi_feature-based_2017}.
+
+Recent research has provided support for a plausible implementation of hierarchical RL is in the brain: The neural circuit that implements RL is multiplexed, and distinct RL loops operate at different levels of abstraction along the rostro-caudal axis \cite{frank_mechanisms_2012, badre_mechanisms_2012, alexander_parallel_1986, alexander_hierarchical_2015, haruno_heterarchical_2006, koechlin_prefrontal_2016, badre_cognitive_2008, badre_is_2009, balleine_hierarchical_2015}. %This neural architecture {\rev leaves open the possibility that RL computations may be applied in the brain to different states and actions. 
+Consistent with this architecture, recent studies have shown signatures of RL values and reward prediction errors at different levels of abstraction in the human brain \cite{ribas_fernandes_neural_2011, ribas_fernandes_subgoal-and_2018, diuk_hierarchical_2013}.
+
+{\rev However, while previous studies showed markers of hierarchical RL in the brain, they did not provide evidence that such signals support the learning and generalization of hierarchically structured behavior. Thus, it remains unknown whether hierarchical RL indeed supports such behavior in humans.
+
+The goal of this study is to fill this gap. We investigate hierarchical RL in a novel paradigm that promotes the creation and reuse of hierarchical structure. We provide a fully-fledged computational model that accounts for behavior across a variety of relevant situations: context-dependent learning, context switches, generalization to new contexts, partially-observable problems, and choices at different levels of abstraction.
+To our knowledge, this is the first study that tests all predictions of hierarchical RL in a single paradigm. Because hierarchical RL makes specific behavioral predictions in each situation, we are able to test the model \textit{qualitatively} against human behavior \cite{palminteri2017importance}. We compare our hierarchical RL model \textit{quantitatively} to the two most relevant competing models, a flat RL and a hierarchical Bayesian model. The latter assumes that abstract decisions are based on computationally expensive Bayesian inference, rather than simple RL \cite{donoso_foundations_2014}.}
+
+%Layout of the paper:
+{\rev In the following, we first introduce our hierarchical RL model and experimental paradigm. We then test whether humans show qualitative behaviors that are predicted by the hierarchical RL model, as well as two competing models: flat RL and hierarchical Bayes.
+We first show evidence for hierarchical representations in humans, as predicted by both hierarchical RL and hierarchical Bayes but not flat RL. We employ multiple independent analyses, including switch cost measures and positive and negative transfer.
+We then provide evidence for human hierarchical value learning, which is only consistent with the hierarchical RL model.
+The majority of results replicates across three independent participant samples.
+We next provide quantitative support for these qualitative results, and show that model comparison supported the hierarchical RL model over flat RL and hierarchical Bayes in every analysis.}
+
+\section*{Results}
+\subsection*{Computational Models}
+ 
+\begin{figure}%[H]
+    \begin{center}
+	\includegraphics[width=\linewidth]{figures/F1_combined.png}
+    \end{center}
+    \caption{A) Schematic of the hierarchical RL model. A high-level RL loop (green) selects a task-set $TS$ in response to the observed context, using learned TS values. The chosen task-set provides learned action-values for the low-level RL loop (blue), which then selects an action in response to the observed stimulus, based on these values. Task-set and action-values are both updated based on the same feedback. B) Human learning curves during initial learning of the "Aliens" task, averaged over blocks. Colors denote true action-values (left) and task-set values (right), respectively. Stars denote the effects of both on performance (main text), which is consistent with hierarchical RL. *** indicates $p<0.001$.}
+    \label{figure:F1_combined}
+\end{figure}
+
+% Abstract description
+Our hierarchical RL model is composed of two hierarchically-structured RL processes. The high-level process manages behavior at the abstract level by acquiring a "policy over policies": It learns which task-set to choose in each context, using "task-set values" (the estimated expected reward of selecting a task-set in a given context). The low-level process acquires the task-sets: it learns which actions to choose in response to each stimulus by estimating "action values" in the selected task-set (the estimated expected reward of selecting an action for a given stimulus, within a specific task-set; Fig. \ref{figure:F1_combined}A).
+At the beginning of the task, task-sets and actions are picked randomly, but over time, trial-and-error learning leads to the formation of meaningful task-sets representing policies that are specialized for a particular context. Trial-and-error learning also underlies the policy over task-sets that determines which task-set is selected in each context.
+Thus, our hierarchical RL model is based on two nested processes, which create an interplay between learning stimulus-action associations (low level) and context-task-set associations (high level). A step-by-step visualisation of this model can be found in the supplemental material (suppl. Fig. \ref{figure:F1_ModelExample}).
+
+% Walking readers through 1 example trial
+Formally, to select an action $a$ in response to stimulus $s$ in context $c$, hierarchical RL goes through a two-step process: It first considers the context to select an appropriate task-set $TS$ based on task-set values $Q(TS|c)$, using
+$p(TS|c) = \frac{exp(Q(TS|c))}{\sum_{TS_i} exp(\beta_{TS}\ Q(TS_i|c))}$, where
+the inverse temperature $\beta_{TS}$ captures task-set choice stochasticity (Fig. \ref{figure:F1_combined}A, suppl. Fig. \ref{figure:F1_ModelExample}A). The chosen task-set $TS$ provides a set of action-values $Q(a|s,TS)$ which are used to select an action $a$, according to
+$p(a|s,TS) = \frac{exp(Q(a|s,TS))}{\sum_{a_i} exp(\beta_a\ Q(a_i|s,TS))}$, where
+$\beta_{a}$ captures action choice stochasticity (Fig. \ref{figure:F1_combined}A; suppl. Fig. \ref{figure:F1_ModelExample}B). After executing action $a$ on trial $t$, feedback $r_t$ reflects the continuous amount of reward received, which is used to update the values of the selected task-set and action:
+
+\begin{align*}
+    Q_{t+1}(TS|c) &= Q_t(TS|c) + \alpha_{TS}\ (r_t - Q_t(TS|c)) \\
+    Q_{t+1}(a|s,TS) &= Q_t(a|s,TS) + \alpha_a\ (r_t - Q_t(a|s,TS))
+\end{align*}
+
+$\alpha_{TS}$ and $\alpha_a$ are separate learning rates at the task-set and action level (Fig. \ref{figure:F1_combined}A; suppl. Fig. \ref{figure:F1_ModelExample}C). 
+% Summing up, action selection is a two-step process in hierarchical RL: Task-set values guide the choice of task-sets based on context (suppl. Fig. \ref{figure:F1_ModelExample}D); the chosen task-set then provides the action-values necessary for selecting actions based on stimuli.
+
+{\rev The flat RL model uses the same mechanism for value learning and action selection, but lacks hierarchical structure: It treats each combination of a context and a stimulus as a unique state (methods).
+The hierarchical Bayesian model creates task-sets like hierarchical RL, but selects them by inferring task-set reliability, instead of learning task-set values (methods).}
+
+\subsection*{Task Design}
+We designed a task in which participants learned to select the correct actions for different stimuli (Fig. \ref{figure:1TaskDesign}A). The mapping between stimuli and actions (i.e., the task-set) varied across three contexts (Fig. \ref{figure:1TaskDesign}B). Each context appeared in three blocks of 52 trials, for a total of 9 blocks. Contexts differed in average rewards, allowing us to test for RL values at different levels of abstraction.
+After this "initial-learning phase" (Fig. \ref{figure:1TaskDesign}A), participants completed four additional test phases (Fig. \ref{figure:1TaskDesign}C) to hone in on specific predictions of hierarchical RL.
+Detailed information about the task is provided in Fig. \ref{figure:1TaskDesign}, the methods, and supplemental methods.
+
+\begin{figure}%[H]
+    \begin{center}
+	\includegraphics[width=\linewidth]{figures/1TaskDesign.png}
+    \end{center}
+    \caption{Task design. A) In the initial-learning phase, participants saw one of four stimuli (alien) in one of three contexts (season), and had to find the correct action (item) through trial and error. Contexts required different mappings between stimuli and actions, and were presented blockwise. Feedback deterministically indicated whether a choice was correct, but different context-stimulus-action combinations lead to different mean rewards (with low Gaussian noise). B) Example mapping between stimuli and actions for each context, defining three task-set $TS$. Average rewards (\textit{task-set values}) differed between contexts. All actions and stimuli had equal average rewards. C) Additional test phases. The hidden-context phase, presented after initial learning, was identical except that contexts were unobservable (season hidden by clouds). This allowed us to test whether participants reactivated the previously-learned task-sets. In the subsequent comparison phase, participants saw either two contexts (top) or two stimuli (bottom) on each trial, and selected their preferred one. We used subjective preferences to assess task-set values (contexts) and action-values (stimuli). The novel-context phase was similar to initial learning, but in a new context and with no feedback. This phase tested how participants generalized previous knowledge to new situations. The final mixed phase was similar to initial learning, but not blocked, i.e., both stimuli and contexts could change on every trial. This phase tested for asymmetric switch costs. All test phases were separated by "refresher blocks" (methods) to alleviate carry-over and forgetting effects.}
+    \label{figure:1TaskDesign}
+\end{figure}
+
+\subsection*{Learning Curves and Effects of Reward}
+\label{section:LearningCurves}
+As expected, participants' performance increased within a block, showing adaptation to changes in context (Fig. \ref{figure:F1_ModelExample}B). We next verified that participants were sensitive to the magnitude of reward (continuous tape length).
+%the continuous rewards we used in this task had the intended effects on behaviour, with faster learning for larger rewards. 
+RL predicts better performance for larger rewards because these lead to larger action-values, which make correct actions more distinguishable from incorrect ones (Fig. \ref{figure:F1_ModelExample}B). Participants indeed showed better performance for high-reward stimuli (Fig. \ref{figure:F1_combined}B, left).
+
+This effect was predicted by both hierarchical and flat RL. Hierarchical RL additionally predicts better performance for high-valued contexts: Larger rewards create larger reward-prediction errors at the task-set level, which allow for better discrimination between correct and incorrect task-sets, and lead to better task-set selection and performance (see Fig. \ref{figure:F1_ModelExample}A for trial-by-trial example). As predicted by our model, participants also showed an effect of task-set values on performance (Fig. \ref{figure:F1_combined}B, right).
+
+To quantitatively test this, we conducted a mixed-effects logistic regression model predicting trialwise accuracy from action-values, task-set values, and their interaction (fixed effects), specifying participants, trial, and block as random effects. We approximated action-values as average stimulus-action rewards, and task-set values as average context-task-set rewards, as shown in Fig. \ref{figure:1TaskDesign}B.
+The model revealed significant effects of both action-values and task-set values on performance (action-values: $\beta=0.38$, $p<0.001$; task-set values: $\beta=0.20$, $p<0.001$; for additional statistics and results in other samples, see suppl. table \ref{table:threeSampleStats}).
+This result provides initial evidence that human choices are sensitive to value at two levels of abstraction---actions and task-sets---, as predicted by hierarchical RL.
+
+\subsection*{Hierarchical Representation}
+\label{section:AcquisitionTaskSets}
+We tested whether participants created hierarchical representations in three independent analyses: We analyzed switch costs in the mixed phase of the task, reactivation of task-sets in the hidden-context phase, and task-set selection errors during initial learning. 
+
+\subsubsection*{Asymmetric Switch Costs}
+Asymmetric switch costs can be evidence for hierarchical representations \cite{monsell_task_2003, collins_human_2014}: changes across trials are more challenging at higher than lower levels of abstraction. For example, switching contexts is more cognitively costly than switching tasks (stimuli) within a context.
+To test for such asymmetries in our paradigm, we compared trials on which a different stimulus was presented than on the previous trial (but the same context) to those on which a different context was presented (but the same stimulus), using the mixed phase (Fig. \ref{figure:1TaskDesign}C).
+As expected, participants responded significantly slower after context switches than after stimulus switches, $t(25)=3.47$, $p=0.002$. {\rev This result cannot be accounted by participants' initial surprise about the interleaved presentation of contexts in the mixed phase (for detailed analyses, see supplements)}. 
+Asymmetric switch costs therefore suggest that participants represented the task in a hierarchical fashion, nesting stimuli within contexts, as predicted by our hierarchical models.
+
+\subsubsection*{Reactivating Task-Sets}
+
+\begin{figure}%[H]
+    \begin{center}
+	\includegraphics[width=\linewidth]{figures/F4_combined.png}
+    \end{center}
+    \caption{A)-B) Task-set reactivation in the hidden-context phase. A) Red frame: Human performance increased across trials 1-4 after a context switch, even though different stimuli were presented on each trial. This suggests that participants retrieved task-sets. Blue frame: Simulated data from the hierarchical RL model shows qualitatively similar behavior. Green frame: The effect is weaker in a Bayesian hierarchical model. Orange frame: The effect is absent in a flat RL model. B) Distribution of model behavior. The x-axis shows the slope over performance in trials 1-4, with human behavior in red. The y-axis shows the density over slopes for 50,000 synthetic datasets from each model. Both hierarchical models (hierarchical RL, blue; hierarchical Bayes, green) put more probability mass on larger slopes, showing that performance increases like in the human sample were more likely under these models. C)-D) Task-set perseveration errors in the initial-learning phase. C) Percent correct trials (accuracy, "Ac") and percent task-set perseveration errors ("Pe") on the first trial after a context switch during initial learning. Humans: Star denotes significance in a repeated-measures t-test. Models: Qualitatively similar behavior to humans in hierarchical RL and hierarchical Bayesian, but not flat RL. D) Density over accuracy and task-set perseveration errors for all three models, with human behavior in red. Dotted lines indicates chance.}
+    \label{figure:F4_combined}
+\end{figure}
+
+Why did participants represent the task hierarchically? Did it provide benefits over a flat representation?
+We tested this is the hidden-context phase of our task: When contexts are not observable, participants could relearn the stimulus-action mappings of the underlying context from scratch; however, they could also reactivate the appropriate task-set, with the correct mappings already in place. Reactivating task-sets in this way enables better performance and faster learning \cite{collins_reasoning_2012, donoso_foundations_2014, koechlin_prefrontal_2016}.
+
+{\rev If participants reactivated task-sets in the hidden-context phase, we should expect a specific pattern of performance on the first few trials after a context switch: Because every trial provides feedback about the appropriateness of the chosen task-set, task-set selection should become more accurate on each trial, and consequently, action selection should improve.
+
+If, on the other hand, participants did not employ task-sets and instead re-learned stimulus-response associations from scratch, performance can only increase once the same stimuli start repeating.
+Because no stimuli are repeated until the $5^{th}$ trial in our task, the first four trials provide the perfect testing ground to pitch these two predictions against each other, as illustrated in Fig. \ref{figure:F4_combined}A: The hierarchical RL simulation shows increasing performance, whereas flat RL shows no change (for details about the shown simulations, refer to section "Relating all behaviors in one model").}
+
+{\rev Human behavior qualitatively matched hierarchical RL predictions: Performance increased steadily over the first four trials after a context switch (Fig. \ref{figure:F4_combined}A), evident in the significant correlation between item position (1-4) and performance, $r=0.19$, $p=0.048$. This shows that participants recalled previously-learned stimulus-action mappings rather than learning from scratch, as predicted by the hierarchical models.}
+
+We next assessed quantitatively which model captured this human behavior best, hierarchical RL, flat RL, or hierarchical Bayes.
+We compared the models using Bayes factors, which we estimated using a method related to Approximate Bayesian Computation (ABC; see methods and supplemental methods \cite{sunnaker_approximate_2013}). The method involved simulating synthetic data from each model and estimating the likelihood of human behavior under the simulated data, as illustrated in Fig. \ref{figure:F4_combined}B.
+
+Hierarchical RL surpassed both hierarchical Bayes, $BF=1.96$, and flat RL in terms of model comparison, $BF=512$ (table \ref{table:BayesFactors}). This confirms our qualitative analysis and shows that human performance in the hidden-context phase was best captured by hierarchical rather than flat models.
+
+\subsubsection*{Task-set Perseveration Errors}
+We showed that hierarchy was beneficial because it enabled participants to reactivate old task-sets in the hidden-context phase. However, hierarchy can also lead to negative transfer: When participants select the wrong task-set, the "correct" action according to this task set is likely to be an incorrect choice in the current context.
+We call such errors "task-set selection errors", and focus on a specific subtype, {\textit task-set perseveration errors}. Here, participants choose actions that would have been correct in the previous context, but are incorrect in the current one.
+
+Hierarchical models predict this kind of error because they select choices through task-sets (see methods). Thus, they are likely to exhibit lower initial accuracy and more task-set perseveration errors (Fig. \ref{figure:F4_combined}C and D). The flat model, on the other hand, does not predict task-set perseveration errors. %To pit the two accounts against each other, we analyzed human behavior for the existence of these errors.
+
+We first tested these contrasting predictions on the first trial after each context switch during initial learning, and found that participants were more likely to make a task-set perseveration error than to select a correct action, $t(25)=2.1$, $p=0.046$, in accordance with hierarchical model simulations (Fig. \ref{figure:F4_combined}D). In humans, task-set perseveration also persisted several trials into the new block, as evident in a logistic regression predicting task-set perseveration errors from trial index ($\beta=-6.83$\%, $z=-9.31$, $p<0.001$), task-set values ($\beta=-2.43$\%, $z=-1.00$, $p<0.001$), and action-values ($\beta=-14.03$\%, $z=-8.45$, $p<0.001$), controlling for block, and specifying random effects of participants. These results support the predictions of hierarchical RL.
+
+In summary, the presence of task-set perseveration errors in humans is qualitative evidence for hierarchical processing. Quantitative model comparison supports the conclusion that hierarchical models fit human error patterns during initial learning better than flat RL (hierarchical vs flat RL: $BF=14.99$; hierarchical Bayes vs flat RL: $BF=10.32$). Within both, hierarchical RL fit better than hierarchical Bayes, $BF=1.40$.
+
+\subsection*{RL Values at Different Levels of Abstraction}
+
+\begin{figure}%[H]
+    \begin{center}
+	\includegraphics[width=\linewidth]{figures/F5_combined.png}
+    \end{center}
+    \caption{Effects of task-set values. A)-B) Comparison phase. A) Humans performed better for contexts than for stimuli ("\% Better chosen": Frequency of choosing the higher-valued alternative). Star indicates more correct than incorrect choices (significant difference from chance, dotted line). Hierarchical RL simulations showed the same pattern, whereas flat RL showed the opposite. F) Histograms of the performance difference between context and stimulus condition. C)-E) Novel-context phase. C) Raw action frequencies. Act1-3 indicate actions, St1-3 stimuli. Human: Overlaid numbers show actions-values in the highest-valued TS3, selected frequently. Stars highlight actions that were correct in multiple task-sets, also selected frequently. "NoTS" indicates actions that were incorrect in all task-sets, selected rarely. Models: Hierarchical and flat RL were qualitatively similar to humans, hierarchical Bayes made different predictions. D) Distribution over model NoTS choices. E) Distribution over the number of actions consistent with TS3 vs. TS1 chosen (TS3 minus TS1 choices). F) Initial-learning phase. Distribution over model regression weights, prediction performance from task-set values.}
+    \label{figure:F5_combined}
+\end{figure}
+
+Our results so far focused on hierarchical representations in general, showing that participants created, reactivated, and transferred task-sets. %Nevertheless, various structure learning models make this prediction (e.g., Bayesian structure learning models) \cite{collins_reasoning_2012, koechlin_prefrontal_2016}. In the following, 
+We now test predictions that are unique to hierarchical RL, assessing whether participants acquired RL values at different levels of abstraction.
+
+\subsubsection*{Task-Set Values Affect Subjective Preference}
+
+A classic approach to assess RL values in humans is to investigate subjective preferences \cite{jocham_dopamine-mediated_2011}.
+To test whether our participants acquired values at two levels of abstraction, we therefore assessed their subjective preferences for contexts---reflecting task-set values---, and for stimuli---reflecting action values---, in the comparison phase of our task: Participants saw either two contexts or two stimuli, and selected their preferred one (Fig. \ref{figure:1TaskDesign}C).
+
+The hierarchical RL model selected contexts based on the task-set values acquired during initial learning, and showed a strong preference for high-valued over low-valued contexts (Fig. \ref{figure:S4_Comparison}).
+The flat RL model selected contexts based on the average action-values in this context.
+The hierarchical Bayesian model did not track values over contexts and was thus not simulated in this phase.
+
+As predicted by hierarchical RL, participants chose high-valued over low-valued contexts, $t(25)=2.56$, $p=0.017$, suggesting that they had acquired RL values at the level of contexts.
+Quantitative model comparison (Fig. \ref{figure:F5_combined}B) strongly favored hierarchical over flat RL, $BF=1171.651$. For completeness, we also confirmed that participants had acquired RL values at the level of stimuli, as predicted by both flat and hierarchical RL models, showing a preference for high-valued over low-valued stimuli, $t(25)=2.11$, $p=0.045$. In conclusion, participants' elicited preferences were best accounted for by the hierarchical RL model.
+
+We next investigated a different model prediction in the comparison phase: The hierarchical RL model takes two steps to retrieve action-values (see methods), but only one to retrieve task-set values, predicting that selecting stimuli should be slower and noisier than selecting contexts.
+Flat RL, on the contrary, takes one step to retrieve action-values, but multiple steps to calculate context-values, predicting the opposite pattern.
+Humans showed both patterns predicted by hierarchical RL: RTs were numerically slower and performance was significantly worse for contexts than for stimuli (mixed-effects regression, RTs: $\beta=148.21$, $t(25)=1.63$, $p=0.12$, Acc.: $\beta=0.28$, $z=2.0$, $p=0.048$; Fig. \ref{figure:F5_combined}B). Though the effect on RTs did not reach significance here, it was strongly significant in the replication (see supplementary table \ref{table:threeSampleStats}).
+Quantitative model comparison favored hierarchical over flat RL in terms of the performance difference, $BF=39.64$.
+
+\subsubsection*{Task-set Values Affect Performance}
+
+Human initial learning performance was affected by both action-values and task-set values (Fig. \ref{figure:F1_combined}B), as predicted by hierarchical RL.
+To perform formal model comparison for this pattern, we calculated the effects of task-set values on performance, using a simplified regression model (see suppl. methods). The hierarchical RL model provided a better fit than flat RL, $BF=1.49$, or hierarchical Bayes, $BF=6.62$.
+
+\subsubsection*{Task-set Values Affect Generalization}
+
+We showed above that participants preferred high-valued contexts over low-valued ones when asked to choose between them (Suppl. Fig. \ref{figure:S4_Comparison}A). 
+Would generalization in the novel-context phase be guided by similar preferences? We first demonstrate that participants reactivated old task-sets when encountering the novel context, and then that they preferred high-valued to low-valued ones.
+
+We simulated hierarchical RL behavior by selecting the highest-valued task-set, and applying it to all stimuli in the novel context. Hierarchical Bayes selected a task-set based on task-set reliability, and flat RL chose actions based on average values (methods).
+We then labeled each of the models' actions in response to a stimulus as one of the following: correct in task-set TS3, TS2, TS1, both TS3 and TS1, both TS2 and TS1, or not correct in any task-set (NoTS).
+
+Despite the lack of feedback, participants showed consistent preferences for certain stimulus-action combinations over others (Fig. \ref{figure:F5_combined}C). They chose NoTS actions less often than other actions, controlling for the frequency of each category, $t(25)=2.24$, $p=0.034$. Mappings shared between multiple task-sets (TS2 and TS1; TS3 and TS1) were selected more frequently than mappings that only occurred in one task-set (TS1, TS2, TS3), controlling for chance level, $t(25)=2.83$, $p=0.0091$. This confirms that participants reactivated old task-sets in new contexts, in accordance with prior findings \cite{collins_cognitive_2013}.
+{\rev Quantitative model comparison confirmed that the number of NoTS choices was captured better by hierarchical RL than by flat RL, $BF=1.78$, or hierarchical Bayes, $BF=45.60$.}
+
+Furthermore, hierarchical RL predicted more actions from the highest-valued TS3 than from the lowest-valued TS1, and a greater difference between the two than flat RL or hierarchical Bayes (Fig. \ref{figure:F5_combined}E).
+Humans showed the same pattern, selecting TS3-consistent actions more than TS1-consistent ones, $t(25)=2.58, p=0.016$. Suppl. Fig. \ref{figure:S3_TSHeatmaps} shows heatmaps of all task-sets for comparison.
+Bayes factors confirmed that this difference was also captured better by the hierarchical RL model than by flat, $BF=1.59$, or hierarchical Bayes, $BF=32.01$.
+
+Taken together, hierarchical RL provided a good account of human generalization, capturing both the reuse of old task-sets, and the preference for higher-valued task-sets over lower-valued ones.
+
+\subsection*{Relating All Behaviors in One Model}
+{\rev Our results showed that human behavior followed the predictions of hierarchical RL qualitatively, and Bayes factors confirmed quantitatively that hierarchical RL accounted best for the results.
+Nevertheless, the previous analyzes were performed independently of each other. We next sought to confirm that it was possible to obtain all qualitative behavioral patterns simultaneously in the same set of simulations.
+To this end, we simulated one single dataset for each model to show throughout the paper (see methods for model parameter selection), side-by-side with human behavior, and verified that the hierarchical RL model, but not competing models, replicated all qualitative behavioral patterns (Figs. \ref{figure:F4_combined}A, \ref{figure:F4_combined}C, \ref{figure:F5_combined}A, \ref{figure:F5_combined}C).
+Note that we did not seek to capture precise quantitative patterns, as these simulations were not generated with parameters obtained through fitting a model to the data.}
+
+\section*{Discussion}
+
+%\subsection*{Behavioral evidence for hierarchical RL}
+% Hypothesis
+The goal of the current study was to assess whether human flexible behavior could be explained by hierarchical reinforcement learning (RL), i.e., the concurrent use of RL at different levels of abstraction \cite{botvinick_hierarchically_2009, diuk_divide_2013}. 
+% This hypothesis is based on previous studies \cite{ribas_fernandes_neural_2011, ribas_fernandes_subgoal-and_2018, chiang_neuronal_2018, diuk_hierarchical_2013} and models \cite{collins_cognitive_2013}.
+We proposed a hierarchical RL model that acquires low-level strategies---or "task-sets"---using RL, and also learns to choose between these task-sets based on RL.
+We contrasted this model with a flat RL model and a hierarchical Bayesian model. The first shows the unique contributions of hierarchy based on the same learning algorithm, while the second shows the unique contribution of RL based on the same hierarchical structure. 
+
+Our hierarchical RL model predicts unique patterns of behavior in a variety of situations. 
+To assess whether humans employed hierarchical RL, we designed a context-based learning task in which multiple subtasks targeted specific predictions of hierarchical RL. Participants' behavior in all subtasks followed these predictions.
+
+% Integrating behavioral results & model part 1: Hierarchical representation
+The first prediction was that participants would create hierarchical representations. Several independent results supported this claim, including the presence of asymmetric switch costs, task-set perseveration errors, and task-set reactivation. 
+These results could not be accounted for by the flat RL model, but were compatible with the hierarchical Bayesian model as well as the hierarchical RL model.
+
+To address the unique aspects of hierarchical RL, we next sought evidence of hierarchical values.
+Hierarchical RL makes specific predictions about 1) context preferences, 2) effects of contexts on performance, and 3) behavior in new contexts, i.e., generalization.
+Human behavior showed the predicted patterns in each case: 
+1) When asked to pick their preferred contexts, participants selected higher-valued ones more often. This suggests that they had formed RL values at an abstract level, in addition to low-level action-values. 
+Participants also performed better when choosing between contexts than stimuli, in accordance with the "blessing of abstraction" of hierarchical representations \cite{gershman_blessing_2017, kemp_learning_2007}.
+2) Task-set values affected performance, with better learning for higher-valued task-sets.
+3) When faced with a new context, participants reused previous task-sets more often than exploring new actions. Furthermore, higher-valued task-sets were preferred over lower-valued ones, suggesting that task-set values guided generalization.
+
+%\subsection*{Simulations and model comparison}
+In summary, human behavior showed all the qualitative patterns predicted by hierarchical RL. To quantify the differences between models, we conducted formal model comparison.
+Most established model comparison approaches were not applicable in our case, including parameter fitting based on maximum likelihood or sampling-based hierarchical Bayesian methods \cite{daw_trial-by-trial_2011, wilson_ten_2019}, because the exact likelihoods of the hierarchical RL model are computationally intractable (latent task-set structure). Likelihood-free methods \cite{sunnaker_approximate_2013, turner_tutorial_2012} were also not applicable because methods like ABC require sufficient summary statistics which were unavailable in our task. Another promising method that does not require summary statistics \cite{turner_generalized_2014} has not been validated for learning models. 
+
+We therefore chose not to fit model parameters, and used an alternative method to compare models, estimating model likelihoods based on simulations, and using the estimated likelihoods to calculate Bayes Factors.
+Bayes Factors instantiate an implicit Occam's razor that accounts for differences in model complexity, such as the larger number of parameters in the two hierarchical models. 
+We computed separate likelihoods and Bayes Factors for each behavior of interest, which also led to more detailed insights into the abilities of each model than classical parameter fitting would have provided. For all behaviors, Bayes Factors favored the hierarchical RL model over flat RL and hierarchical Bayes.
+
+Based on this quantitative confirmation of the hierarchical RL model, we next asked whether all the results could be jointly observed when simulating the model with a single set of parameters, to confirm that different parameter regimes were not responsible for different independent results. We used the simulations' summary statistics to identify a set of likely parameters.
+A new dataset simulated with these parameters replicated all the behavioral pattern observed in humans qualitatively, whereas the same was not true for flat RL or hierarchical Bayes.
+
+This shows that seemingly different behaviors, including trial-and-error learning (initial-learning phase), "inference" of missing information (hidden-context phase), subjective preferences (comparison phase), and generalization (novel-context phase), can all be explained by one overarching hierarchical RL framework.
+
+Many computational models have addressed cognitive hierarchy. How are they related to our model?
+One important class of hierarchical models is purely Bayesian \cite{tenenbaum_how_2011, tomov_discovery_2019, solway_optimal_2014}. These models aim to explain, on a computational level of analysis \cite{marr_vision:_1982}, the fundamental purpose of hierarchy for cognitive agents.
+Our model, on the other hand, is algorithmic, like many pure-RL models: It aims to describe dynamically which cognitive steps humans take when they make decisions in complex environments. Our model is also inspired by the structure of human neural learning circuits \cite{alexander_parallel_1986, alexander_hierarchical_2015, badre_cognitive_2008}, thereby extending to the implementational level of analysis.
+
+Some models of hierarchical cognition are method hybrids: Some combine Bayesian inference at the abstract level with RL at the lower level \cite{collins_reasoning_2012, frank_mechanisms_2012}. Other, resource-rational models, combine Bayesian principles of rationality with cognitive constrains \cite{lieder_resource-rational_2019}. Frank and Badre \cite{badre_mechanisms_2012, frank_mechanisms_2012} proposed a hybrid model that uses Bayesian inference to arbitrate between multiple types of hierarchy and flat RL. In general, hybrid models assume a role for Bayesian inference at higher levels of hierarchy, contrary to our hierarchical RL model. This is an important difference: Hierarchical RL mimics a form of inference (for example, identifying the latent task-set at the beginning of a block), but cannot do it optimally. An important direction for future research would be to identify whether human behavior is suboptimal in the same way. Our analyses tentatively support this (supplementary results 2.1), but it would be important to test in a specialized paradigm.
+
+Computational models at different levels of analysis \cite{marr_vision:_1982} are not mutually exclusive. Bayesian inference offers a perspective based on optimality, but Bayesian inference is often computationally intractable and approximations are extremely expensive. RL, on the other hand, uses values to approximate expectations instead of calculating them exactly. Because of its relative computational simplicity, and because it is biologically well supported, RL has often been used as a model at the algorithmic and implementational levels. 
+Recent research showed that a neural network that implemented hierarchical RL was able to approximate Bayesian inference, allowing for optimal behavior with simpler computations \cite{collins_cognitive_2013}. In other words, hierarchical RL might be an algorithmic model that approximates the optimality of Bayesian inference.
+
+Hierarchical RL was initially proposed in the field of artificial intelligence (AI) \cite{vezhnevets_feudal_2017, konidaris_necessity_2019}. Many different AI algorithms have recently been tested as models of human cognition \cite{ribas_fernandes_neural_2011, ribas_fernandes_subgoal-and_2018, sutton_between_1999, momennejad_successor_2017, wang_prefrontal_2018}, showing how connected the two fields have become in the recent past \cite{sutton_reinforcement_2017, lake_building_2017, collins_reinforcement_2019}. 
+Most hierarchical RL algorithms in AI focus on hierarchy over the time scale of choices (\textit{temporal abstraction}, e.g., breaking up long-term goals into short-term ones). Our hierarchical model, in contrast, focuses on \textit{choice abstraction} (i.e., allowing choice at the level of task-sets and motor actions). Both share in common the ability to use RL at different levels of abstraction \cite{ collins_reinforcement_2019}.
+
+To summarize, classic RL has been a powerful model for simple decision making in animals and humans, but it cannot explain hallmarks of intelligence like flexible behavioral change, continual learning, generalization, and inference of missing information. Recent advances in AI have proposed hierarchical RL as a solution to these shortcomings, and we found that human behavior showed many signs of hierarchical RL, which were captured better by our hierarchical RL model than competing ones. %It will be an important question for future research to check whether this generalizes to other learning environments (Yarkoni, 2019, PsyRxiv).
+
+There is no debate that achieving goals and receiving punishment are some of the most fundamental motivators that shape our learning and decision making. Nevertheless, almost all decisions humans face pose more complex problems than what can be achieved by flat RL. Structured hierarchical representations have long been proposed as a solution to this problem, and our hierarchical RL model uses only simple RL computations, known to be implemented in our brains, to solve complex problems that have traditionally been tackled with intractable Bayesian inference. This research aims to model complex behaviors using neurally plausible algorithms, and provides a step toward modeling human-level, everyday-life intelligence. 
+
+\section*{Methods}
+
+\subsection*{Participants}
+We tested three independent groups of participants, with approval from UC Berkeley's institutional review board. All were university students, gave written informed consent, and received course credit for participation. 
+
+% Pilot sample
+The pilot sample had 51 participants (26 women; mean age$\pm$sd: $22.1\pm1.5$), 3 of whom were excluded due to past or present psychological or neurological disorders. Due to a technical error, data were not recorded in the comparison phase for this sample.
+% Second sample
+The second and main sample had 31 participants (22 women; mean age$\pm$sd: $20.9\pm2.1$), 4 of whom were excluded due to disorders, and one of whom was excluded because average performance in the initial-learning phase was below 35\% (chance is 33\%). We added the mixed testing phase for this sample. 
+% Third sample
+The third sample had 32 participants (15 women; mean age$\pm$sd $=20.8\pm5.0$), 2 of whom were excluded due to disorders. Five participants did not complete the experiment and were excluded from analyses with missing data. The task was minimally adapted for EEG data collection for this sample.
+% Note
+We conducted all tests in all samples and present the results in the supplemental material (table \ref{table:threeSampleStats} and Fig. \ref{figure:S1_LearningCurves}). Differences between samples are discussed in detail (supplemental section).
+
+\subsection*{Task Design}
+
+Participants first received instructions and underwent the initial-learning phase of the task. The purpose of initial learning was for participants to acquire distinct task-sets, i.e., specific stimulus-action mappings for each context. We also used the initial-learning phase to test for the effects of action-values and task-set values on performance, and to assess specific errors types that are predicted by hierarchical RL.
+
+% \subsubsection*{Instructions and training}
+In the beginning, participants were instructed to "feed aliens to help them grow as much as possible". A tutorial with instructed trials followed, then participants practiced a \textbf{simplified task} without contexts: on each trial, participants saw one of four stimuli and selected one of three actions by pressing J, K, or L on the keyboard (Fig. \ref{figure:1TaskDesign}A). Feedback was given in form of a measuring tape whose length indicated the amount of reward. Correct actions produced consistent long (mean=5.0) and incorrect actions short tapes (mean=1.0, \ref{figure:1TaskDesign}).
+When no action was selected, participants were reminded to respond faster next time, and the trial was counted as missed.
+Participants received 10 training trials per stimulus (40 total), with a maximum response time of 3,000 msec. Order was pseudo-randomized such that each stimulus appeared once in four trials, and the same stimulus never appeared twice in a row.
+
+The \textbf{initial-learning phase} had the same structure as training, but
+stimuli were presented in one of three contexts, each with a unique mapping between stimuli and actions (Fig. \ref{figure:1TaskDesign}B). The context remained the same for a block of 52 trials. At the end of a block, a context change was explicitly signaled, before the next block began with a new context. Participants went through 9 blocks (3 per context) for a total of 468 trials.
+% Tape lengths
+Participants needed to respond within 1.5s, then received reward. Rewards varied between 2-10 for correct actions (Fig. \ref{figure:1TaskDesign}B); rewards for incorrect actions remained 1. We chose these numbers to maximize differences between contexts, while controlling for differences between stimuli and actions. See supplements for more details.
+
+The hidden-context phase was identical to initial learning and participants knew they would encounter the same stimuli and contexts as before, but this time, contexts were "hidden" (Fig. \ref{figure:1TaskDesign}C). There were 9 blocks with 10 trials per stimulus per block (360 total). %Participants were told that clouds were covering the sky such that they could not see the current seasons. 
+Context switches were again signaled.
+
+% \subsubsection*{Comparison phase}
+The purpose of the following \textbf{comparison phase} was to assess participants' subjective preferences for different contexts and stimuli, as estimates of their task-set and action-values.
+Participants were shown two contexts (context condition), or two stimuli in the same context (stimulus condition), and selected their preferred one (Fig. \ref{figure:1TaskDesign}C). Participants saw each of three pairs of contexts 5 times, and each of 18 pairs of stimuli 3 times, for a total of $15+198=213$ trials. Participants had 3,000 msec to respond.
+
+% \subsubsection*{Novel-context phase}
+The purpose of the \textbf{novel-context phase} was to probe generalization: Would participants reuse old task-sets in a new context?
+The novel-context phase was identical to the initial-learning phase, except that it introduced a new context in extinction, i.e., without feedback (Fig. \ref{figure:1TaskDesign}C). Participants received 3 trials per stimulus (12 total). 
+
+% \subsubsection*{Mixed phase}
+The purpose of the final \textbf{mixed phase} was to probe switch costs, assessing whether context or stimulus were more costly. An asymmetry in switch costs indicates hierarchical representation.
+The mixed phase was identical to the initial-learning phase, except that contexts as well as stimuli could change on every trial. Participants received 3 blocks of 84 trials (252 total), each with 7 repetitions per stimulus-context combination.
+
+% \subsetcion{Refreshers}
+To alleviate carry-over effects and forgetting between the test phases, we interleaved them with \textbf{refresher blocks}, shorter versions of the initial-learning phase with only 120 trials.
+More details on task design are in the supplemental methods on task design.
+
+\subsection*{Computational Models}
+We will address how each model behaves in each experimental phase in turn.
+During \textbf{initial learning}, the flat RL model implemented classic model-free ({\textit delta-rule}) RL (\cite{sutton_reinforcement_2017}): It treated every combination of a context and a stimulus as a unique state, and learned one RL value for each state and action, as visualized in suppl. Fig. \ref{figure:F8_HierFlatTables}A.
+Using main text notations, values were updated based on $Q_{t+1}(a|s,c) = Q_t(a|s,c) + \alpha\ (r - Q_t(a|s,c))$, and actions were selected based on $p(a|s,c) = \frac{exp(Q(a|s,c))}{\sum_{a_i} exp(\beta\ Q(a_i|s,c))}$. 
+
+The hierarchical RL model acquired 9 task-set-values and 36 action-values (45 total), with six free parameters $\alpha_{a}$, $\alpha_{TS}$, $\beta_{a}$, $\beta_{TS}$, $f_{a}$, and $f_{TS}$ (equations in main text), whereas flat RL acquired only 36 action-values, based on three parameters $\alpha$, $\beta$, and $forget$. Suppl. Fig. \ref{figure:F8_HierFlatTables} visualizes the difference between hierarchical and flat RL, and suppl. Fig. \ref{figure:F1_ModelExample} shows hierarchical RL example behavior.
+The forgetting parameters $f$ ($f_a$, $f_{TS}$) captured value decay in both models: $Q_{t+1} = (1 - f)\ Q_{t} + f\ Q_{init}$.
+
+The hierarchical Bayes model also learned task-sets, but acquired their action-values based on correct-incorrect rather than continuous feedback: $Q_{t+1}(a|s,TS) = Q_t(a|s,TS) + \alpha\ (correct - Q_t(a|s,TS))$. The main difference to hierarchical RL was the selection of task-sets: The Bayesian model chose task-sets based on estimated reliability rather than task-set values, using Bayes theorem to obtain task-set reliabilities: $p_{t+1}(TS|c) = \frac{p(r|s,TS,a) p_t(TS|c)}{p(r|s,a)}$, with $p(r|s,TS,a) = Q(a|s,TS)$.
+Another difference is that hierarchical RL updates $Q(TS|c)$ only for the chosen task-set, whereas hierarchical Bayes keeps $p(TS|c)$ up-to-date for all task-sets at all times \cite{collins_reasoning_2012,donoso_foundations_2014}.
+
+Q-values of all models were initialized at the expected reward for chance performance, $Q_{init}=1.67$.
+The subsequent testing phases started from the Q-values at the end of initial learning.
+
+% \subsubsection*{Hidden-context phase}
+In the \textbf{hidden-context phase}, contexts were not shown, such that models could not directly reuse acquired values that were dependent on contexts (flat RL: $Q(a|c,s)$; hierarchical RL: $Q(TS|c)$; Bayes: $p(TS|c)$). All models instead initialized these values at $Q_{init}$ after each context switch, and then relearned them from scratch, using the same update equations as during initial learning.
+For flat RL, this resulted in learning an entire new policy $Q(a|c,s)$. For hierarchical models, only high-level information ($Q(TS|c)$ for RL, $p(TS|c)$ for Bayes) had to be relearned, but not action values $Q(a|s,TS)$.
+This ability to retain parts of learned values was a main advantage of hierarchical systems over flat ones.
+
+% \subsubsection*{Comparison phase}
+For the \textbf{comparison phase}, we only simulated RL models because the Bayesian model assumes that no value was stored for contexts.
+To select between stimuli, both RL models computed "state values" \cite{sutton_reinforcement_2017} from their learned action values, for both presented options: $V(c,s) = max_a \ Q(a|c,s)$ (flat RL) and $V(c,s) = \max_a \ Q(a|s,TS) \ p(TS|c)$, where $p(TS|c) = softmax(Q(TS|c))$ (hierarchical RL). The models then selected one option based on a softmax over the state values. 
+To select between contexts, the hierarchical model had access to task-set values to select between contexts, but the flat model needed to use an average over learned action-values to estimate context preferences on-the-fly. Hierarchical RL computed state values at the task-set level: $V(c) = max_{TS} \ Q(TS|c)$. Flat RL averaged its state values $V(c) = mean_s \ V(c,s)$.
+
+In the \textbf{novel-context phase}, models were faced with a context for which they had not learned any values. %They had to make a "best guess" about which actions are correct based on previous experience.
+Flat RL used averages over previous action-values for choice: $Q(a|c_{new},s) = mean_c \ Q(a|c,s)$.
+Hierarchical RL [Bayes] applied the previously highest-valued [most reliable] task-set: $Q(TS|c_{new}) = max_c \ Q(TS|c)$ [$p(TS|c_{new}) = max_c \ p(TS|c)$]. Because each simulated population contained multiple agents, this implementation is similar to selecting task-sets probabilistically on each trial.
+
+\subsection*{Model Comparison}
+
+{\rev The Bayes factor $F$ quantifies the support for one model $M_1$ over another model $M_2$ by assessing the ratio between their marginal likelihoods, $F = \frac{p(data|M_1)}{p(data|M_2)}$.
+Marginal model likelihoods represent the probability of some data under the model, marginalizing over model parameters $\theta$: $p(data|M) = \int p(data|M, \theta) \ p(\theta) \ d\theta$.
+
+To approximate marginal model likelihoods, we simulated synthetic datasets under a uniform random prior for parameter values. The empirical distribution over simulated datasets provided an approximation of the likelihood.% Formally, $p(\theta)$ was identical for all $\theta$ and summed to 1, such that $p(data|M) = \int p(data|M, \theta) \ p(\theta) \ d\theta$ is simply the distribution given by all simulated datasets.
+
+Specifically, we computed summary statistics of interest $s_m$ for all synthetic datasets, leading to estimated model densities $\hat{S}_m$ for each statistic. We then calculated the same summary statistic $s_h$ for the human dataset and assessed the likelihood of the human statistic under the model, which provided marginal model likelihoods $p(s_h|\hat{S}_m)$. To obtain Bayes factors, we simply assessed the ratio $F = \frac{p(s_h|\hat{S}_{m1})}{p(s_h|\hat{S}_{m2})}$.
+
+The parameter priors were random uniform in a range allowing as broad coverage of possible behavior as possible: $0 < \alpha_{a}, \alpha_{TS}, f_{a}, f_{TS} < 1$ and $1 < \beta_{a}, \beta_{TS} < 20$.
+Each synthetic dataset consisted of 26 agents simulated on the exact same inputs received by 26 participants, such that the noise in the synthetic statistics was identical to the one in the human dataset. We simulated 50,000 datasets for each model to assure sufficient coverage of the parameter space.
+
+We presented one example datasets for each model in the bar graphs of figures \ref{figure:F4_combined}A, \ref{figure:F4_combined}C, \ref{figure:F5_combined}A. These datasets were obtained by first selecting all of the 50,000 model simulations that fell within a certain range of human behavior, for all summary statistics (50\%-150\% for flat and hierarchical RL; 10\%-190\% for hierarchical Bayes). We then simulated one new dataset per model based on the median parameter values of the selected models.
+
+For detailed discussion of our model comparison method and selection of the example datasets, please refer to the supplementary methods.}
+
+\section*{Acknowledgements}
+We thank Lucy Whitmore and Sarah Master for their contributions to this project. 
+
+\bibliographystyle{apa}
+\bibliography{Aliens2}
+
+\end{document}

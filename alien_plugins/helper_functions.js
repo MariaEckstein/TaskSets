@@ -102,7 +102,6 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
     section_target_length = n_trials_per_alien * alien_names.length;
     last_alien_old_chunk = "none";
 
-
     //// Create a block of 4 aliens
     while (section.length < section_target_length) {  // add trials until I have the right number
       four_trials = [];
@@ -121,7 +120,6 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
           four_trials.push(trial);
       }
 
-
       //// Add the 4-alien block to section (if this does not create an alien repetition)
       four_trials = jsPsych.randomization.shuffle(four_trials);  // randomize order within each chunk of 4 trials
       first_alien_new_chunk = four_trials[0].sad_alien;
@@ -129,7 +127,6 @@ function create_feed_aliens_section(section_i, TS_order, n_trials_per_alien, blo
         section = section.concat(four_trials)
         last_alien_old_chunk = four_trials[four_trials.length-1].sad_alien
       }
-
     }
 
     // Create start_new_season (non-mixed blocks) and put at the beginning of `section`

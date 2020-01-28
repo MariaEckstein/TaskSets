@@ -1,0 +1,11 @@
+
+  // Creating a message to display a byte with value 255 on the parallel port
+  var startTrackingEvent = new CustomEvent('jspsych', {
+      detail:{
+          target : 'parallel',
+          action : 'trigger',
+          payload: 255  // 1 = show fixation
+      }
+  });
+  //send the message
+  document.dispatchEvent(startTrackingEvent);
