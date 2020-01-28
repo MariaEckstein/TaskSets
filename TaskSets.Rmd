@@ -8,7 +8,7 @@ output: html_document
 # Preprocessing
 
 ```{r Set parameters load packages etc.}
-library("ggplot2"); library("plyr"); library("lme4"); library("reshape2"); library("zoo")
+library("ggplot2"); library("plyr"); library("lme4"); library("reshape2"); library("zoo"); library("lmerTest")
 theme_set(theme_bw())
 
 # TDs
@@ -29,11 +29,11 @@ feed_aliens_phases = c("1InitialLearning", "2CloudySeason", "Refresher2", "Refre
 colnames(n_trials) = paste0("X", feed_aliens_phases)
 colnames(n_blocks) = paste0("X", feed_aliens_phases)
 if (run_on == "humans") {
-  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version3.1"  # version3.1  # versions1.0and3.1  # version1.0  # versionEEG
+  data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/Data/version1.0"  # version3.1  # versions1.0and3.1  # version1.0  # versionEEG
   patt = ".*csv"
 } else if (run_on == "simulations") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AliensFitting/SummariesInsteadOfFitting_revision/FullSimulations/" # "C:/Users/maria/MEGAsync/SLCN/PSsimulations/"   # "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/MaxInsteadOfSoftmax/"
-  patt = "aliens_Bayes.*csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
+  patt = "aliens_flat.*csv"  # "alien_..csv" -> subjID1-9, "alien_...csv" -> subjID10-99, "alien_....csv" -> subjID100-999
   feed_aliens_phases = feed_aliens_phases[feed_aliens_phases != "2CloudySeason"]
 } else if (run_on == "gen_rec") {
   data_dir = "C:/Users/maria/MEGAsync/Berkeley/TaskSets/AlienGenRec/fit_par/"
@@ -1682,20 +1682,26 @@ if (run_on == "humans" & substr(data_dir, 55, 58) != "1.0") {
 ```
 ```{r Mixed-block performance and RTs}
 if (run_on == "humans" & substr(data_dir, 55, 58) != "1.0") {
+    
+  half_block = (min(mixed_block_l$trial_index) + max(mixed_block_l$trial_index)) / 2
+  mixed_block_l$half = "First Half"
+  mixed_block_l$half[mixed_block_l$trial_index > half_block] = "Second Half"
+
   # Performance over time, dependent on (subj and obj) item values and TS values
   gg_mixed_acc_TS_obj = ggplot(mixed_block, aes(alien_trial, 100 * ACC, color = TS_value_obj, group = TS_value_obj)) +  # it looks like there are just 7 blocks, but there shold be 7 * 3...
     stat_summary(fun.data = mean_se, geom = "pointrange") +
     stat_summary(fun.data = mean_se, geom = "line") +
+    coord_cartesian(ylim=c(0, 100)) +
     labs(x = "Block", y = "% correct", color = "TS value (obj.)")
   gg_mixed_acc_TS_subj = gg_mixed_acc_TS_obj + aes(color = round(TS_value_subj), group = round(TS_value_subj)) + labs(color = "TS value (subj.)")
   gg_mixed_acc_item_obj = gg_mixed_acc_TS_obj + aes(color = round(item_value_obj / 2 ) * 2, group = round(item_value_obj / 2) * 2) + labs(color = "Item value (obj.)")
   gg_mixed_acc_item_subj = gg_mixed_acc_TS_obj + aes(color = round(item_value_subj / 2) * 2, group = round(item_value_subj / 2) * 2) + labs(color = "Item value (subj.)")
   
-  gg_mixed_rts = ggplot(subset(mixed_block_l, !is.na(switch) & ACC == 1), aes(level, rt, color = level)) +
+  gg_mixed_rts = ggplot(subset(mixed_block_l, !is.na(switch) & ACC == 1 & level != 'both'), aes(level, rt, color = level)) +
     stat_summary(fun.data = mean_se, geom = "pointrange", position = position_dodge(width = 0.9)) +
     labs(x = "", y = "RT (msec)", fill = "") +
     theme(legend.position = "none") +
-    facet_grid(~ switch)
+    facet_grid(half ~ switch)
   gg_mixed_ACCs = gg_mixed_rts + aes(y = 100 * ACC) + labs(y = "% correct")
   gg_mixed_ACCs$data = subset(mixed_block_l, !is.na(switch))
   
@@ -1718,6 +1724,9 @@ if (run_on == "humans" & substr(data_dir, 55, 58) != "1.0") {
     ggsave(file.path(plot_dir, "6gg_mixed_ACCs_within.png"), gg_mixed_ACCs_within, width = 2, height = 3)
   }
 }
+dat = ddply(mixed_block, .(subjID), summarize, ACC=mean(ACC))
+mean(dat$ACC)
+sd(dat$ACC)
 ```
 
 # Paper stats and tests
@@ -1738,8 +1747,11 @@ if (substr(data_dir, 55, 58) != "1.0") {
   ddply(mixed_block_l, .(level), summarize, n_trials_stay = sum(switch == "Stay", na.rm = T) / n_subj)
   
   # Tests
-  hist(mixed_block_l_sum_wide$RT_diff)
+  hist(mixed_block_l_sum_wide$RT_diff)  # with(mixed_block_l_sum_wide, ts_RT.Switch - ts_RT.Stay)
   print(t.test(mixed_block_l_sum_wide$RT_diff))
+  
+  library("effsize")
+  print(cohen.d(mixed_block_l_sum_wide$ts_RT.Switch, mixed_block_l_sum_wide$ts_RT.Stay))
   
   hist(mixed_block_l_sum_wide$ACC_diff)
   print(t.test(mixed_block_l_sum_wide$ACC_diff))
@@ -1767,12 +1779,13 @@ ggplot(wide_dat, aes(ACC_minus_Intr)) + geom_histogram()
 t.test(wide_dat$ACC.ACC_prev_TS - 1/3)
 t.test(wide_dat$ACC.ACC_prev_notTS - 1/3)
 t.test(wide_dat$ACC_minus_Intr)
+cohen.d(wide_dat$ACC.ACC, wide_dat$ACC_not_TS)
 ```
 ```{r regressions performance ~ action values and task-set values and cloudy}
 # Effect of action values and task-set values on performance
 colnames(feed_aliens)
 act_ts_val_mode = glmer(correct ~ item_value_obj * TS_value_obj + (1 | subjID) + (1 | alien_trial) + (1 | repetition),
-                subset(feed_aliens, phase=="1InitialLearning"), binomial)
+                        subset(feed_aliens, phase=="1InitialLearning"), binomial)
 summary(act_ts_val_mode)
 
 # Reactivation of task-sets
@@ -1805,7 +1818,7 @@ sum_dat = ddply(wide_dat, .(subjID), summarize, ACC1=mean(ACC.3.75, na.rm=T), AC
 t.test(sum_dat$ACC2minus1)
 ddply(sum_dat, .(), summarize, ACC1=mean(ACC1), ACC2=mean(ACC2), diff=ACC2-ACC1)
 ```
-```{r Competiton phase t-tests}
+```{r Competiton phase}
 if (substr(data_dir, 55, 58) != "1.0") {
   subj_dat = ddply(pick_aliens, .(subjID, assess), summarize, ACC=mean(selected_better_obj, na.rm=T))
   subj_dat_wide = reshape(subset(subj_dat, assess%in%c('season', 'alien-same-season')), direction='wide', timevar='assess', idvar='subjID')
@@ -1814,9 +1827,12 @@ if (substr(data_dir, 55, 58) != "1.0") {
   
   print(mean(subj_dat_wide$`ACC.season`))
   print(t.test(subj_dat_wide$`ACC.season`-0.5))
+  print(cohen.d(subj_dat_wide$`ACC.season`, 1-subj_dat_wide$`ACC.season`))
   
   print(mean(subj_dat_wide$`ACC.alien-same-season`))
   print(t.test(subj_dat_wide$`ACC.alien-same-season`-0.5))
+  print(cohen.d(subj_dat_wide$`ACC.alien-same-season`, 1-subj_dat_wide$`ACC.alien-same-season`))
+  
   print(t.test(subj_dat_wide$`ACC.alien-same-season` - subj_dat_wide$`ACC.season`))
   
   unique(all_files$phase)
@@ -1830,6 +1846,9 @@ if (substr(data_dir, 55, 58) != "1.0") {
   print(t.test(wide_dat$missed_context_minus_season))
   
   summary(glmer(selected_better_obj ~ assess + (1 | subjID), family=binomial, data=subset(pick_aliens, assess%in%c('season', 'alien-same-season')), na.action=na.omit))
+  summary(lmer(RT ~ assess + (1 | subjID), data=dat, na.action=na.omit))
+  
+  t.test(log(wide_dat$`RT.alien-same-season`) - log(wide_dat$RT.season))
 }
 ```
 ```{r Rainbow phase}
@@ -1850,9 +1869,12 @@ rainbow_sum$`2minus1` = with(rainbow_sum, `2` - `1`)
 rainbow_sum$`1minus0` = with(rainbow_sum, `1` - `0`)
 rainbow_sum$`21minus20` = with(rainbow_sum, `0and2` - `1and2`)
 t.test(rainbow_sum$`2minus0`)
+cohen.d(rainbow_sum$`2`, rainbow_sum$`0`)
 t.test(rainbow_sum$`2minus1`)
+cohen.d(rainbow_sum$`0`, rainbow_sum$`1`)
 t.test(rainbow_sum$`1minus0`)
 t.test(rainbow_sum$`21minus20`)
+cohen.d(rainbow_sum$`1and2`, rainbow_sum$`0and2`)
 
 mean(rainbow_sum$`0`)
 mean(rainbow_sum$`1`)
@@ -1880,10 +1902,14 @@ mean(rainbow_sum$None) / 12
 # mean(rainbow_sum$None)
 # mean(rainbow_sum$None / Valid_choices)
 # t.test(rainbow_sum$None - 2 / 12 * Valid_choices)
-# Double_TS_choices = rainbow_sum$TS0and2 + rainbow_sum$TS1and2
-# mean(Double_TS_choices)
-# mean(Double_TS_choices / Valid_choices)
-# t.test(Double_TS_choices - 2 / 12 * Valid_choices)
+Double_TS_choices = rainbow_sum$`0and2` + rainbow_sum$`1and2`
+mean(Double_TS_choices)
+mean(Double_TS_choices / Valid_choices)
+t.test(Double_TS_choices - 2 / 12 * Valid_choices)
+Single_TS_choices = rainbow_sum$`0` + rainbow_sum$`1` + rainbow_sum$`2`
+
+t.test(Double_TS_choices / 2 - Single_TS_choices / 8)
+
 ```
 ```{r Diagnostic Trials}
 # Mark "non-diagnostic" trials (same action is correct for an alien in TWO DIFFERENT task-sets)
