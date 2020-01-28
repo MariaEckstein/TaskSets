@@ -7,6 +7,8 @@ Data
 .idea*
 *.html
 /paperplots/
-/models/
+/models/Summaries/
+/models/__pycache__/
+/models/.ipynb_checkpoints/
 /old/
 *.pdf
